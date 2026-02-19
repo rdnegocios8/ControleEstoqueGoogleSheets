@@ -45,7 +45,6 @@ function mostrarView(view) {
     
     document.getElementById(`${view}-view`).style.display = 'block';
     
-    // Atualizar menu ativo
     document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
     document.getElementById(`menu-${view}`).classList.add('active');
 }
@@ -55,7 +54,6 @@ async function carregarDados() {
     try {
         mostrarCarregando(true);
         
-        // Carregar produtos
         const produtosResponse = await fetch(PRODUTOS_URL);
         const produtosData = await produtosResponse.json();
         
@@ -72,7 +70,6 @@ async function carregarDados() {
             produtos = [];
         }
         
-        // Carregar recebimentos
         const recebimentosResponse = await fetch(RECEBIMENTOS_URL);
         const recebimentosData = await recebimentosResponse.json();
         
@@ -90,7 +87,6 @@ async function carregarDados() {
         atualizarInterface();
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
-        mostrarMensagem('Erro ao conectar com Google Sheets. Usando dados locais.', 'warning');
         carregarDadosExemplo();
     } finally {
         mostrarCarregando(false);
@@ -352,7 +348,7 @@ async function salvarProduto() {
         document.getElementById('form-produto').reset();
         atualizarInterface();
         
-        mostrarMensagem('Produto salvo com sucesso!', 'success');
+        alert('Produto salvo com sucesso!');
     } catch (error) {
         console.error('Erro ao salvar:', error);
         alert('Erro ao salvar produto. Tente novamente.');
@@ -402,7 +398,7 @@ async function atualizarProduto() {
             bootstrap.Modal.getInstance(document.getElementById('modalEditarProduto')).hide();
             atualizarInterface();
             
-            mostrarMensagem('Produto atualizado com sucesso!', 'success');
+            alert('Produto atualizado com sucesso!');
         } catch (error) {
             console.error('Erro ao atualizar:', error);
             alert('Erro ao atualizar produto. Tente novamente.');
@@ -424,7 +420,7 @@ async function excluirProduto(codigo) {
         produtos = produtos.filter(p => p.codigo !== codigo);
         
         atualizarInterface();
-        mostrarMensagem('Produto excluído com sucesso!', 'success');
+        alert('Produto excluído com sucesso!');
     } catch (error) {
         console.error('Erro ao excluir:', error);
         alert('Erro ao excluir produto. Tente novamente.');
@@ -441,25 +437,26 @@ async function darBaixa(codigo, quantidade = 1) {
         return;
     }
     
-    if (produto.quantidade < quantidade) {
-        alert(`Quantidade insuficiente! Estoque atual: ${produto.quantidade}`);
-        return;
-    }
-    
+    let qtd = quantidade;
     if (quantidade === 1) {
-        const qtd = prompt('Quantidade para dar baixa:', '1');
-        if (qtd === null) return;
-        quantidade = parseInt(qtd);
-        if (isNaN(quantidade) || quantidade <= 0) {
+        const qtdInput = prompt('Quantidade para dar baixa:', '1');
+        if (qtdInput === null) return;
+        qtd = parseInt(qtdInput);
+        if (isNaN(qtd) || qtd <= 0) {
             alert('Quantidade inválida!');
             return;
         }
     }
     
+    if (produto.quantidade < qtd) {
+        alert(`Quantidade insuficiente! Estoque atual: ${produto.quantidade}`);
+        return;
+    }
+    
     try {
         mostrarCarregando(true);
         
-        produto.quantidade -= quantidade;
+        produto.quantidade -= qtd;
         
         await atualizarNoGoogleSheets(produto);
         
@@ -508,7 +505,7 @@ async function registrarRecebimento(event) {
         document.getElementById('form-recebimento').reset();
         atualizarInterface();
         
-        mostrarMensagem('Recebimento registrado com sucesso!', 'success');
+        alert('Recebimento registrado com sucesso!');
     } catch (error) {
         console.error('Erro ao registrar recebimento:', error);
         alert('Erro ao registrar recebimento. Tente novamente.');
@@ -521,6 +518,11 @@ async function registrarRecebimento(event) {
 function setupQRCode() {
     if (typeof Html5Qrcode === 'undefined') {
         console.error('Biblioteca Html5Qrcode não carregada!');
+        document.getElementById('qr-reader').innerHTML = `
+            <div class="alert alert-danger">
+                Erro ao carregar leitor QR Code. Verifique sua conexão.
+            </div>
+        `;
         return;
     }
     
@@ -542,7 +544,14 @@ function setupQRCode() {
     const config = { fps: 10, qrbox: { width: 250, height: 250 } };
     
     html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-        .catch(err => console.error('Erro ao iniciar QR Code:', err));
+        .catch(err => {
+            console.error('Erro ao iniciar QR Code:', err);
+            document.getElementById('qr-reader').innerHTML = `
+                <div class="alert alert-warning">
+                    Não foi possível acessar a câmera. Verifique as permissões.
+                </div>
+            `;
+        });
 }
 
 // Adicionar última baixa
@@ -595,65 +604,81 @@ function mostrarCarregando(show) {
     console.log(show ? 'Carregando...' : 'Carregamento concluído');
 }
 
-function mostrarMensagem(texto, tipo) {
-    console.log(`[${tipo}] ${texto}`);
-}
-
 // ============================================
 // FUNÇÕES DE INTEGRAÇÃO COM GOOGLE SHEETS (VIA WEB APP)
 // ============================================
 
 // Salvar novo produto
 async function salvarNoGoogleSheets(produto) {
-    const response = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(produto)
-    });
-    
-    console.log('Produto enviado para o Sheets:', produto.codigo);
-    return { success: true };
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(produto)
+        });
+        
+        console.log('Produto enviado para o Sheets:', produto.codigo);
+        return { success: true };
+    } catch (error) {
+        console.error('Erro na requisição:', error);
+        throw error;
+    }
 }
 
 // Atualizar produto existente
 async function atualizarNoGoogleSheets(produto) {
-    const response = await fetch(WEB_APP_URL, {
-        method: 'PUT',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(produto)
-    });
-    
-    console.log('Produto atualizado no Sheets:', produto.codigo);
-    return { success: true };
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'PUT',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(produto)
+        });
+        
+        console.log('Produto atualizado no Sheets:', produto.codigo);
+        return { success: true };
+    } catch (error) {
+        console.error('Erro na requisição:', error);
+        throw error;
+    }
 }
 
 // Excluir produto
 async function excluirNoGoogleSheets(codigo) {
-    const response = await fetch(WEB_APP_URL, {
-        method: 'DELETE',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigo })
-    });
-    
-    console.log('Produto excluído do Sheets:', codigo);
-    return { success: true };
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'DELETE',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigo })
+        });
+        
+        console.log('Produto excluído do Sheets:', codigo);
+        return { success: true };
+    } catch (error) {
+        console.error('Erro na requisição:', error);
+        throw error;
+    }
 }
 
 // Salvar recebimento
 async function salvarRecebimentoNoGoogleSheets(recebimento) {
-    const response = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            ...recebimento,
-            tipo: 'recebimento'
-        })
-    });
-    
-    console.log('Recebimento salvo no Sheets');
-    return { success: true };
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...recebimento,
+                tipo: 'recebimento'
+            })
+        });
+        
+        console.log('Recebimento salvo no Sheets');
+        return { success: true };
+    } catch (error) {
+        console.error('Erro na requisição:', error);
+        throw error;
+    }
 }
