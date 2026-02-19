@@ -1,10 +1,13 @@
 body {
     background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .card {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    border-radius: 8px;
 }
 
 .card:hover {
@@ -12,8 +15,21 @@ body {
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+}
+
 .table th {
-    background-color: #f1f1f1;
+    background-color: #007bff;
+    color: white;
+    font-weight: 500;
+    border: none;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,123,255,0.05);
 }
 
 .qr-code-img {
@@ -21,39 +37,119 @@ body {
     height: 50px;
     cursor: pointer;
     transition: transform 0.2s;
+    border-radius: 4px;
+    padding: 2px;
+    background-color: white;
 }
 
 .qr-code-img:hover {
     transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 #qr-reader {
     border: 2px dashed #007bff;
     border-radius: 8px;
     overflow: hidden;
+    background-color: #f8f9fa;
+    padding: 10px;
 }
 
 .alerta-vencimento {
     background-color: #fff3cd;
     border-left: 4px solid #ffc107;
-    padding: 10px;
-    margin-bottom: 5px;
+    padding: 12px;
+    margin-bottom: 8px;
     border-radius: 4px;
+    transition: transform 0.2s;
+}
+
+.alerta-vencimento:hover {
+    transform: translateX(2px);
 }
 
 .alerta-vencido {
     background-color: #f8d7da;
     border-left: 4px solid #dc3545;
-    padding: 10px;
-    margin-bottom: 5px;
+    padding: 12px;
+    margin-bottom: 8px;
     border-radius: 4px;
+    transition: transform 0.2s;
+}
+
+.alerta-vencido:hover {
+    transform: translateX(2px);
 }
 
 .estoque-baixo {
     color: #dc3545;
     font-weight: bold;
+    background-color: rgba(220,53,69,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
 }
 
 .btn-sm {
     margin: 0 2px;
+    border-radius: 4px;
+}
+
+.btn-warning {
+    color: #212529;
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-info {
+    color: white;
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.list-group-item.active {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.list-group-item i {
+    margin-right: 8px;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.modal-content {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.modal-header {
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#ultimas-baixas .alert {
+    transition: transform 0.2s;
+}
+
+#ultimas-baixas .alert:hover {
+    transform: translateX(2px);
 }
