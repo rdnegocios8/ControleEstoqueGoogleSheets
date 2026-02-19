@@ -1,0 +1,59 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.table th {
+    background-color: #f1f1f1;
+}
+
+.qr-code-img {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.qr-code-img:hover {
+    transform: scale(1.1);
+}
+
+#qr-reader {
+    border: 2px dashed #007bff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.alerta-vencimento {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+}
+
+.alerta-vencido {
+    background-color: #f8d7da;
+    border-left: 4px solid #dc3545;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+}
+
+.estoque-baixo {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.btn-sm {
+    margin: 0 2px;
+}

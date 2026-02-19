@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Estoque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-box-seam"></i> Sistema de Gestão de Estoque
+            </span>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2">
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action active" id="menu-dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" id="menu-produtos">
+                        <i class="bi bi-box"></i> Produtos
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" id="menu-recebimento">
+                        <i class="bi bi-truck"></i> Recebimento
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" id="menu-qrcode">
+                        <i class="bi bi-qr-code"></i> Baixa por QR Code
+                    </a>
+                </div>
+            </div>
+
+            <!-- Conteúdo Principal -->
+            <div class="col-md-10">
+                <!-- Dashboard -->
+                <div id="dashboard-view">
+                    <h2>Dashboard</h2>
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card text-white bg-primary mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total de Produtos</h5>
+                                    <h2 id="total-produtos">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-success mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Itens em Estoque</h5>
+                                    <h2 id="total-itens">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-warning mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Próximos a Vencer</h5>
+                                    <h2 id="proximos-vencer">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-danger mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estoque Baixo</h5>
+                                    <h2 id="estoque-baixo">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    Produtos em Estoque
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="grafico-produtos"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    Alertas de Validade
+                                </div>
+                                <div class="card-body">
+                                    <div id="alertas-validade"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Produtos View -->
+                <div id="produtos-view" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2>Produtos em Estoque</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalProduto">
+                            <i class="bi bi-plus"></i> Novo Produto
+                        </button>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="search-produto" placeholder="Buscar produto...">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-4">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Unidade</th>
+                                    <th>Quantidade</th>
+                                    <th>Lote</th>
+                                    <th>Validade</th>
+                                    <th>QR Code</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-produtos">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recebimento View -->
+                <div id="recebimento-view" style="display: none;">
+                    <h2>Recebimento de Mercadorias</h2>
+                    
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <form id="form-recebimento">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="data-recebimento" class="form-label">Data de Recebimento</label>
+                                        <input type="date" class="form-control" id="data-recebimento" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="codigo-recebimento" class="form-label">Código do Produto</label>
+                                        <input type="text" class="form-control" id="codigo-recebimento" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="quantidade-recebimento" class="form-label">Quantidade</label>
+                                        <input type="number" class="form-control" id="quantidade-recebimento" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check"></i> Registrar Recebimento
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <h3 class="mt-4">Histórico de Recebimentos</h3>
+                    <div class="table-responsive mt-2">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Quantidade</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-recebimentos">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- QR Code View -->
+                <div id="qrcode-view" style="display: none;">
+                    <h2>Baixa por QR Code</h2>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <div id="qr-reader" style="width: 100%;"></div>
+                                    <div id="qr-reader-results" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    Últimas Baixas
+                                </div>
+                                <div class="card-body">
+                                    <div id="ultimas-baixas"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Produto -->
+    <div class="modal fade" id="modalProduto" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-produto">
+                        <div class="mb-3">
+                            <label for="produto-codigo" class="form-label">Código</label>
+                            <input type="text" class="form-control" id="produto-codigo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="produto-descricao" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="produto-descricao" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="produto-unidade" class="form-label">Unidade de Medida</label>
+                            <select class="form-control" id="produto-unidade" required>
+                                <option value="UN">UN - Unidade</option>
+                                <option value="KG">KG - Quilograma</option>
+                                <option value="LT">LT - Litro</option>
+                                <option value="CX">CX - Caixa</option>
+                                <option value="PC">PC - Peça</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="produto-quantidade" class="form-label">Quantidade Inicial</label>
+                            <input type="number" class="form-control" id="produto-quantidade" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="produto-lote" class="form-label">Lote</label>
+                            <input type="text" class="form-control" id="produto-lote" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="produto-validade" class="form-label">Validade</label>
+                            <input type="date" class="form-control" id="produto-validade" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="salvar-produto">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Produto -->
+    <div class="modal fade" id="modalEditarProduto" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-editar-produto">
+                        <input type="hidden" id="editar-id">
+                        <div class="mb-3">
+                            <label for="editar-codigo" class="form-label">Código</label>
+                            <input type="text" class="form-control" id="editar-codigo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editar-descricao" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="editar-descricao" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editar-unidade" class="form-label">Unidade de Medida</label>
+                            <select class="form-control" id="editar-unidade" required>
+                                <option value="UN">UN - Unidade</option>
+                                <option value="KG">KG - Quilograma</option>
+                                <option value="LT">LT - Litro</option>
+                                <option value="CX">CX - Caixa</option>
+                                <option value="PC">PC - Peça</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editar-quantidade" class="form-label">Quantidade</label>
+                            <input type="number" class="form-control" id="editar-quantidade" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editar-lote" class="form-label">Lote</label>
+                            <input type="text" class="form-control" id="editar-lote" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editar-validade" class="form-label">Validade</label>
+                            <input type="date" class="form-control" id="editar-validade" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="atualizar-produto">Atualizar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
