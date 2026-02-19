@@ -1,14 +1,11 @@
 // Configurações do Google Sheets
 const SHEET_ID = '1We0xDOamU_iIGNcm_YxZ8jbBGNWK1PIyljgDb9xWf84';
 const API_KEY = 'AIzaSyCShYO-EV8ZcjuOFuYedULIrfcwOgbcwsU';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
 
-// URLs da API do Google Sheets
+// URLs da API do Google Sheets (para leitura)
 const PRODUTOS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Produtos?key=${API_KEY}`;
 const RECEBIMENTOS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Recebimentos?key=${API_KEY}`;
-
-// URLs para escrita (append)
-const PRODUTOS_APPEND_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Produtos:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
-const RECEBIMENTOS_APPEND_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Recebimentos:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
 
 // Variáveis globais
 let produtos = [];
@@ -56,7 +53,6 @@ function mostrarView(view) {
 // Carregar dados do Google Sheets
 async function carregarDados() {
     try {
-        // Mostrar indicador de carregamento
         mostrarCarregando(true);
         
         // Carregar produtos
@@ -71,7 +67,7 @@ async function carregarDados() {
                 quantidade: parseInt(row[3]) || 0,
                 lote: row[4] || '',
                 validade: row[5] || ''
-            })).filter(p => p.codigo); // Remove linhas vazias
+            })).filter(p => p.codigo);
         } else {
             produtos = [];
         }
@@ -340,7 +336,6 @@ async function salvarProduto() {
         validade: document.getElementById('produto-validade').value
     };
     
-    // Validar campos obrigatórios
     if (!produto.codigo || !produto.descricao) {
         alert('Código e descrição são obrigatórios!');
         return;
@@ -349,13 +344,10 @@ async function salvarProduto() {
     try {
         mostrarCarregando(true);
         
-        // Salvar no Google Sheets
         await salvarNoGoogleSheets(produto);
         
-        // Adicionar ao array local
         produtos.push(produto);
         
-        // Fechar modal e atualizar interface
         bootstrap.Modal.getInstance(document.getElementById('modalProduto')).hide();
         document.getElementById('form-produto').reset();
         atualizarInterface();
@@ -403,10 +395,8 @@ async function atualizarProduto() {
         try {
             mostrarCarregando(true);
             
-            // Atualizar no Google Sheets
             await atualizarNoGoogleSheets(produtoAtualizado);
             
-            // Atualizar no array local
             produtos[index] = produtoAtualizado;
             
             bootstrap.Modal.getInstance(document.getElementById('modalEditarProduto')).hide();
@@ -429,10 +419,8 @@ async function excluirProduto(codigo) {
     try {
         mostrarCarregando(true);
         
-        // Excluir do Google Sheets
         await excluirNoGoogleSheets(codigo);
         
-        // Remover do array local
         produtos = produtos.filter(p => p.codigo !== codigo);
         
         atualizarInterface();
@@ -458,7 +446,6 @@ async function darBaixa(codigo, quantidade = 1) {
         return;
     }
     
-    // Perguntar quantidade se não foi especificada
     if (quantidade === 1) {
         const qtd = prompt('Quantidade para dar baixa:', '1');
         if (qtd === null) return;
@@ -474,11 +461,7 @@ async function darBaixa(codigo, quantidade = 1) {
         
         produto.quantidade -= quantidade;
         
-        // Atualizar no Google Sheets
         await atualizarNoGoogleSheets(produto);
-        
-        // Registrar a baixa como um recebimento negativo? (opcional)
-        // await registrarBaixa(codigo, produto.descricao, quantidade);
         
         atualizarInterface();
         alert(`Baixa realizada com sucesso! Nova quantidade: ${produto.quantidade}`);
@@ -508,7 +491,6 @@ async function registrarRecebimento(event) {
     try {
         mostrarCarregando(true);
         
-        // Encontrar produto e atualizar quantidade
         const produto = produtos.find(p => p.codigo === recebimento.codigo);
         if (!produto) {
             alert('Produto não encontrado!');
@@ -518,13 +500,9 @@ async function registrarRecebimento(event) {
         recebimento.descricao = produto.descricao;
         produto.quantidade += recebimento.quantidade;
         
-        // Salvar recebimento no Google Sheets
         await salvarRecebimentoNoGoogleSheets(recebimento);
-        
-        // Atualizar produto no Google Sheets
         await atualizarNoGoogleSheets(produto);
         
-        // Adicionar ao array local
         recebimentos.push(recebimento);
         
         document.getElementById('form-recebimento').reset();
@@ -541,6 +519,11 @@ async function registrarRecebimento(event) {
 
 // Configurar leitor de QR Code
 function setupQRCode() {
+    if (typeof Html5Qrcode === 'undefined') {
+        console.error('Biblioteca Html5Qrcode não carregada!');
+        return;
+    }
+    
     const html5QrCode = new Html5Qrcode("qr-reader");
     
     const qrCodeSuccessCallback = (decodedText, decodedResult) => {
@@ -557,13 +540,6 @@ function setupQRCode() {
     };
     
     const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-    
-    // Parar leitor anterior se existir
-    try {
-        html5QrCode.stop();
-    } catch (e) {
-        // Ignorar erro se não estiver rodando
-    }
     
     html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
         .catch(err => console.error('Erro ao iniciar QR Code:', err));
@@ -584,7 +560,6 @@ function adicionarUltimaBaixa(codigo) {
     
     container.prepend(div);
     
-    // Manter apenas as 5 últimas
     while (container.children.length > 5) {
         container.removeChild(container.lastChild);
     }
@@ -617,140 +592,68 @@ function gerarQRCode(codigo) {
 }
 
 function mostrarCarregando(show) {
-    // Implementar se desejar um indicador visual de carregamento
     console.log(show ? 'Carregando...' : 'Carregamento concluído');
 }
 
 function mostrarMensagem(texto, tipo) {
-    // Implementar se desejar notificações toast
     console.log(`[${tipo}] ${texto}`);
 }
 
 // ============================================
-// FUNÇÕES DE INTEGRAÇÃO COM GOOGLE SHEETS
+// FUNÇÕES DE INTEGRAÇÃO COM GOOGLE SHEETS (VIA WEB APP)
 // ============================================
 
 // Salvar novo produto
 async function salvarNoGoogleSheets(produto) {
-    const body = {
-        values: [[
-            produto.codigo,
-            produto.descricao,
-            produto.unidade,
-            produto.quantidade,
-            produto.lote,
-            produto.validade
-        ]]
-    };
-    
-    const response = await fetch(PRODUTOS_APPEND_URL, {
+    const response = await fetch(WEB_APP_URL, {
         method: 'POST',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(produto)
     });
     
-    if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-    }
-    
-    return await response.json();
+    console.log('Produto enviado para o Sheets:', produto.codigo);
+    return { success: true };
 }
 
 // Atualizar produto existente
 async function atualizarNoGoogleSheets(produto) {
-    // Primeiro precisamos encontrar a linha do produto
-    const response = await fetch(PRODUTOS_URL);
-    const data = await response.json();
-    
-    if (!data.values) {
-        throw new Error('Não foi possível ler os produtos');
-    }
-    
-    // Encontrar a linha do produto pelo código (ignorando cabeçalho)
-    const linhaIndex = data.values.findIndex((row, index) => 
-        index > 0 && row[0] === produto.codigo
-    );
-    
-    if (linhaIndex === -1) {
-        throw new Error('Produto não encontrado na planilha');
-    }
-    
-    // Atualizar a linha (linhaIndex + 1 porque o array é 0-based e a planilha é 1-based)
-    const linha = linhaIndex + 1;
-    const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Produtos!A${linha}:F${linha}?valueInputOption=USER_ENTERED&key=${API_KEY}`;
-    
-    const body = {
-        values: [[
-            produto.codigo,
-            produto.descricao,
-            produto.unidade,
-            produto.quantidade,
-            produto.lote,
-            produto.validade
-        ]]
-    };
-    
-    const updateResponse = await fetch(updateUrl, {
+    const response = await fetch(WEB_APP_URL, {
         method: 'PUT',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(produto)
     });
     
-    if (!updateResponse.ok) {
-        throw new Error(`Erro HTTP ao atualizar: ${updateResponse.status}`);
-    }
-    
-    return await updateResponse.json();
+    console.log('Produto atualizado no Sheets:', produto.codigo);
+    return { success: true };
 }
 
-// Excluir produto (limpa a linha mas mantém a estrutura)
+// Excluir produto
 async function excluirNoGoogleSheets(codigo) {
-    // Primeiro encontrar a linha
-    const response = await fetch(PRODUTOS_URL);
-    const data = await response.json();
-    
-    if (!data.values) return;
-    
-    const linhaIndex = data.values.findIndex((row, index) => 
-        index > 0 && row[0] === codigo
-    );
-    
-    if (linhaIndex === -1) return;
-    
-    // Limpar o conteúdo da linha (não é possível excluir via API gratuita)
-    const linha = linhaIndex + 1;
-    const clearUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Produtos!A${linha}:F${linha}:clear?key=${API_KEY}`;
-    
-    const clearResponse = await fetch(clearUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+    const response = await fetch(WEB_APP_URL, {
+        method: 'DELETE',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo })
     });
     
-    if (!clearResponse.ok) {
-        throw new Error(`Erro HTTP ao limpar: ${clearResponse.status}`);
-    }
+    console.log('Produto excluído do Sheets:', codigo);
+    return { success: true };
 }
 
 // Salvar recebimento
 async function salvarRecebimentoNoGoogleSheets(recebimento) {
-    const body = {
-        values: [[
-            recebimento.data,
-            recebimento.codigo,
-            recebimento.descricao,
-            recebimento.quantidade
-        ]]
-    };
-    
-    const response = await fetch(RECEBIMENTOS_APPEND_URL, {
+    const response = await fetch(WEB_APP_URL, {
         method: 'POST',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+            ...recebimento,
+            tipo: 'recebimento'
+        })
     });
     
-    if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-    }
-    
-    return await response.json();
+    console.log('Recebimento salvo no Sheets');
+    return { success: true };
 }
