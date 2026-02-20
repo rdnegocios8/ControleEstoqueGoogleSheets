@@ -388,3 +388,42 @@ a:hover {
 .border-warning { border-color: var(--accent-orange) !important; }
 .border-danger { border-color: var(--accent-red) !important; }
 .border-success { border-color: #198754 !important; }
+
+/* Correção para textos escuros */
+.form-text, .text-muted {
+    color: #adb5bd !important;
+}
+
+.form-check-label {
+    color: #e9ecef !important;
+}
+
+small {
+    color: #adb5bd !important;
+}
+
+#campo-quantidade-real label {
+    color: #fd7e14 !important;
+    font-weight: 600;
+}
+
+#campo-quantidade-real small {
+    color: #6c757d !important;
+    font-style: italic;
+}
+
+/* Melhorar visibilidade dos placeholders */
+::placeholder {
+    color: #6c757d !important;
+    opacity: 1;
+}
+
+/* Ajustar cor do texto nos inputs */
+.form-control, .form-select {
+    color: #e9ecef !important;
+}
+
+.form-control[readonly] {
+    color: #fd7e14 !important;
+    font-weight: 600;
+}
