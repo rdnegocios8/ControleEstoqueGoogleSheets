@@ -54,8 +54,6 @@
             font-size: 1.8rem;
             font-weight: 700;
             margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
         
         .produto-sku {
@@ -83,28 +81,22 @@
             font-weight: 700;
             color: #fd7e14;
             display: block;
-            line-height: 1.2;
         }
         
         .estoque-label {
             font-size: 0.9rem;
             color: #adb5bd;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         .form-label {
             font-weight: 600;
             color: #fd7e14;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: block;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
         }
         
         .form-control, .form-select {
@@ -113,37 +105,29 @@
             background-color: #2c3034;
             border: 2px solid #3a3f45;
             border-radius: 10px;
-            font-size: 1rem;
             color: #e9ecef;
-            transition: all 0.3s;
         }
         
-        .form-control:focus, .form-select:focus {
+        .form-control:focus {
             outline: none;
             border-color: #fd7e14;
-            box-shadow: 0 0 0 3px rgba(253,126,20,0.2);
         }
         
         .form-control[readonly] {
             background-color: #1a1e24;
-            border-color: #3a3f45;
             color: #fd7e14;
             font-weight: 600;
         }
         
         .disponivel-badge {
             color: #28a745;
-            font-weight: normal;
             font-size: 0.85rem;
             margin-left: 10px;
-            background: rgba(40,167,69,0.2);
-            padding: 2px 8px;
-            border-radius: 20px;
         }
         
         .transferencia-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 10px;
             margin-top: 10px;
         }
@@ -151,28 +135,24 @@
         .transferencia-option {
             background-color: #2c3034;
             border: 2px solid #3a3f45;
-            border-radius: 10px;
-            padding: 15px 10px;
+            border-radius: 8px;
+            padding: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             color: #e9ecef;
-            font-weight: 500;
-            font-size: 0.9rem;
         }
         
         .transferencia-option:hover {
             background-color: #fd7e14;
             border-color: #fd7e14;
             color: white;
-            transform: translateY(-2px);
         }
         
         .transferencia-option.selected {
             background: linear-gradient(135deg, #dc3545, #fd7e14);
             border-color: #fd7e14;
             color: white;
-            font-weight: 600;
         }
         
         .observacao {
@@ -181,10 +161,8 @@
             background-color: #2c3034;
             border: 2px solid #3a3f45;
             border-radius: 10px;
-            font-size: 1rem;
             color: #e9ecef;
             resize: vertical;
-            min-height: 80px;
         }
         
         .btn-confirmar {
@@ -199,32 +177,11 @@
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
         
         .btn-confirmar:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 30px rgba(220,53,69,0.4);
-        }
-        
-        .btn-confirmar i {
-            font-size: 1.3rem;
-        }
-        
-        .badge-unidade {
-            display: inline-block;
-            padding: 5px 12px;
-            background: linear-gradient(135deg, #0d6efd, #0a58ca);
-            color: white;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 15px;
         }
         
         .info-row {
@@ -236,7 +193,6 @@
         
         .info-label {
             color: #adb5bd;
-            font-weight: 500;
         }
         
         .info-value {
@@ -248,17 +204,20 @@
 <body>
     <div class="baixa-container">
         <div class="baixa-card">
-            <div class="badge-unidade">
-                <i class="bi bi-qr-code"></i> TRANSFERÊNCIA DE UNIDADE
-            </div>
-            
             <div class="produto-header">
                 <h1 class="produto-titulo" id="produto-nome">Carregando...</h1>
                 <div class="produto-sku" id="produto-sku">SKU: </div>
             </div>
 
             <div class="estoque-info" id="estoque-info">
-                <!-- Informações de estoque serão preenchidas -->
+                <div class="estoque-item">
+                    <span class="estoque-valor" id="display-volume">0</span>
+                    <span class="estoque-label" id="display-unidade-volume">MALA</span>
+                </div>
+                <div class="estoque-item">
+                    <span class="estoque-valor" id="display-quantidade">0</span>
+                    <span class="estoque-label">UNIDADES</span>
+                </div>
             </div>
 
             <form id="form-baixa">
@@ -273,33 +232,23 @@
 
                 <div class="form-group">
                     <label class="form-label">
-                        Volume 
+                        Volume a Transferir (<span id="label-unidade-volume">MALA</span>)
                         <span class="disponivel-badge" id="volume-disponivel"></span>
                     </label>
-                    <input type="number" class="form-control" id="volume" min="1" required>
+                    <input type="number" class="form-control" id="volume-transferir" min="1" required>
+                    <small class="text-muted" id="volume-info">Cada unidade contém X unidades</small>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">
-                        Quantidade 
+                        Quantidade a Transferir (UNIDADES)
                         <span class="disponivel-badge" id="quantidade-disponivel"></span>
                     </label>
-                    <input type="number" class="form-control" id="quantidade" min="1" required>
+                    <input type="number" class="form-control" id="quantidade-transferir" min="1" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Unidade de Medida</label>
-                    <select class="form-select" id="unidade-medida" required>
-                        <option value="KG">KG (Quilograma)</option>
-                        <option value="LT">LT (Litro)</option>
-                        <option value="UN">UN (Unidade)</option>
-                        <option value="CX">CX (Caixa)</option>
-                        <option value="PLT">PLT (Palete)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Transferido para <span style="color: #dc3545;">*</span></label>
+                    <label class="form-label">Transferido para *</label>
                     <div class="transferencia-options" id="transferencia-options">
                         <div class="transferencia-option" onclick="selecionarDestino('Farinheira')">Farinheira</div>
                         <div class="transferencia-option" onclick="selecionarDestino('Doméstica')">Doméstica</div>
@@ -310,7 +259,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Observações (opcional)</label>
+                    <label class="form-label">Observações</label>
                     <textarea class="observacao" id="observacao" placeholder="Informações adicionais..."></textarea>
                 </div>
 
@@ -331,9 +280,6 @@
     </div>
 
     <script>
-        // Configurações
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
-        
         // Carregar dados da URL
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id');
@@ -341,100 +287,84 @@
         const lote = urlParams.get('lote');
         const validade = urlParams.get('validade');
         const produtoNome = decodeURIComponent(urlParams.get('produto') || '');
-        const volumeTotal = parseInt(urlParams.get('volume')) || 1;
-        const quantidadeTotal = parseFloat(urlParams.get('quantidade')) || 0;
-        const unidade = urlParams.get('unidade') || 'UN';
+        const volumeTotal = parseInt(urlParams.get('volume')) || 0;
+        const quantidadeTotal = parseInt(urlParams.get('quantidade')) || 0;
+        const unidadeVolume = urlParams.get('unidade') || 'UN';
+        const qtdPorEmbalagem = parseInt(urlParams.get('qtdPorEmbalagem')) || 1;
 
-        // Variáveis
         let destinoSelecionado = '';
 
-        // Preencher dados do produto
-        document.getElementById('produto-nome').textContent = produtoNome || 'Produto não identificado';
-        document.getElementById('produto-sku').textContent = `SKU: ${sku || 'N/A'}`;
-        document.getElementById('unidade-id').value = unidadeId || '';
-        document.getElementById('unidade-sku').value = sku || '';
-        document.getElementById('lote').value = lote || '';
-        document.getElementById('unidade-medida').value = unidade;
-        document.getElementById('info-id').textContent = unidadeId || '';
+        // Calcular unidades por embalagem
+        const unidadesPorEmbalagem = Math.floor(quantidadeTotal / volumeTotal) || qtdPorEmbalagem;
+
+        // Preencher dados iniciais
+        document.getElementById('produto-nome').textContent = produtoNome;
+        document.getElementById('produto-sku').textContent = `SKU: ${sku}`;
+        document.getElementById('unidade-id').value = unidadeId;
+        document.getElementById('unidade-sku').value = sku;
+        document.getElementById('lote').value = lote;
+        document.getElementById('info-id').textContent = unidadeId;
         document.getElementById('info-validade').textContent = validade ? new Date(validade).toLocaleDateString('pt-BR') : 'N/A';
 
-        // Configurar limites
-        document.getElementById('volume').max = volumeTotal;
-        document.getElementById('volume').value = 1;
-        document.getElementById('quantidade').max = quantidadeTotal;
-        document.getElementById('quantidade').value = quantidadeTotal;
+        document.getElementById('display-volume').textContent = volumeTotal;
+        document.getElementById('display-unidade-volume').textContent = unidadeVolume;
+        document.getElementById('display-quantidade').textContent = quantidadeTotal;
+        document.getElementById('label-unidade-volume').textContent = unidadeVolume;
+        document.getElementById('volume-disponivel').textContent = `Disponível: ${volumeTotal} ${unidadeVolume}`;
+        document.getElementById('quantidade-disponivel').textContent = `Disponível: ${quantidadeTotal} UN`;
+        document.getElementById('volume-info').textContent = `Cada ${unidadeVolume} contém ${unidadesPorEmbalagem} unidades`;
 
-        // Preencher informações de disponibilidade
-        document.getElementById('estoque-info').innerHTML = `
-            <div class="estoque-item">
-                <span class="estoque-valor">${volumeTotal}</span>
-                <span class="estoque-label">Volume (${unidade})</span>
-            </div>
-            <div class="estoque-item">
-                <span class="estoque-valor">${quantidadeTotal}</span>
-                <span class="estoque-label">Quantidade</span>
-            </div>
-        `;
+        document.getElementById('volume-transferir').max = volumeTotal;
+        document.getElementById('volume-transferir').value = 1;
 
-        document.getElementById('volume-disponivel').textContent = `Disponível: ${volumeTotal} ${unidade}`;
-        document.getElementById('quantidade-disponivel').textContent = `Disponível: ${quantidadeTotal}`;
+        // Calcular quantidade ao digitar volume
+        document.getElementById('volume-transferir').addEventListener('input', function() {
+            const volume = parseInt(this.value) || 0;
+            const quantidade = volume * unidadesPorEmbalagem;
+            document.getElementById('quantidade-transferir').value = quantidade;
+        });
 
-        // Função para selecionar destino
         function selecionarDestino(destino) {
             destinoSelecionado = destino;
             document.getElementById('unidade-destino').value = destino;
             
-            // Remover seleção anterior
             document.querySelectorAll('.transferencia-option').forEach(opt => {
                 opt.classList.remove('selected');
             });
-            
-            // Adicionar seleção ao clicado
             event.target.classList.add('selected');
         }
 
-        // Função para confirmar baixa
         async function confirmarBaixa() {
-            const volume = parseInt(document.getElementById('volume').value);
-            const quantidade = parseFloat(document.getElementById('quantidade').value);
-            const novaUnidade = document.getElementById('unidade-medida').value;
-            const destino = destinoSelecionado;
-            const observacao = document.getElementById('observacao').value;
+            const volumeTransferir = parseInt(document.getElementById('volume-transferir').value);
+            const quantidadeTransferir = volumeTransferir * unidadesPorEmbalagem;
 
-            // Validações
-            if (!destino) {
+            if (!destinoSelecionado) {
                 alert('Selecione um destino para a transferência!');
                 return;
             }
 
-            if (volume < 1 || volume > volumeTotal) {
+            if (volumeTransferir < 1 || volumeTransferir > volumeTotal) {
                 alert(`Volume deve estar entre 1 e ${volumeTotal}`);
                 return;
             }
 
-            if (quantidade < 1 || quantidade > quantidadeTotal) {
-                alert(`Quantidade deve estar entre 1 e ${quantidadeTotal}`);
-                return;
-            }
-
-            // Criar movimentação
             const movimentacao = {
                 tipo: 'movimentacao',
                 data: new Date().toISOString().split('T')[0],
                 tipoMov: 'Transferência',
                 idUnidade: unidadeId,
                 sku: sku,
-                volume: volume,
-                quantidade: quantidade,
-                destino: destino,
+                volume: volumeTransferir,
+                quantidade: quantidadeTransferir,
+                unidadeEmbalagem: unidadeVolume,
+                destino: destinoSelecionado,
                 responsavel: 'Sistema',
-                observacao: observacao
+                observacao: document.getElementById('observacao').value
             };
 
-            // Atualizar unidade (diminuir quantidade)
-            const novaQuantidade = quantidadeTotal - quantidade;
-            const novoVolume = Math.ceil(novaQuantidade / (quantidadeTotal / volumeTotal));
-            
+            const novaQuantidade = quantidadeTotal - quantidadeTransferir;
+            const novoVolume = Math.ceil(novaQuantidade / unidadesPorEmbalagem);
+
             const unidadeAtualizada = {
                 tipo: 'unidade',
                 id: unidadeId,
@@ -443,14 +373,17 @@
                 validade: validade,
                 volume: novoVolume,
                 quantidade: novaQuantidade,
-                unidade: novaUnidade,
+                unidadeEmbalagem: unidadeVolume,
                 status: novaQuantidade > 0 ? 'Disponível' : 'Transferido',
-                localizacao: destino,
-                destino: novaQuantidade > 0 ? '' : destino
+                localizacao: '-',
+                destino: novaQuantidade > 0 ? '' : destinoSelecionado,
+                foraPadrao: false,
+                qtdRealPorEmbalagem: null
             };
 
+            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
+
             try {
-                // Enviar movimentação
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -458,7 +391,6 @@
                     body: JSON.stringify(movimentacao)
                 });
 
-                // Atualizar unidade
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -467,15 +399,10 @@
                 });
 
                 alert('Transferência realizada com sucesso!');
-                
-                // Fechar a janela
-                setTimeout(() => {
-                    window.close();
-                }, 2000);
-                
+                setTimeout(() => window.close(), 2000);
             } catch (error) {
-                console.error('Erro ao realizar transferência:', error);
-                alert('Erro ao realizar transferência. Tente novamente.');
+                console.error('Erro:', error);
+                alert('Erro ao realizar transferência.');
             }
         }
     </script>
