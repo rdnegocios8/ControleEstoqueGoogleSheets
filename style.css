@@ -179,251 +179,192 @@ body {
 }
 
 /* ============================================ */
-/* TABELAS */
+/* TABELAS - FUNDO ESCURO CORRIGIDO */
 /* ============================================ */
 
 .table {
-    color: var(--text-secondary);
+    color: #e2e8f0 !important; /* Texto claro */
     background: transparent;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
 }
 
+/* Cabeçalho da tabela */
 .table thead th {
-    background: linear-gradient(135deg, #2d3a4f, #1e293b) !important;
-    color: var(--accent-gold) !important;
+    background: #1a2634 !important; /* Fundo escuro para cabeçalho */
+    color: #fbbf24 !important; /* Texto dourado */
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.8rem;
     letter-spacing: 0.5px;
     padding: 15px 8px !important;
-    border-bottom: 2px solid var(--accent-gold) !important;
+    border-bottom: 2px solid #fbbf24 !important;
     border: none;
+    white-space: nowrap;
 }
 
+/* Linhas do corpo da tabela */
 .table tbody tr {
-    border-bottom: 1px solid var(--border-color);
+    background-color: #0f172a !important; /* Fundo escuro padrão */
+    border-bottom: 1px solid #2d3748;
     transition: all 0.2s ease;
 }
 
 .table tbody tr:hover {
-    background-color: #2d3a4f !important;
+    background-color: #1e293b !important; /* Um pouco mais claro ao passar o mouse */
 }
 
 .table td {
     padding: 12px 8px;
     vertical-align: middle;
-    color: var(--text-secondary);
+    color: #e2e8f0 !important; /* Texto branco suave */
+    border: none;
 }
 
+/* Linhas alternadas - fundo escuro com variação sutil */
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: #1e293b !important;
+    background-color: #0f172a !important; /* Azul noturno */
 }
 
 .table-striped tbody tr:nth-of-type(even) {
-    background-color: #253341 !important;
+    background-color: #1a1f2e !important; /* Azul um pouco mais claro mas ainda escuro */
 }
 
 /* ============================================ */
 /* TABELA DE UNIDADES - CORES ESPECÍFICAS */
 /* ============================================ */
 
-#tabela-unidades td {
+#tabela-unidades {
     color: #e2e8f0 !important;
 }
 
+#tabela-unidades td {
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+}
+
+/* IDs das unidades em dourado */
 #tabela-unidades td:first-child {
-    color: var(--accent-gold) !important;
+    color: #fbbf24 !important;
     font-family: monospace;
     font-weight: 600;
 }
 
+/* Volume e Quantidade em dourado */
 #tabela-unidades td:nth-child(7),
 #tabela-unidades td:nth-child(8) {
-    color: var(--accent-gold) !important;
+    color: #fbbf24 !important;
     font-weight: 600;
 }
 
+/* Datas de validade */
+#tabela-unidades td:nth-child(6) {
+    color: #e2e8f0 !important;
+}
+
 #tabela-unidades td:nth-child(6).text-danger {
-    color: var(--danger) !important;
+    color: #fc8181 !important; /* Vermelho claro para vencidos */
     font-weight: 700;
 }
 
+/* Textos pequenos (como IDs reduzidos) */
 #tabela-unidades td small {
-    color: var(--text-muted) !important;
+    color: #a0aec0 !important;
 }
 
 /* ============================================ */
 /* TABELA DE MOVIMENTAÇÕES */
 /* ============================================ */
 
-#tabela-movimentacoes td {
+#tabela-movimentacoes {
     color: #e2e8f0 !important;
 }
 
+#tabela-movimentacoes td {
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+}
+
 #tabela-movimentacoes td small {
-    color: var(--text-muted) !important;
+    color: #a0aec0 !important;
 }
 
 /* ============================================ */
-/* BADGES */
+/* BADGES DENTRO DAS TABELAS */
 /* ============================================ */
 
-.badge {
-    padding: 6px 12px;
+#tabela-unidades .badge,
+#tabela-movimentacoes .badge {
     font-weight: 600;
-    font-size: 0.75rem;
-    border-radius: 30px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
-    color: white;
+    display: inline-block;
 }
 
-.badge.bg-primary {
-    background: linear-gradient(135deg, var(--info), #2563eb) !important;
+#tabela-unidades .badge.bg-success,
+#tabela-movimentacoes .badge.bg-success {
+    background: #059669 !important;
+    color: white !important;
 }
 
-.badge.bg-success {
-    background: linear-gradient(135deg, var(--success), #059669) !important;
+#tabela-unidades .badge.bg-danger,
+#tabela-movimentacoes .badge.bg-danger {
+    background: #b91c1c !important;
+    color: white !important;
 }
 
-.badge.bg-warning {
-    background: linear-gradient(135deg, var(--warning), #d97706) !important;
+#tabela-unidades .badge.bg-warning,
+#tabela-movimentacoes .badge.bg-warning {
+    background: #d97706 !important;
     color: #0f172a !important;
 }
 
-.badge.bg-danger {
-    background: linear-gradient(135deg, var(--danger), #dc2626) !important;
+#tabela-unidades .badge.bg-primary,
+#tabela-movimentacoes .badge.bg-primary {
+    background: #1e40af !important;
+    color: white !important;
 }
 
-.badge.bg-info {
-    background: linear-gradient(135deg, var(--accent-teal), #0d9488) !important;
+#tabela-unidades .badge.bg-info,
+#tabela-movimentacoes .badge.bg-info {
+    background: #0e7490 !important;
+    color: white !important;
 }
 
 /* ============================================ */
-/* BOTÕES */
+/* BOTÕES DE AÇÃO NAS TABELAS */
 /* ============================================ */
 
-.btn {
-    border-radius: 12px;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    transition: all 0.3s ease;
+#tabela-unidades .btn-info,
+#tabela-unidades .btn-warning {
+    padding: 4px 8px;
+    margin: 0 2px;
+    border-radius: 6px;
     border: none;
-    position: relative;
-    overflow: hidden;
-    font-size: 0.95rem;
+    font-size: 0.8rem;
 }
 
-.btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.5s, height 0.5s;
+#tabela-unidades .btn-info {
+    background: #2563eb !important;
+    color: white !important;
 }
 
-.btn:hover::before {
-    width: 300px;
-    height: 300px;
+#tabela-unidades .btn-warning {
+    background: #fbbf24 !important;
+    color: #0f172a !important;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, var(--info), #2563eb);
-    color: white;
-}
-
-.btn-success {
-    background: linear-gradient(135deg, var(--success), #059669);
-    color: white;
-}
-
-.btn-warning {
-    background: linear-gradient(135deg, var(--accent-amber), var(--accent-gold));
-    color: var(--bg-primary);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, var(--danger), #dc2626);
-    color: white;
-}
-
-.btn-info {
-    background: linear-gradient(135deg, var(--accent-teal), #0d9488);
-    color: white;
-}
-
-.btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
+#tabela-unidades .btn-info:hover,
+#tabela-unidades .btn-warning:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 /* ============================================ */
-/* FORMULÁRIOS */
-/* ============================================ */
-
-.form-control, .form-select {
-    background-color: var(--bg-tertiary) !important;
-    border: 2px solid var(--border-color) !important;
-    color: var(--text-primary) !important;
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
-    font-size: 0.95rem;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: var(--accent-gold) !important;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2) !important;
-    background-color: var(--bg-secondary) !important;
-}
-
-.form-control[readonly] {
-    background-color: var(--bg-secondary) !important;
-    color: var(--accent-gold) !important;
-    font-weight: 600;
-    border-color: var(--accent-gold) !important;
-}
-
-.form-label {
-    color: var(--accent-gold) !important;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
-}
-
-.form-check-label {
-    color: var(--text-secondary) !important;
-}
-
-.form-check-input {
-    background-color: var(--bg-tertiary);
-    border-color: var(--border-color);
-}
-
-.form-check-input:checked {
-    background-color: var(--accent-gold);
-    border-color: var(--accent-gold);
-}
-
-::placeholder {
-    color: var(--text-muted) !important;
-    opacity: 1;
-}
-
-/* ============================================ */
-/* FILTROS */
+/* FILTROS ACIMA DAS TABELAS */
 /* ============================================ */
 
 #filtro-produto-unidades,
@@ -437,182 +378,19 @@ body {
 #search-produto,
 #filtro-categoria-produto,
 #filtro-embalagem-produto {
-    background-color: #1e293b !important;
-    color: #f1f5f9 !important;
-    border: 2px solid #334155 !important;
+    background-color: #1a2634 !important;
+    color: #e2e8f0 !important;
+    border: 2px solid #2d3748 !important;
+    border-radius: 8px;
+    padding: 8px 12px;
 }
 
 #filtro-produto-unidades:focus,
 #filtro-status-unidades:focus,
 #filtro-destino-unidades:focus,
 #filtro-embalagem-unidades:focus {
-    border-color: var(--accent-gold) !important;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2) !important;
-}
-
-/* ============================================ */
-/* MODAIS */
-/* ============================================ */
-
-.modal-content {
-    background-color: var(--bg-secondary);
-    border: 2px solid var(--accent-gold);
-    border-radius: 24px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-.modal-header {
-    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
-    border-bottom: 2px solid var(--accent-gold);
-    border-radius: 24px 24px 0 0;
-    padding: 1.5rem;
-}
-
-.modal-header .modal-title {
-    color: var(--text-primary);
-    font-weight: 700;
-    font-size: 1.25rem;
-}
-
-.modal-header .btn-close {
-    background-color: var(--text-secondary);
-    opacity: 0.8;
-    filter: none;
-}
-
-.modal-body {
-    padding: 1.5rem;
-    color: var(--text-secondary);
-}
-
-.modal-footer {
-    border-top: 1px solid var(--border-color);
-    padding: 1.5rem;
-}
-
-/* ============================================ */
-/* QR CODE */
-/* ============================================ */
-
-#qr-reader {
-    border: 2px dashed var(--accent-gold);
-    border-radius: 20px;
-    background-color: var(--bg-tertiary);
-    padding: 1.5rem;
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#qr-reader canvas, #qr-reader img {
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    max-width: 100%;
-    height: auto;
-}
-
-#qr-reader video {
-    border-radius: 12px;
-    max-width: 100%;
-}
-
-.qr-code-img {
-    background-color: white;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 2px solid var(--accent-gold);
-    box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);
-    transition: all 0.3s ease;
-}
-
-.qr-code-img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 15px 40px rgba(251, 191, 36, 0.3);
-}
-
-/* ============================================ */
-/* ALERTAS DE VALIDADE */
-/* ============================================ */
-
-.alerta-vencimento {
-    background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), transparent);
-    border-left: 4px solid var(--warning);
-    padding: 1rem 1.25rem;
-    margin-bottom: 0.75rem;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    transition: all 0.3s ease;
-}
-
-.alerta-vencimento:hover {
-    background: linear-gradient(90deg, rgba(245, 158, 11, 0.2), transparent);
-    transform: translateX(5px);
-}
-
-.alerta-vencido {
-    background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), transparent);
-    border-left: 4px solid var(--danger);
-    padding: 1rem 1.25rem;
-    margin-bottom: 0.75rem;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    transition: all 0.3s ease;
-}
-
-.alerta-vencido:hover {
-    background: linear-gradient(90deg, rgba(239, 68, 68, 0.2), transparent);
-    transform: translateX(5px);
-}
-
-/* ============================================ */
-/* CARDS DE PRODUTOS */
-/* ============================================ */
-
-#cards-produtos .card {
-    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
-    border: 1px solid var(--border-color);
-}
-
-#cards-produtos .card:hover {
-    border-color: var(--accent-gold);
-}
-
-#cards-produtos .badge {
-    margin-right: 0.5rem;
-    font-size: 0.7rem;
-}
-
-#cards-produtos .col-6 small {
-    color: var(--text-muted);
-}
-
-#cards-produtos .col-6 strong {
-    color: var(--accent-gold);
-}
-
-/* ============================================ */
-/* TEXTOS ESPECÍFICOS DOS MODAIS */
-/* ============================================ */
-
-#volume-descricao, 
-#quantidade-descricao {
-    color: var(--accent-gold) !important;
-    font-weight: 500;
-    display: block;
-    margin-top: 0.25rem;
-}
-
-#campo-qtd-por-embalagem small {
-    color: var(--accent-gold) !important;
-    font-style: italic;
-}
-
-.input-group-text {
-    background-color: var(--bg-tertiary) !important;
-    border: 2px solid var(--border-color) !important;
-    color: var(--accent-gold) !important;
-    font-weight: 600;
+    border-color: #fbbf24 !important;
+    outline: none;
 }
 
 /* ============================================ */
@@ -620,14 +398,12 @@ body {
 /* ============================================ */
 
 #tabela-unidades td[colspan],
-#tabela-movimentacoes td[colspan],
-#cards-produtos .text-muted {
-    color: var(--text-muted) !important;
+#tabela-movimentacoes td[colspan] {
+    color: #a0aec0 !important;
     font-style: italic;
     text-align: center;
-    padding: 30px !important;
-    background-color: #1e293b !important;
-    border-radius: 8px;
+    padding: 40px !important;
+    background-color: #0f172a !important;
 }
 
 /* ============================================ */
@@ -745,3 +521,4 @@ h2 {
 .card, .modal-content {
     animation: fadeIn 0.3s ease-out;
 }
+
