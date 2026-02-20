@@ -1,4 +1,7 @@
-/* Tema Escuro com Cores Vibrantes */
+/* ============================================ */
+/* TEMA ESCURO COM CORES VIBRANTES */
+/* ============================================ */
+
 :root {
     --primary-dark: #0a0c0f;
     --secondary-dark: #1a1e24;
@@ -17,7 +20,10 @@ body {
     color: var(--text-light);
 }
 
-/* Navbar */
+/* ============================================ */
+/* NAVBAR */
+/* ============================================ */
+
 .navbar {
     background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-orange) 100%);
     box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
@@ -29,9 +35,17 @@ body {
     font-weight: 700;
     font-size: 1.5rem;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    color: white !important;
 }
 
-/* Sidebar */
+.navbar-brand i {
+    color: white;
+}
+
+/* ============================================ */
+/* SIDEBAR */
+/* ============================================ */
+
 .list-group {
     background-color: transparent;
     border-radius: 12px;
@@ -57,19 +71,24 @@ body {
 .list-group-item:hover {
     background-color: #2c3034;
     transform: translateX(5px);
+    color: white;
 }
 
 .list-group-item.active {
     background: linear-gradient(90deg, var(--accent-red) 0%, var(--accent-orange) 100%);
     border: none;
     font-weight: 600;
+    color: white;
 }
 
 .list-group-item.active i {
     color: white;
 }
 
-/* Cards */
+/* ============================================ */
+/* CARDS */
+/* ============================================ */
+
 .card {
     background-color: var(--secondary-dark);
     border: 1px solid var(--border-color);
@@ -103,6 +122,19 @@ body {
     color: var(--text-light);
 }
 
+.card-title {
+    color: var(--accent-orange);
+    font-weight: 600;
+}
+
+.card-subtitle {
+    color: var(--text-muted) !important;
+}
+
+.card-text {
+    color: var(--text-light);
+}
+
 /* Cards de gradiente para métricas */
 .bg-gradient-primary {
     background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
@@ -121,7 +153,10 @@ body {
     background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
 }
 
-/* Tabelas */
+/* ============================================ */
+/* TABELAS */
+/* ============================================ */
+
 .table {
     color: var(--text-light);
     background-color: transparent;
@@ -150,13 +185,17 @@ body {
 .table td {
     padding: 12px 10px;
     vertical-align: middle;
+    color: var(--text-light);
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
     background-color: rgba(255,255,255,0.02);
 }
 
-/* Badges */
+/* ============================================ */
+/* BADGES */
+/* ============================================ */
+
 .badge {
     padding: 6px 12px;
     font-weight: 500;
@@ -164,6 +203,7 @@ body {
     border-radius: 20px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    color: white;
 }
 
 .badge.bg-primary { background: linear-gradient(135deg, #0d6efd, #0a58ca) !important; }
@@ -172,7 +212,10 @@ body {
 .badge.bg-danger { background: linear-gradient(135deg, #dc3545, #b02a37) !important; }
 .badge.bg-info { background: linear-gradient(135deg, #0dcaf0, #0aa2c0) !important; }
 
-/* Botões */
+/* ============================================ */
+/* BOTÕES */
+/* ============================================ */
+
 .btn {
     border-radius: 8px;
     font-weight: 500;
@@ -181,6 +224,7 @@ body {
     border: none;
     position: relative;
     overflow: hidden;
+    color: white;
 }
 
 .btn::after {
@@ -203,27 +247,26 @@ body {
 
 .btn-primary {
     background: linear-gradient(135deg, var(--accent-blue), #0a58ca);
-    color: white;
 }
 
 .btn-success {
     background: linear-gradient(135deg, #198754, #146c43);
-    color: white;
 }
 
 .btn-warning {
-    background: linear-gradient(135deg, var(--accent-orange), #cc7a00);
-    color: white;
+    background: linear-gradient(135deg, var(--accent-orange), #dc3545);
 }
 
 .btn-danger {
     background: linear-gradient(135deg, var(--accent-red), #b02a37);
-    color: white;
 }
 
 .btn-info {
     background: linear-gradient(135deg, #0dcaf0, #0aa2c0);
-    color: white;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
 }
 
 .btn-sm {
@@ -231,25 +274,34 @@ body {
     font-size: 0.85rem;
 }
 
-/* Formulários */
+/* ============================================ */
+/* FORMULÁRIOS */
+/* ============================================ */
+
 .form-control, .form-select {
-    background-color: #2c3034;
-    border: 2px solid var(--border-color);
-    color: var(--text-light);
+    background-color: #2c3034 !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-light) !important;
     border-radius: 8px;
     padding: 10px 15px;
     transition: all 0.3s;
 }
 
 .form-control:focus, .form-select:focus {
-    background-color: #363b41;
-    border-color: var(--accent-orange);
-    box-shadow: 0 0 0 0.2rem rgba(253, 126, 20, 0.25);
-    color: var(--text-light);
+    background-color: #363b41 !important;
+    border-color: var(--accent-orange) !important;
+    box-shadow: 0 0 0 0.2rem rgba(253, 126, 20, 0.25) !important;
+    color: var(--text-light) !important;
 }
 
-.form-label {
-    color: var(--text-muted);
+.form-control[readonly] {
+    background-color: #1a1e24 !important;
+    color: var(--accent-orange) !important;
+    font-weight: 600;
+}
+
+.form-label, label {
+    color: var(--accent-orange) !important;
     font-weight: 500;
     margin-bottom: 5px;
     text-transform: uppercase;
@@ -257,7 +309,28 @@ body {
     letter-spacing: 0.3px;
 }
 
-/* Modais */
+.form-check-label {
+    color: var(--text-light) !important;
+}
+
+.form-check-input {
+    background-color: #2c3034 !important;
+    border-color: var(--accent-orange) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--accent-orange) !important;
+}
+
+::placeholder, .form-control::placeholder {
+    color: #6c757d !important;
+    opacity: 1;
+}
+
+/* ============================================ */
+/* MODAIS */
+/* ============================================ */
+
 .modal-content {
     background-color: var(--secondary-dark);
     border: 1px solid var(--border-color);
@@ -272,6 +345,10 @@ body {
     border-bottom: 2px solid var(--accent-blue);
 }
 
+.modal-header .modal-title {
+    color: white;
+}
+
 .modal-header .btn-close {
     filter: brightness(0) invert(1);
 }
@@ -280,7 +357,15 @@ body {
     border-top: 1px solid var(--border-color);
 }
 
-/* QR Code */
+.modal-body {
+    padding: 24px;
+    color: var(--text-light);
+}
+
+/* ============================================ */
+/* QR CODE */
+/* ============================================ */
+
 #qr-reader {
     border: 2px dashed var(--accent-orange);
     border-radius: 12px;
@@ -296,7 +381,10 @@ body {
     border: 2px solid var(--accent-orange);
 }
 
-/* Alertas */
+/* ============================================ */
+/* ALERTAS DE VALIDADE */
+/* ============================================ */
+
 .alerta-vencimento {
     background: linear-gradient(90deg, rgba(255,193,7,0.1) 0%, transparent 100%);
     border-left: 4px solid var(--accent-yellow);
@@ -304,6 +392,7 @@ body {
     margin-bottom: 8px;
     border-radius: 6px;
     transition: all 0.3s;
+    color: var(--text-light);
 }
 
 .alerta-vencimento:hover {
@@ -318,6 +407,7 @@ body {
     margin-bottom: 8px;
     border-radius: 6px;
     transition: all 0.3s;
+    color: var(--text-light);
 }
 
 .alerta-vencido:hover {
@@ -325,7 +415,74 @@ body {
     transform: translateX(5px);
 }
 
-/* Scrollbar personalizada */
+/* ============================================ */
+/* CARDS DE PRODUTOS */
+/* ============================================ */
+
+#cards-produtos .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0,0,0,0.05);
+    background-color: #1a1e24;
+}
+
+#cards-produtos .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+#cards-produtos .card-body .mt-3 {
+    margin-top: auto;
+}
+
+#cards-produtos .card-img-top {
+    height: 150px;
+    object-fit: cover;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#cards-produtos .text-muted {
+    color: var(--text-muted) !important;
+    font-style: italic;
+}
+
+/* ============================================ */
+/* ÚLTIMAS MOVIMENTAÇÕES */
+/* ============================================ */
+
+#ultimas-movimentacoes .alert {
+    transition: transform 0.2s;
+    margin-bottom: 8px;
+    border-left: 3px solid transparent;
+    color: var(--text-light);
+}
+
+#ultimas-movimentacoes .alert:hover {
+    transform: translateX(3px);
+    border-left-color: var(--accent-orange);
+}
+
+#ultimas-movimentacoes .alert-success {
+    background-color: rgba(40, 167, 69, 0.2);
+    border-color: #28a745;
+}
+
+#ultimas-movimentacoes .alert-warning {
+    background-color: rgba(255, 193, 7, 0.2);
+    border-color: #ffc107;
+}
+
+#ultimas-movimentacoes .alert-info {
+    background-color: rgba(23, 162, 184, 0.2);
+    border-color: #17a2b8;
+}
+
+/* ============================================ */
+/* SCROLLBAR PERSONALIZADA */
+/* ============================================ */
+
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -344,9 +501,12 @@ body {
     background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
 }
 
-/* Títulos */
+/* ============================================ */
+/* TÍTULOS */
+/* ============================================ */
+
 h1, h2, h3, h4, h5, h6 {
-    color: var(--text-light);
+    color: var(--accent-orange);
     font-weight: 600;
 }
 
@@ -357,7 +517,10 @@ h2 {
     display: inline-block;
 }
 
-/* Links */
+/* ============================================ */
+/* LINKS */
+/* ============================================ */
+
 a {
     color: var(--accent-orange);
     text-decoration: none;
@@ -368,62 +531,135 @@ a:hover {
     color: var(--accent-red);
 }
 
-/* Responsividade */
+/* ============================================ */
+/* TEXTOS GERAIS */
+/* ============================================ */
+
+p, span, div, small, strong, .text-muted {
+    color: var(--text-light);
+}
+
+.text-muted, small, .form-text, .help-text {
+    color: var(--text-muted) !important;
+}
+
+/* ============================================ */
+/* BORDAS */
+/* ============================================ */
+
+.border-primary { border-color: var(--accent-blue) !important; }
+.border-warning { border-color: var(--accent-orange) !important; }
+.border-danger { border-color: var(--accent-red) !important; }
+.border-success { border-color: #198754 !important; }
+
+/* ============================================ */
+/* ALERTAS BOOTSTRAP */
+/* ============================================ */
+
+.alert {
+    color: var(--text-light);
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.2);
+    border-color: #28a745;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.2);
+    border-color: #ffc107;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    border-color: #dc3545;
+}
+
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.2);
+    border-color: #17a2b8;
+}
+
+/* ============================================ */
+/* CAMPOS ESPECÍFICOS DO MODAL DE UNIDADE */
+/* ============================================ */
+
+#campo-quantidade-real label {
+    color: var(--accent-orange) !important;
+}
+
+#campo-quantidade-real small {
+    color: var(--text-muted) !important;
+}
+
+label[for="unidade-volume"],
+label[for="unidade-quantidade"],
+label[for="unidade-lote"],
+label[for="unidade-validade"],
+label[for="unidade-medida"],
+label[for="unidade-localizacao"],
+label[for="unidade-status"] {
+    color: var(--accent-orange) !important;
+}
+
+/* ============================================ */
+/* ÍCONES */
+/* ============================================ */
+
+i, .bi {
+    color: inherit;
+}
+
+/* ============================================ */
+/* RESPONSIVIDADE */
+/* ============================================ */
+
 @media (max-width: 768px) {
     .col-md-2 {
         margin-bottom: 20px;
+    }
+    
+    .btn-sm {
+        margin: 2px;
     }
     
     .table {
         font-size: 0.8rem;
     }
     
-    .btn-sm {
-        margin: 2px;
+    h2 {
+        font-size: 1.5rem;
     }
 }
 
-/* Utilitários de borda */
-.border-primary { border-color: var(--accent-blue) !important; }
-.border-warning { border-color: var(--accent-orange) !important; }
-.border-danger { border-color: var(--accent-red) !important; }
-.border-success { border-color: #198754 !important; }
+/* ============================================ */
+/* UTILITÁRIOS */
+/* ============================================ */
 
-/* Correção para textos escuros */
-.form-text, .text-muted {
-    color: #adb5bd !important;
+.text-small {
+    font-size: 0.85rem;
 }
 
-.form-check-label {
-    color: #e9ecef !important;
+.cursor-pointer {
+    cursor: pointer;
 }
 
-small {
-    color: #adb5bd !important;
+.overflow-auto {
+    overflow: auto;
 }
 
-#campo-quantidade-real label {
-    color: #fd7e14 !important;
-    font-weight: 600;
+/* Loading */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--accent-orange);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-#campo-quantidade-real small {
-    color: #6c757d !important;
-    font-style: italic;
-}
-
-/* Melhorar visibilidade dos placeholders */
-::placeholder {
-    color: #6c757d !important;
-    opacity: 1;
-}
-
-/* Ajustar cor do texto nos inputs */
-.form-control, .form-select {
-    color: #e9ecef !important;
-}
-
-.form-control[readonly] {
-    color: #fd7e14 !important;
-    font-weight: 600;
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
