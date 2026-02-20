@@ -8,13 +8,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         body {
-            background: linear-gradient(135deg, #0a0c0f 0%, #1a1e24 100%);
+            background: linear-gradient(135deg, #0f172a, #1e293b);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
         }
         
         .baixa-container {
@@ -23,11 +24,11 @@
         }
         
         .baixa-card {
-            background-color: #1a1e24;
-            border: 2px solid #dc3545;
-            border-radius: 20px;
+            background: #0f172a;
+            border: 2px solid #fbbf24;
+            border-radius: 24px;
             padding: 30px;
-            box-shadow: 0 15px 40px rgba(220,53,69,0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
         }
@@ -38,34 +39,35 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #dc3545, #fd7e14, #0d6efd);
+            height: 4px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
         }
         
         .produto-header {
-            border-bottom: 2px solid #fd7e14;
+            border-bottom: 2px solid #fbbf24;
             padding-bottom: 20px;
             margin-bottom: 25px;
             text-align: center;
         }
         
         .produto-titulo {
-            color: #fd7e14;
+            color: #fbbf24;
             font-size: 1.8rem;
             font-weight: 700;
             margin: 0;
+            letter-spacing: -0.5px;
         }
         
         .produto-sku {
-            color: #adb5bd;
+            color: #94a3b8;
             font-size: 1rem;
             margin-top: 8px;
         }
         
         .estoque-info {
-            background: linear-gradient(135deg, #2c3034 0%, #1a1e24 100%);
-            border: 1px solid #fd7e14;
-            border-radius: 15px;
+            background: #1e293b;
+            border: 1px solid #fbbf24;
+            border-radius: 16px;
             padding: 20px;
             margin-bottom: 30px;
             display: flex;
@@ -79,13 +81,16 @@
         .estoque-valor {
             font-size: 2rem;
             font-weight: 700;
-            color: #fd7e14;
+            color: #fbbf24;
             display: block;
+            line-height: 1.2;
         }
         
         .estoque-label {
             font-size: 0.9rem;
-            color: #adb5bd;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .form-group {
@@ -94,35 +99,47 @@
         
         .form-label {
             font-weight: 600;
-            color: #fd7e14;
+            color: #fbbf24;
             margin-bottom: 8px;
             display: block;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
         }
         
         .form-control, .form-select {
             width: 100%;
             padding: 12px 15px;
-            background-color: #2c3034;
-            border: 2px solid #3a3f45;
-            border-radius: 10px;
-            color: #e9ecef;
+            background-color: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
         
-        .form-control:focus {
+        .form-control:focus, .form-select:focus {
             outline: none;
-            border-color: #fd7e14;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+            background-color: #2d3a4f;
         }
         
         .form-control[readonly] {
-            background-color: #1a1e24;
-            color: #fd7e14;
+            background-color: #1a2634;
+            color: #fbbf24;
             font-weight: 600;
+            border-color: #fbbf24;
         }
         
         .disponivel-badge {
-            color: #28a745;
+            color: #10b981;
+            font-weight: normal;
             font-size: 0.85rem;
             margin-left: 10px;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 2px 8px;
+            border-radius: 20px;
         }
         
         .transferencia-options {
@@ -133,77 +150,138 @@
         }
         
         .transferencia-option {
-            background-color: #2c3034;
-            border: 2px solid #3a3f45;
-            border-radius: 8px;
-            padding: 12px;
+            background-color: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 15px 10px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
-            color: #e9ecef;
+            transition: all 0.3s ease;
+            color: #cbd5e1;
+            font-weight: 500;
+            font-size: 0.9rem;
         }
         
         .transferencia-option:hover {
-            background-color: #fd7e14;
-            border-color: #fd7e14;
-            color: white;
+            background-color: #fbbf24;
+            border-color: #fbbf24;
+            color: #0f172a;
+            transform: translateY(-2px);
         }
         
         .transferencia-option.selected {
-            background: linear-gradient(135deg, #dc3545, #fd7e14);
-            border-color: #fd7e14;
-            color: white;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-color: #fbbf24;
+            color: #0f172a;
+            font-weight: 600;
         }
         
         .observacao {
             width: 100%;
             padding: 12px 15px;
-            background-color: #2c3034;
-            border: 2px solid #3a3f45;
-            border-radius: 10px;
-            color: #e9ecef;
+            background-color: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-size: 1rem;
             resize: vertical;
+            min-height: 80px;
+        }
+        
+        .observacao:focus {
+            outline: none;
+            border-color: #fbbf24;
         }
         
         .btn-confirmar {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #dc3545, #fd7e14);
-            color: white;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0f172a;
             border: none;
             border-radius: 12px;
             font-size: 1.2rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn-confirmar:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(220,53,69,0.4);
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
+        }
+        
+        .btn-confirmar i {
+            font-size: 1.3rem;
+        }
+        
+        .badge-unidade {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
         }
         
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #2c3034;
+            padding: 12px 0;
+            border-bottom: 1px solid #334155;
         }
         
         .info-label {
-            color: #adb5bd;
+            color: #94a3b8;
+            font-weight: 500;
         }
         
         .info-value {
-            color: #fd7e14;
+            color: #fbbf24;
             font-weight: 600;
+            font-family: monospace;
+        }
+        
+        .lote-badge {
+            background: #1e293b;
+            padding: 8px 15px;
+            border-radius: 30px;
+            border: 1px solid #fbbf24;
+            display: inline-block;
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        
+        .volume-info-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        small.text-muted {
+            color: #64748b !important;
+            display: block;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
     <div class="baixa-container">
         <div class="baixa-card">
+            <div class="badge-unidade">
+                <i class="bi bi-qr-code-scan"></i> TRANSFERÊNCIA DE UNIDADE
+            </div>
+            
             <div class="produto-header">
                 <h1 class="produto-titulo" id="produto-nome">Carregando...</h1>
                 <div class="produto-sku" id="produto-sku">SKU: </div>
@@ -212,7 +290,7 @@
             <div class="estoque-info" id="estoque-info">
                 <div class="estoque-item">
                     <span class="estoque-valor" id="display-volume">0</span>
-                    <span class="estoque-label" id="display-unidade-volume">MALA</span>
+                    <span class="estoque-label" id="display-unidade-volume">PCT</span>
                 </div>
                 <div class="estoque-item">
                     <span class="estoque-valor" id="display-quantidade">0</span>
@@ -226,29 +304,33 @@
                 <input type="hidden" id="unidade-destino">
                 
                 <div class="form-group">
-                    <label class="form-label">Lote</label>
-                    <input type="text" class="form-control" id="lote" readonly>
+                    <label class="form-label">
+                        <i class="bi bi-tag"></i> Lote
+                    </label>
+                    <div class="lote-badge" id="lote">-</div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">
-                        Volume a Transferir (<span id="label-unidade-volume">MALA</span>)
+                        <i class="bi bi-box"></i> Volume a Transferir (<span id="label-unidade-volume">PCT</span>)
                         <span class="disponivel-badge" id="volume-disponivel"></span>
                     </label>
                     <input type="number" class="form-control" id="volume-transferir" min="1" required>
-                    <small class="text-muted" id="volume-info">Cada unidade contém X unidades</small>
+                    <small class="volume-info-text" id="volume-info"></small>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">
-                        Quantidade a Transferir (UNIDADES)
+                        <i class="bi bi-calculator"></i> Quantidade a Transferir (UNIDADES)
                         <span class="disponivel-badge" id="quantidade-disponivel"></span>
                     </label>
                     <input type="number" class="form-control" id="quantidade-transferir" min="1" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Transferido para *</label>
+                    <label class="form-label">
+                        <i class="bi bi-arrow-right-circle"></i> Transferido para <span style="color: #ef4444;">*</span>
+                    </label>
                     <div class="transferencia-options" id="transferencia-options">
                         <div class="transferencia-option" onclick="selecionarDestino('Farinheira')">Farinheira</div>
                         <div class="transferencia-option" onclick="selecionarDestino('Doméstica')">Doméstica</div>
@@ -259,16 +341,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Observações</label>
+                    <label class="form-label">
+                        <i class="bi bi-chat-text"></i> Observações
+                    </label>
                     <textarea class="observacao" id="observacao" placeholder="Informações adicionais..."></textarea>
                 </div>
 
                 <div class="info-row">
-                    <span class="info-label">ID da Unidade:</span>
+                    <span class="info-label"><i class="bi bi-upc-scan"></i> ID da Unidade:</span>
                     <span class="info-value" id="info-id"></span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Validade:</span>
+                    <span class="info-label"><i class="bi bi-calendar"></i> Validade:</span>
                     <span class="info-value" id="info-validade"></span>
                 </div>
 
@@ -302,7 +386,7 @@
         document.getElementById('produto-sku').textContent = `SKU: ${sku}`;
         document.getElementById('unidade-id').value = unidadeId;
         document.getElementById('unidade-sku').value = sku;
-        document.getElementById('lote').value = lote;
+        document.getElementById('lote').textContent = lote;
         document.getElementById('info-id').textContent = unidadeId;
         document.getElementById('info-validade').textContent = validade ? new Date(validade).toLocaleDateString('pt-BR') : 'N/A';
 
@@ -316,6 +400,7 @@
 
         document.getElementById('volume-transferir').max = volumeTotal;
         document.getElementById('volume-transferir').value = 1;
+        document.getElementById('quantidade-transferir').value = unidadesPorEmbalagem;
 
         // Calcular quantidade ao digitar volume
         document.getElementById('volume-transferir').addEventListener('input', function() {
@@ -335,97 +420,78 @@
         }
 
         async function confirmarBaixa() {
-    const volumeTransferir = parseInt(document.getElementById('volume-transferir').value);
-    const quantidadeTransferir = volumeTransferir * unidadesPorEmbalagem;
+            const volumeTransferir = parseInt(document.getElementById('volume-transferir').value);
+            const quantidadeTransferir = volumeTransferir * unidadesPorEmbalagem;
 
-    if (!destinoSelecionado) {
-        alert('Selecione um destino para a transferência!');
-        return;
-    }
-
-    if (volumeTransferir < 1 || volumeTransferir > volumeTotal) {
-        alert(`Volume deve estar entre 1 e ${volumeTotal}`);
-        return;
-    }
-
-    // Calcular nova quantidade após a baixa
-    const novaQuantidade = quantidadeTotal - quantidadeTransferir;
-    const novoVolume = Math.ceil(novaQuantidade / unidadesPorEmbalagem);
-
-    // Se transferiu tudo, muda status para Transferido
-    const novoStatus = novaQuantidade <= 0 ? 'Transferido' : 'Disponível';
-    
-    // Se transferiu tudo, marca o destino
-    const novoDestino = novaQuantidade <= 0 ? destinoSelecionado : '';
-
-    // ===== CORREÇÃO AQUI =====
-    // Em vez de criar nova unidade, vamos ATUALIZAR a existente
-    const unidadeAtualizada = {
-        tipo: 'unidade',
-        id: unidadeId,  // MESMO ID da unidade original
-        sku: sku,
-        lote: lote,
-        validade: validade,
-        volume: novoVolume,
-        quantidade: novaQuantidade,
-        unidadeEmbalagem: unidadeVolume,
-        status: novoStatus,
-        localizacao: '-',
-        destino: novoDestino,
-        foraPadrao: false,
-        qtdRealPorEmbalagem: null
-    };
-
-    // Criar movimentação
-    const movimentacao = {
-        tipo: 'movimentacao',
-        data: new Date().toISOString().split('T')[0],
-        tipoMov: 'Transferência',
-        idUnidade: unidadeId,
-        sku: sku,
-        volume: volumeTransferir,
-        quantidade: quantidadeTransferir,
-        unidadeEmbalagem: unidadeVolume,
-        destino: destinoSelecionado,
-        responsavel: 'Sistema',
-        observacao: document.getElementById('observacao').value
-    };
-
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
-
-    try {
-        // 1. Registrar a movimentação
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(movimentacao)
-        });
-
-        // 2. ATUALIZAR a unidade existente (mesmo ID)
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(unidadeAtualizada)
-        });
-
-        alert(`✅ Transferência realizada com sucesso!\nQuantidade restante: ${novaQuantidade} UN`);
-        
-        // Fechar a janela após 2 segundos
-        setTimeout(() => {
-            if (window.opener) {
-                window.opener.location.reload(); // Recarregar a página principal
+            if (!destinoSelecionado) {
+                alert('Selecione um destino para a transferência!');
+                return;
             }
-            window.close();
-        }, 2000);
 
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('❌ Erro ao realizar transferência. Tente novamente.');
-    }
-}
+            if (volumeTransferir < 1 || volumeTransferir > volumeTotal) {
+                alert(`Volume deve estar entre 1 e ${volumeTotal}`);
+                return;
+            }
+
+            const novaQuantidade = quantidadeTotal - quantidadeTransferir;
+            const novoVolume = Math.ceil(novaQuantidade / unidadesPorEmbalagem);
+            const novoStatus = novaQuantidade <= 0 ? 'Transferido' : 'Disponível';
+            const novoDestino = novaQuantidade <= 0 ? destinoSelecionado : '';
+
+            const unidadeAtualizada = {
+                tipo: 'unidade',
+                id: unidadeId,
+                sku: sku,
+                lote: lote,
+                validade: validade,
+                volume: novoVolume,
+                quantidade: novaQuantidade,
+                unidadeEmbalagem: unidadeVolume,
+                status: novoStatus,
+                localizacao: '-',
+                destino: novoDestino,
+                foraPadrao: false,
+                qtdRealPorEmbalagem: null
+            };
+
+            const movimentacao = {
+                tipo: 'movimentacao',
+                data: new Date().toISOString().split('T')[0],
+                tipoMov: 'Transferência',
+                idUnidade: unidadeId,
+                sku: sku,
+                volume: volumeTransferir,
+                quantidade: quantidadeTransferir,
+                unidadeEmbalagem: unidadeVolume,
+                destino: destinoSelecionado,
+                responsavel: 'Sistema',
+                observacao: document.getElementById('observacao').value
+            };
+
+            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(movimentacao)
+                });
+
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(unidadeAtualizada)
+                });
+
+                alert('Transferência realizada com sucesso!');
+                setTimeout(() => window.close(), 2000);
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao realizar transferência.');
+            }
+        }
     </script>
 </body>
 </html>
-
