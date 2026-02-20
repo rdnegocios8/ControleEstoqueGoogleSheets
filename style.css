@@ -12,7 +12,7 @@
     --accent-gold: #fbbf24;      /* Dourado */
     --accent-amber: #f59e0b;     /* Âmbar */
     --accent-teal: #2dd4bf;      /* Turquesa */
-    --accent-rose: #fb7185;       /* Rosa suave */
+    --accent-rose: #fb7185;      /* Rosa suave */
     --border-color: #334155;      /* Cor da borda */
     --success: #10b981;           /* Verde */
     --danger: #ef4444;            /* Vermelho */
@@ -188,15 +188,15 @@ body {
 }
 
 .table thead th {
-    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
-    color: var(--accent-gold);
-    font-weight: 600;
+    background: linear-gradient(135deg, #2d3a4f, #1e293b) !important;
+    color: var(--accent-gold) !important;
+    font-weight: 700;
     text-transform: uppercase;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     letter-spacing: 0.5px;
-    padding: 1rem;
+    padding: 15px 8px !important;
+    border-bottom: 2px solid var(--accent-gold) !important;
     border: none;
-    border-bottom: 2px solid var(--accent-gold);
 }
 
 .table tbody tr {
@@ -205,17 +205,62 @@ body {
 }
 
 .table tbody tr:hover {
-    background-color: rgba(51, 65, 85, 0.5);
+    background-color: #2d3a4f !important;
 }
 
 .table td {
-    padding: 1rem;
+    padding: 12px 8px;
     vertical-align: middle;
     color: var(--text-secondary);
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(30, 41, 59, 0.5);
+    background-color: #1e293b !important;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #253341 !important;
+}
+
+/* ============================================ */
+/* TABELA DE UNIDADES - CORES ESPECÍFICAS */
+/* ============================================ */
+
+#tabela-unidades td {
+    color: #e2e8f0 !important;
+}
+
+#tabela-unidades td:first-child {
+    color: var(--accent-gold) !important;
+    font-family: monospace;
+    font-weight: 600;
+}
+
+#tabela-unidades td:nth-child(7),
+#tabela-unidades td:nth-child(8) {
+    color: var(--accent-gold) !important;
+    font-weight: 600;
+}
+
+#tabela-unidades td:nth-child(6).text-danger {
+    color: var(--danger) !important;
+    font-weight: 700;
+}
+
+#tabela-unidades td small {
+    color: var(--text-muted) !important;
+}
+
+/* ============================================ */
+/* TABELA DE MOVIMENTAÇÕES */
+/* ============================================ */
+
+#tabela-movimentacoes td {
+    color: #e2e8f0 !important;
+}
+
+#tabela-movimentacoes td small {
+    color: var(--text-muted) !important;
 }
 
 /* ============================================ */
@@ -223,12 +268,13 @@ body {
 /* ============================================ */
 
 .badge {
-    padding: 0.5rem 1rem;
-    font-weight: 500;
+    padding: 6px 12px;
+    font-weight: 600;
     font-size: 0.75rem;
     border-radius: 30px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    color: white;
 }
 
 .badge.bg-primary {
@@ -241,7 +287,7 @@ body {
 
 .badge.bg-warning {
     background: linear-gradient(135deg, var(--warning), #d97706) !important;
-    color: var(--bg-primary) !important;
+    color: #0f172a !important;
 }
 
 .badge.bg-danger {
@@ -374,6 +420,34 @@ body {
 ::placeholder {
     color: var(--text-muted) !important;
     opacity: 1;
+}
+
+/* ============================================ */
+/* FILTROS */
+/* ============================================ */
+
+#filtro-produto-unidades,
+#filtro-status-unidades,
+#filtro-destino-unidades,
+#filtro-embalagem-unidades,
+#filtro-data-inicio,
+#filtro-data-fim,
+#filtro-tipo-movimentacao,
+#filtro-destino-movimentacao,
+#search-produto,
+#filtro-categoria-produto,
+#filtro-embalagem-produto {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border: 2px solid #334155 !important;
+}
+
+#filtro-produto-unidades:focus,
+#filtro-status-unidades:focus,
+#filtro-destino-unidades:focus,
+#filtro-embalagem-unidades:focus {
+    border-color: var(--accent-gold) !important;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2) !important;
 }
 
 /* ============================================ */
@@ -518,6 +592,45 @@ body {
 }
 
 /* ============================================ */
+/* TEXTOS ESPECÍFICOS DOS MODAIS */
+/* ============================================ */
+
+#volume-descricao, 
+#quantidade-descricao {
+    color: var(--accent-gold) !important;
+    font-weight: 500;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+#campo-qtd-por-embalagem small {
+    color: var(--accent-gold) !important;
+    font-style: italic;
+}
+
+.input-group-text {
+    background-color: var(--bg-tertiary) !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--accent-gold) !important;
+    font-weight: 600;
+}
+
+/* ============================================ */
+/* TEXTO "NENHUM REGISTRO ENCONTRADO" */
+/* ============================================ */
+
+#tabela-unidades td[colspan],
+#tabela-movimentacoes td[colspan],
+#cards-produtos .text-muted {
+    color: var(--text-muted) !important;
+    font-style: italic;
+    text-align: center;
+    padding: 30px !important;
+    background-color: #1e293b !important;
+    border-radius: 8px;
+}
+
+/* ============================================ */
 /* SCROLLBAR */
 /* ============================================ */
 
@@ -554,10 +667,11 @@ h2 {
     padding-bottom: 0.75rem;
     margin-bottom: 2rem;
     display: inline-block;
+    color: var(--accent-gold) !important;
 }
 
 /* ============================================ */
-/* TEXTOS ESPECÍFICOS */
+/* UTILITÁRIOS */
 /* ============================================ */
 
 .text-muted, small, .form-text, .help-text {
@@ -566,32 +680,6 @@ h2 {
 
 .text-primary { color: var(--text-primary) !important; }
 .text-secondary { color: var(--text-secondary) !important; }
-
-/* Textos de ajuda nos modais */
-#volume-descricao, #quantidade-descricao {
-    color: var(--accent-gold) !important;
-    font-weight: 500;
-    display: block;
-    margin-top: 0.25rem;
-}
-
-/* Texto de exemplo no modal de produto */
-#campo-qtd-por-embalagem small {
-    color: var(--accent-gold) !important;
-    font-style: italic;
-}
-
-/* Input group */
-.input-group-text {
-    background-color: var(--bg-tertiary) !important;
-    border: 2px solid var(--border-color) !important;
-    color: var(--accent-gold) !important;
-    font-weight: 600;
-}
-
-/* ============================================ */
-/* UTILITÁRIOS */
-/* ============================================ */
 
 .border-primary { border-color: var(--info) !important; }
 .border-warning { border-color: var(--accent-gold) !important; }
