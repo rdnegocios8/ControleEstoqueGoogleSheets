@@ -7,11 +7,13 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqU
 const PRODUTOS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Produtos?key=${API_KEY}`;
 const UNIDADES_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Unidades?key=${API_KEY}`;
 const MOVIMENTACOES_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Movimentações?key=${API_KEY}`;
+const RECEBIMENTOS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Recebimentos?key=${API_KEY}`;
 
 // Variáveis globais
 let produtos = [];
 let unidades = [];
 let movimentacoes = [];
+let recebimentos = [];
 let graficoEstoque = null;
 let graficoStatus = null;
 let graficoDestinos = null;
@@ -51,6 +53,7 @@ function setupEventListeners() {
     document.getElementById('menu-produtos').addEventListener('click', () => mostrarView('produtos'));
     document.getElementById('menu-unidades').addEventListener('click', () => mostrarView('unidades'));
     document.getElementById('menu-scanner').addEventListener('click', () => mostrarView('scanner'));
+    document.getElementById('menu-recebimentos').addEventListener('click', () => mostrarView('recebimentos'));
     document.getElementById('menu-movimentacoes').addEventListener('click', () => mostrarView('movimentacoes'));
     document.getElementById('menu-relatorios').addEventListener('click', () => mostrarView('relatorios'));
     document.getElementById('menu-categorias').addEventListener('click', () => mostrarView('categorias'));
@@ -58,6 +61,7 @@ function setupEventListeners() {
     document.getElementById('salvar-produto').addEventListener('click', salvarProduto);
     document.getElementById('salvar-unidade').addEventListener('click', salvarUnidade);
     document.getElementById('salvar-categoria').addEventListener('click', salvarCategoria);
+    document.getElementById('salvar-recebimento').addEventListener('click', salvarRecebimento);
     
     document.getElementById('search-produto').addEventListener('keyup', filtrarProdutos);
     document.getElementById('filtro-categoria-produto').addEventListener('change', filtrarProdutos);
@@ -72,6 +76,9 @@ function setupEventListeners() {
     document.getElementById('unidade-sku').addEventListener('change', atualizarInfoEmbalagem);
     document.getElementById('unidade-volume').addEventListener('input', calcularQuantidadeAutomatica);
     document.getElementById('unidade-fora-padrao').addEventListener('change', toggleCampoQuantidadeReal);
+    
+    document.getElementById('recebimento-sku').addEventListener('change', atualizarInfoRecebimento);
+    document.getElementById('recebimento-volume').addEventListener('input', calcularQuantidadeRecebimento);
 }
 
 // Mostrar/esconder campo de quantidade por embalagem
@@ -131,9 +138,243 @@ function atualizarInfoEmbalagem() {
     calcularQuantidadeAutomatica();
 }
 
+// ============================================
+// FUNÇÕES DE RECEBIMENTO
+// ============================================
+
+// Atualizar informações no recebimento
+function atualizarInfoRecebimento() {
+    const select = document.getElementById('recebimento-sku');
+    const selectedOption = select.options[select.selectedIndex];
+    const sku = select.value;
+    const produto = produtos.find(p => p.sku === sku);
+    
+    if (produto) {
+        document.getElementById('recebimento-produto').value = produto.nome;
+        document.getElementById('recebimento-unidade').value = produto.tipoEmbalagem || 'UN';
+        document.getElementById('recebimento-qtd-embalagem').value = produto.qtdPorEmbalagem || 1;
+        calcularQuantidadeRecebimento();
+    }
+}
+
+// Calcular quantidade total no recebimento
+function calcularQuantidadeRecebimento() {
+    const volume = parseInt(document.getElementById('recebimento-volume').value) || 1;
+    const qtdPorEmbalagem = parseInt(document.getElementById('recebimento-qtd-embalagem').value) || 1;
+    const quantidadeTotal = volume * qtdPorEmbalagem;
+    document.getElementById('recebimento-quantidade').value = quantidadeTotal;
+}
+
+// Salvar recebimento
+async function salvarRecebimento() {
+    const dataRecebimento = document.getElementById('recebimento-data').value;
+    const sku = document.getElementById('recebimento-sku').value;
+    const produto = produtos.find(p => p.sku === sku);
+    
+    if (!dataRecebimento || !sku) {
+        alert('Data e SKU são obrigatórios!');
+        return;
+    }
+    
+    const recebimento = {
+        tipo: 'recebimento',
+        dataRecebimento: dataRecebimento,
+        numeroNF: document.getElementById('recebimento-nf').value,
+        fornecedor: document.getElementById('recebimento-fornecedor').value,
+        codigoSKU: sku,
+        nomeProduto: produto.nome,
+        lote: document.getElementById('recebimento-lote').value,
+        validade: document.getElementById('recebimento-validade').value,
+        quantidade: parseInt(document.getElementById('recebimento-quantidade').value),
+        volume: parseInt(document.getElementById('recebimento-volume').value),
+        unidadeMedida: document.getElementById('recebimento-unidade').value,
+        qtdPorEmbalagem: parseInt(document.getElementById('recebimento-qtd-embalagem').value),
+        localizacao: document.getElementById('recebimento-localizacao').value,
+        responsavel: 'Sistema',
+        observacoes: document.getElementById('recebimento-observacoes').value
+    };
+    
+    try {
+        // Salvar recebimento
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(recebimento)
+        });
+        
+        // Criar unidade automaticamente
+        const idUnidade = gerarIdUnico();
+        const unidade = {
+            tipo: 'unidade',
+            id: idUnidade,
+            sku: sku,
+            lote: recebimento.lote,
+            validade: recebimento.validade,
+            volume: recebimento.volume,
+            quantidade: recebimento.quantidade,
+            unidadeEmbalagem: recebimento.unidadeMedida,
+            status: 'Disponível',
+            localizacao: recebimento.localizacao || '-',
+            destino: '',
+            foraPadrao: false,
+            qtdRealPorEmbalagem: null
+        };
+        
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(unidade)
+        });
+        
+        // Limpar formulário
+        document.getElementById('form-recebimento').reset();
+        bootstrap.Modal.getInstance(document.getElementById('modalRecebimento')).hide();
+        
+        // Recarregar dados
+        await carregarDados();
+        
+        alert('Recebimento registrado com sucesso!');
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao registrar recebimento.');
+    }
+}
+
+// Carregar recebimentos
+async function carregarRecebimentos() {
+    try {
+        const response = await fetch(RECEBIMENTOS_URL);
+        const data = await response.json();
+        
+        if (data.values && data.values.length > 1) {
+            recebimentos = data.values.slice(1).map(row => ({
+                data: row[0],
+                nf: row[1],
+                fornecedor: row[2],
+                sku: row[3],
+                produto: row[4],
+                lote: row[5],
+                validade: row[6],
+                quantidade: row[7],
+                volume: row[8],
+                unidade: row[9],
+                qtdPorEmbalagem: row[10],
+                localizacao: row[11],
+                responsavel: row[12],
+                observacoes: row[13]
+            }));
+            
+            atualizarTabelaRecebimentos();
+        }
+    } catch (error) {
+        console.error('Erro ao carregar recebimentos:', error);
+    }
+}
+
+// Atualizar tabela de recebimentos
+function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
+    const tbody = document.getElementById('tabela-recebimentos');
+    if (!tbody) return;
+    
+    const dados = recebimentosFiltrados || recebimentos;
+    
+    tbody.innerHTML = '';
+    
+    if (dados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center">Nenhum recebimento encontrado</td></tr>';
+        return;
+    }
+    
+    dados.slice(-50).reverse().forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${formatarData(r.data)}</td>
+            <td>${r.nf || '-'}</td>
+            <td>${r.fornecedor || '-'}</td>
+            <td>${r.sku}</td>
+            <td>${r.produto}</td>
+            <td>${r.lote}</td>
+            <td>${formatarData(r.validade)}</td>
+            <td>${r.volume}</td>
+            <td>${r.unidade}</td>
+            <td>${r.quantidade}</td>
+            <td>${r.localizacao || '-'}</td>
+            <td>${r.responsavel}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Filtrar recebimentos
+function filtrarRecebimentos() {
+    const dataInicio = document.getElementById('filtro-recebimento-data-inicio').value;
+    const dataFim = document.getElementById('filtro-recebimento-data-fim').value;
+    const fornecedor = document.getElementById('filtro-recebimento-fornecedor').value.toLowerCase();
+    
+    let filtrados = [...recebimentos];
+    
+    if (dataInicio) {
+        filtrados = filtrados.filter(r => r.data >= dataInicio);
+    }
+    
+    if (dataFim) {
+        filtrados = filtrados.filter(r => r.data <= dataFim);
+    }
+    
+    if (fornecedor) {
+        filtrados = filtrados.filter(r => r.fornecedor && r.fornecedor.toLowerCase().includes(fornecedor));
+    }
+    
+    atualizarTabelaRecebimentos(filtrados);
+}
+
+// ============================================
+// FUNÇÕES EXISTENTES (manter todas as outras funções)
+// ============================================
+
+// Mostrar view
+function mostrarView(view) {
+    const views = ['painel', 'produtos', 'unidades', 'scanner', 'recebimentos', 'movimentacoes', 'relatorios', 'categorias'];
+    views.forEach(v => {
+        const el = document.getElementById(`${v}-view`);
+        if (el) el.style.display = 'none';
+    });
+    
+    const viewEl = document.getElementById(`${view}-view`);
+    if (viewEl) viewEl.style.display = 'block';
+    
+    document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+    const menu = document.getElementById(`menu-${view}`);
+    if (menu) menu.classList.add('active');
+    
+    if (view === 'scanner') setupQRCode();
+    if (view === 'unidades') {
+        preencherFiltros();
+        atualizarTabelaUnidades();
+    }
+    if (view === 'recebimentos') {
+        preencherSelectProdutosRecebimento();
+        carregarRecebimentos();
+    }
+    if (view === 'relatorios') gerarRelatorios();
+    if (view === 'categorias') atualizarTabelaCategorias();
+}
+
+// Preencher select de produtos no recebimento
+function preencherSelectProdutosRecebimento() {
+    const select = document.getElementById('recebimento-sku');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Selecione um produto</option>';
+    produtos.forEach(p => {
+        select.innerHTML += `<option value="${p.sku}" data-tipo="${p.tipoEmbalagem}" data-qtd="${p.qtdPorEmbalagem}">${p.nome} (${p.sku})</option>`;
+    });
+}
+
 // Preencher todos os filtros
 function preencherFiltros() {
-    // Filtro de categoria em produtos
     const selectCategoria = document.getElementById('filtro-categoria-produto');
     if (selectCategoria) {
         selectCategoria.innerHTML = '<option value="">Todas as categorias</option>';
@@ -142,10 +383,8 @@ function preencherFiltros() {
         });
     }
     
-    // Filtro de produtos em unidades
     preencherSelectProdutos();
     
-    // Filtro de embalagem em unidades
     const selectEmbalagem = document.getElementById('filtro-embalagem-unidades');
     if (selectEmbalagem) {
         selectEmbalagem.innerHTML = '<option value="">Todas embalagens</option>';
@@ -170,36 +409,11 @@ function preencherSelectProdutos() {
     });
 }
 
-// Mostrar view
-function mostrarView(view) {
-    const views = ['painel', 'produtos', 'unidades', 'scanner', 'movimentacoes', 'relatorios', 'categorias'];
-    views.forEach(v => {
-        const el = document.getElementById(`${v}-view`);
-        if (el) el.style.display = 'none';
-    });
-    
-    const viewEl = document.getElementById(`${view}-view`);
-    if (viewEl) viewEl.style.display = 'block';
-    
-    document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
-    const menu = document.getElementById(`menu-${view}`);
-    if (menu) menu.classList.add('active');
-    
-    if (view === 'scanner') setupQRCode();
-    if (view === 'unidades') {
-        preencherFiltros();
-        atualizarTabelaUnidades();
-    }
-    if (view === 'relatorios') gerarRelatorios();
-    if (view === 'categorias') atualizarTabelaCategorias();
-}
-
 // Carregar dados
 async function carregarDados() {
     try {
         console.log('Carregando dados...');
         
-        // Carregar produtos
         const produtosRes = await fetch(PRODUTOS_URL);
         const produtosData = await produtosRes.json();
         if (produtosData.values && produtosData.values.length > 1) {
@@ -215,7 +429,6 @@ async function carregarDados() {
             })).filter(p => p.sku);
         }
 
-        // Carregar unidades
         const unidadesRes = await fetch(UNIDADES_URL);
         const unidadesData = await unidadesRes.json();
         if (unidadesData.values && unidadesData.values.length > 1) {
@@ -228,14 +441,13 @@ async function carregarDados() {
                 quantidade: parseFloat(row[5]) || 0,
                 unidadeEmbalagem: row[6] || 'UN',
                 status: row[7] || 'Disponível',
-                localizacao: row[8] || '',
+                localizacao: row[8] || '-',
                 destino: row[9] || '',
-                foraPadrao: row[10] === 'true',
-                qtdRealPorEmbalagem: parseInt(row[11]) || null
+                foraPadrao: row[10] === 'Sim',
+                qtdRealPorEmbalagem: row[11] ? parseInt(row[11]) : null
             })).filter(u => u.id);
         }
 
-        // Carregar movimentações
         const movRes = await fetch(MOVIMENTACOES_URL);
         const movData = await movRes.json();
         if (movData.values && movData.values.length > 1) {
@@ -253,6 +465,7 @@ async function carregarDados() {
             })).filter(m => m.data);
         }
 
+        await carregarRecebimentos();
         atualizarInterface();
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
@@ -273,6 +486,7 @@ function carregarDadosExemplo() {
     ];
     
     movimentacoes = [];
+    recebimentos = [];
     atualizarInterface();
 }
 
@@ -492,7 +706,6 @@ async function salvarUnidade() {
     const foraPadrao = document.getElementById('unidade-fora-padrao').checked;
     let quantidade = parseInt(document.getElementById('unidade-quantidade').value);
     
-    // Se for fora do padrão, recalcular com a quantidade real
     if (foraPadrao) {
         const qtdReal = parseInt(document.getElementById('unidade-quantidade-real').value);
         if (qtdReal) {
@@ -631,7 +844,6 @@ function verUnidade(id) {
     document.getElementById('detalhe-localizacao').textContent = unidadeAtual.localizacao;
     document.getElementById('detalhe-destino').textContent = unidadeAtual.destino || '-';
     
-    // Gerar QR Code
     const qrContainer = document.getElementById('unidade-qr-code');
     qrContainer.innerHTML = '';
     
@@ -889,7 +1101,7 @@ function atualizarGraficosPainel() {
                 labels: categorias.map(c => c.nome),
                 datasets: [{
                     data: categoriasData,
-                    backgroundColor: ['#007bff', '#fd7e14', '#dc3545', '#28a745']
+                    backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981']
                 }]
             }
         });
@@ -898,7 +1110,6 @@ function atualizarGraficosPainel() {
 
 // Gerar relatórios
 function gerarRelatorios() {
-    // Gráfico de categorias
     const ctxCategorias = document.getElementById('grafico-relatorio-categorias');
     if (ctxCategorias) {
         const categoriasData = categorias.map(cat => {
@@ -913,13 +1124,12 @@ function gerarRelatorios() {
                 datasets: [{
                     label: 'Produtos por Categoria',
                     data: categoriasData,
-                    backgroundColor: '#007bff'
+                    backgroundColor: '#3b82f6'
                 }]
             }
         });
     }
     
-    // Gráfico de status
     const ctxStatus = document.getElementById('grafico-status');
     if (ctxStatus) {
         const disponiveis = unidades.filter(u => u.status === 'Disponível').length;
@@ -932,13 +1142,12 @@ function gerarRelatorios() {
                 labels: ['Disponíveis', 'Bloqueados', 'Transferidos'],
                 datasets: [{
                     data: [disponiveis, bloqueados, transferidos],
-                    backgroundColor: ['#28a745', '#dc3545', '#fd7e14']
+                    backgroundColor: ['#10b981', '#ef4444', '#f59e0b']
                 }]
             }
         });
     }
     
-    // Gráfico de destinos
     const ctxDestinos = document.getElementById('grafico-destinos');
     if (ctxDestinos) {
         const destinosData = destinos.map(d => {
@@ -952,13 +1161,12 @@ function gerarRelatorios() {
                 datasets: [{
                     label: 'Unidades por Destino',
                     data: destinosData,
-                    backgroundColor: '#fd7e14'
+                    backgroundColor: '#f59e0b'
                 }]
             }
         });
     }
     
-    // Lista de estoque baixo
     const containerEstoque = document.getElementById('lista-estoque-baixo');
     if (containerEstoque) {
         const estoqueBaixo = produtos.filter(p => {
@@ -987,7 +1195,6 @@ function gerarRelatorios() {
         }
     }
     
-    // Lista de validades próximas
     const containerValidades = document.getElementById('lista-validades');
     if (containerValidades) {
         const hoje = new Date();
