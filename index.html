@@ -10,11 +10,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-primary">
+    <nav class="navbar navbar-dark">
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="bi bi-box-seam"></i> Controle de Estoque
             </span>
+            <div class="text-white">
+                <i class="bi bi-person-circle"></i> RD Negócios
+            </div>
         </div>
     </nav>
 
@@ -41,6 +44,9 @@
                     <a href="#" class="list-group-item list-group-item-action" id="menu-relatorios">
                         <i class="bi bi-file-text"></i> Relatórios
                     </a>
+                    <a href="#" class="list-group-item list-group-item-action" id="menu-categorias">
+                        <i class="bi bi-tags"></i> Categorias
+                    </a>
                 </div>
             </div>
 
@@ -51,7 +57,7 @@
                     <h2>Painel</h2>
                     <div class="row mt-4">
                         <div class="col-md-3">
-                            <div class="card text-white bg-primary mb-3">
+                            <div class="card text-white bg-gradient-primary mb-3">
                                 <div class="card-body">
                                     <h5 class="card-title">Total Produtos</h5>
                                     <h2 id="total-produtos">0</h2>
@@ -59,7 +65,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card text-white bg-success mb-3">
+                            <div class="card text-white bg-gradient-success mb-3">
                                 <div class="card-body">
                                     <h5 class="card-title">Unidades em Estoque</h5>
                                     <h2 id="total-unidades">0</h2>
@@ -67,7 +73,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card text-white bg-warning mb-3">
+                            <div class="card text-white bg-gradient-warning mb-3">
                                 <div class="card-body">
                                     <h5 class="card-title">Próximos a Vencer</h5>
                                     <h2 id="proximos-vencer">0</h2>
@@ -75,7 +81,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card text-white bg-danger mb-3">
+                            <div class="card text-white bg-gradient-danger mb-3">
                                 <div class="card-body">
                                     <h5 class="card-title">Estoque Baixo</h5>
                                     <h2 id="estoque-baixo">0</h2>
@@ -86,18 +92,18 @@
                     
                     <div class="row mt-4">
                         <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="bi bi-pie-chart"></i> Estoque por Produto
+                            <div class="card border-primary">
+                                <div class="card-header bg-dark text-white">
+                                    <i class="bi bi-pie-chart"></i> Estoque por Categoria
                                 </div>
                                 <div class="card-body">
-                                    <canvas id="grafico-estoque"></canvas>
+                                    <canvas id="grafico-categorias"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
+                            <div class="card border-danger">
+                                <div class="card-header bg-dark text-white">
                                     <i class="bi bi-exclamation-triangle"></i> Alertas de Validade
                                 </div>
                                 <div class="card-body">
@@ -109,8 +115,8 @@
 
                     <div class="row mt-4">
                         <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
+                            <div class="card border-warning">
+                                <div class="card-header bg-dark text-white">
                                     <i class="bi bi-clock-history"></i> Últimas Movimentações
                                 </div>
                                 <div class="card-body">
@@ -131,8 +137,13 @@
                     </div>
                     
                     <div class="row mt-4">
-                        <div class="col-md-12">
+                        <div class="col-md-4">
                             <input type="text" class="form-control" id="search-produto" placeholder="Buscar produto...">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-control" id="filtro-categoria-produto">
+                                <option value="">Todas as categorias</option>
+                            </select>
                         </div>
                     </div>
 
@@ -151,17 +162,28 @@
                     </div>
                     
                     <div class="row mt-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <select class="form-control" id="filtro-produto-unidades">
                                 <option value="">Todos os produtos</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <select class="form-control" id="filtro-status-unidades">
                                 <option value="">Todos os status</option>
                                 <option value="Disponível">Disponível</option>
                                 <option value="Bloqueado">Bloqueado</option>
+                                <option value="Transferido">Transferido</option>
                                 <option value="Vencido">Vencido</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control" id="filtro-destino-unidades">
+                                <option value="">Todos os destinos</option>
+                                <option value="Farinheira">Farinheira</option>
+                                <option value="Doméstica">Doméstica</option>
+                                <option value="Massas">Massas</option>
+                                <option value="Biscoito">Biscoito</option>
+                                <option value="Transferência MV">Transferência MV</option>
                             </select>
                         </div>
                     </div>
@@ -172,12 +194,13 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Produto</th>
+                                    <th>Categoria</th>
                                     <th>Lote</th>
                                     <th>Validade</th>
-                                    <th>Quantidade</th>
-                                    <th>Unidade</th>
+                                    <th>Volume</th>
+                                    <th>Qtd</th>
                                     <th>Status</th>
-                                    <th>Localização</th>
+                                    <th>Destino</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -192,15 +215,18 @@
                     <h2>Scanner QR Code</h2>
                     <div class="row mt-4">
                         <div class="col-md-6">
-                            <div class="card">
+                            <div class="card border-primary">
+                                <div class="card-header bg-dark text-white">
+                                    <i class="bi bi-camera"></i> Leitor
+                                </div>
                                 <div class="card-body text-center">
                                     <div id="qr-reader" style="width: 100%;"></div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
+                            <div class="card border-danger">
+                                <div class="card-header bg-dark text-white">
                                     Resultado
                                 </div>
                                 <div class="card-body" id="qr-resultado">
@@ -222,15 +248,26 @@
                         <div class="col-md-3">
                             <input type="date" class="form-control" id="filtro-data-fim">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <select class="form-control" id="filtro-tipo-movimentacao">
-                                <option value="">Todos os tipos</option>
+                                <option value="">Todos</option>
                                 <option value="Entrada">Entrada</option>
                                 <option value="Saída">Saída</option>
+                                <option value="Transferência">Transferência</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-primary" onclick="filtrarMovimentacoes()">
+                        <div class="col-md-2">
+                            <select class="form-control" id="filtro-destino-movimentacao">
+                                <option value="">Destino</option>
+                                <option value="Farinheira">Farinheira</option>
+                                <option value="Doméstica">Doméstica</option>
+                                <option value="Massas">Massas</option>
+                                <option value="Biscoito">Biscoito</option>
+                                <option value="Transferência MV">Transferência MV</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100" onclick="filtrarMovimentacoes()">
                                 <i class="bi bi-search"></i> Filtrar
                             </button>
                         </div>
@@ -244,7 +281,9 @@
                                     <th>Tipo</th>
                                     <th>ID Unidade</th>
                                     <th>Produto</th>
-                                    <th>Quantidade</th>
+                                    <th>Volume</th>
+                                    <th>Qtd</th>
+                                    <th>Destino</th>
                                     <th>Responsável</th>
                                 </tr>
                             </thead>
@@ -260,18 +299,18 @@
                     
                     <div class="row mt-4">
                         <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    Estoque por Produto
+                            <div class="card border-primary">
+                                <div class="card-header bg-dark text-white">
+                                    Estoque por Categoria
                                 </div>
                                 <div class="card-body">
-                                    <canvas id="grafico-relatorio-produtos"></canvas>
+                                    <canvas id="grafico-relatorio-categorias"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">
+                            <div class="card border-danger">
+                                <div class="card-header bg-dark text-white">
                                     Status das Unidades
                                 </div>
                                 <div class="card-body">
@@ -280,25 +319,107 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    Validades
+                            <div class="card border-warning">
+                                <div class="card-header bg-dark text-white">
+                                    Transferências por Destino
                                 </div>
                                 <div class="card-body">
-                                    <canvas id="grafico-validades"></canvas>
+                                    <canvas id="grafico-destinos"></canvas>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-header bg-dark text-white">
                                     Produtos com Estoque Baixo
                                 </div>
                                 <div class="card-body">
                                     <div id="lista-estoque-baixo"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-danger">
+                                <div class="card-header bg-dark text-white">
+                                    Validades Próximas
+                                </div>
+                                <div class="card-body">
+                                    <div id="lista-validades"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categorias View -->
+                <div id="categorias-view" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2>Categorias</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+                            <i class="bi bi-plus"></i> Nova Categoria
+                        </button>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Categoria</th>
+                                                <th>Tipo</th>
+                                                <th>Descrição</th>
+                                                <th>Total Produtos</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabela-categorias">
+                                            <tr>
+                                                <td>Insumos</td>
+                                                <td>Matéria Prima</td>
+                                                <td>Insumos para produção</td>
+                                                <td>0</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Embalagem Papelão</td>
+                                                <td>Embalagem</td>
+                                                <td>Caixas de papelão</td>
+                                                <td>0</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Embalagem Filme</td>
+                                                <td>Embalagem</td>
+                                                <td>Filme stretch e plástico</td>
+                                                <td>0</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Embalagem Sacaria</td>
+                                                <td>Embalagem</td>
+                                                <td>Sacos e big bags</td>
+                                                <td>0</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -312,9 +433,9 @@
     <div class="modal fade" id="modalProduto" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Novo Produto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="form-produto">
@@ -329,6 +450,18 @@
                         <div class="mb-3">
                             <label for="produto-descricao" class="form-label">Descrição</label>
                             <textarea class="form-control" id="produto-descricao" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="produto-categoria" class="form-label">Categoria</label>
+                            <select class="form-control" id="produto-categoria" required>
+                                <option value="">Selecione uma categoria</option>
+                                <option value="Insumos">Insumos</option>
+                                <option value="Embalagem Papelão">Embalagem Papelão</option>
+                                <option value="Embalagem Filme">Embalagem Filme</option>
+                                <option value="Embalagem Sacaria">Embalagem Sacaria</option>
+                                <option value="Material de Limpeza">Material de Limpeza</option>
+                                <option value="EPI">EPI</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="produto-unidade-base" class="form-label">Unidade Base</label>
@@ -358,9 +491,9 @@
     <div class="modal fade" id="modalUnidade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Nova Unidade</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="form-unidade">
@@ -380,7 +513,11 @@
                             <input type="date" class="form-control" id="unidade-validade" required>
                         </div>
                         <div class="mb-3">
-                            <label for="unidade-quantidade" class="form-label">Quantidade</label>
+                            <label for="unidade-volume" class="form-label">Volume</label>
+                            <input type="number" class="form-control" id="unidade-volume" value="1" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="unidade-quantidade" class="form-label">Quantidade por Volume</label>
                             <input type="number" class="form-control" id="unidade-quantidade" required>
                         </div>
                         <div class="mb-3">
@@ -414,41 +551,38 @@
         </div>
     </div>
 
-    <!-- Modal Movimentação -->
-    <div class="modal fade" id="modalMovimentacao" tabindex="-1">
+    <!-- Modal Categoria -->
+    <div class="modal fade" id="modalCategoria" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Registrar Movimentação</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Nova Categoria</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="form-movimentacao">
-                        <input type="hidden" id="movimentacao-id-unidade">
+                    <form id="form-categoria">
                         <div class="mb-3">
-                            <label for="movimentacao-tipo" class="form-label">Tipo</label>
-                            <select class="form-control" id="movimentacao-tipo" required>
-                                <option value="Entrada">Entrada</option>
-                                <option value="Saída">Saída</option>
+                            <label for="categoria-nome" class="form-label">Nome da Categoria</label>
+                            <input type="text" class="form-control" id="categoria-nome" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoria-tipo" class="form-label">Tipo</label>
+                            <select class="form-control" id="categoria-tipo" required>
+                                <option value="Matéria Prima">Matéria Prima</option>
+                                <option value="Embalagem">Embalagem</option>
+                                <option value="Insumo">Insumo</option>
+                                <option value="Produto Acabado">Produto Acabado</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="movimentacao-quantidade" class="form-label">Quantidade</label>
-                            <input type="number" class="form-control" id="movimentacao-quantidade" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="movimentacao-responsavel" class="form-label">Responsável</label>
-                            <input type="text" class="form-control" id="movimentacao-responsavel" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="movimentacao-observacao" class="form-label">Observação</label>
-                            <textarea class="form-control" id="movimentacao-observacao" rows="2"></textarea>
+                            <label for="categoria-descricao" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="categoria-descricao" rows="2"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="salvar-movimentacao">Registrar</button>
+                    <button type="button" class="btn btn-primary" id="salvar-categoria">Salvar</button>
                 </div>
             </div>
         </div>
@@ -458,44 +592,30 @@
     <div class="modal fade" id="modalDetalhesUnidade" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Detalhes da Unidade</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 text-center">
                             <div id="unidade-qr-code" class="p-3 border rounded mb-3"></div>
-                            <button class="btn btn-sm btn-outline-primary" onclick="baixarQRCode()">
-                                <i class="bi bi-download"></i> Baixar QR Code
+                            <button class="btn btn-primary" onclick="verQRCodeCompleto()">
+                                <i class="bi bi-qr-code"></i> Ver QR Code Completo
                             </button>
                         </div>
                         <div class="col-md-6">
                             <p><strong>ID:</strong> <span id="detalhe-id"></span></p>
                             <p><strong>Produto:</strong> <span id="detalhe-produto"></span></p>
+                            <p><strong>Categoria:</strong> <span id="detalhe-categoria"></span></p>
                             <p><strong>SKU:</strong> <span id="detalhe-sku"></span></p>
                             <p><strong>Lote:</strong> <span id="detalhe-lote"></span></p>
                             <p><strong>Validade:</strong> <span id="detalhe-validade"></span></p>
-                            <p><strong>Quantidade:</strong> <span id="detalhe-quantidade"></span></p>
-                            <p><strong>Unidade:</strong> <span id="detalhe-unidade"></span></p>
+                            <p><strong>Volume:</strong> <span id="detalhe-volume"></span> <span id="detalhe-unidade-volume"></span></p>
+                            <p><strong>Quantidade:</strong> <span id="detalhe-quantidade"></span> <span id="detalhe-unidade"></span></p>
                             <p><strong>Status:</strong> <span id="detalhe-status"></span></p>
                             <p><strong>Localização:</strong> <span id="detalhe-localizacao"></span></p>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <button class="btn btn-success" onclick="abrirModalMovimentacao('entrada')">
-                                <i class="bi bi-plus-circle"></i> Entrada
-                            </button>
-                            <button class="btn btn-warning" onclick="abrirModalMovimentacao('saida')">
-                                <i class="bi bi-dash-circle"></i> Saída
-                            </button>
-                            <button class="btn btn-danger" onclick="bloquearUnidade()">
-                                <i class="bi bi-lock"></i> Bloquear
-                            </button>
-                            <button class="btn btn-info" onclick="editarUnidade()">
-                                <i class="bi bi-pencil"></i> Editar
-                            </button>
+                            <p><strong>Destino:</strong> <span id="detalhe-destino"></span></p>
                         </div>
                     </div>
                 </div>
@@ -507,7 +627,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
