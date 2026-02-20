@@ -19,7 +19,7 @@ let graficoCategorias = null;
 let unidadeAtual = null;
 
 // Categorias pré-definidas
-const categorias = [
+let categorias = [
     { id: 1, nome: 'Insumos', tipo: 'Matéria Prima', descricao: 'Insumos para produção' },
     { id: 2, nome: 'Embalagem Papelão', tipo: 'Embalagem', descricao: 'Caixas de papelão' },
     { id: 3, nome: 'Embalagem Filme', tipo: 'Embalagem', descricao: 'Filme stretch e plástico' },
@@ -35,11 +35,14 @@ const destinos = [
     'Transferência MV'
 ];
 
+// Tipos de embalagem
+const tiposEmbalagem = ['UN', 'MALA', 'PCT', 'CX', 'FD', 'PLT'];
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     carregarDados();
     setupEventListeners();
-    preencherFiltrosCategoria();
+    preencherFiltros();
 });
 
 // Configurar event listeners
@@ -58,9 +61,113 @@ function setupEventListeners() {
     
     document.getElementById('search-produto').addEventListener('keyup', filtrarProdutos);
     document.getElementById('filtro-categoria-produto').addEventListener('change', filtrarProdutos);
+    document.getElementById('filtro-embalagem-produto').addEventListener('change', filtrarProdutos);
+    
     document.getElementById('filtro-produto-unidades').addEventListener('change', filtrarUnidades);
     document.getElementById('filtro-status-unidades').addEventListener('change', filtrarUnidades);
     document.getElementById('filtro-destino-unidades').addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-embalagem-unidades').addEventListener('change', filtrarUnidades);
+    
+    document.getElementById('produto-tipo-embalagem').addEventListener('change', toggleCampoQtdEmbalagem);
+    document.getElementById('unidade-sku').addEventListener('change', atualizarInfoEmbalagem);
+    document.getElementById('unidade-volume').addEventListener('input', calcularQuantidadeAutomatica);
+    document.getElementById('unidade-fora-padrao').addEventListener('change', toggleCampoQuantidadeReal);
+}
+
+// Mostrar/esconder campo de quantidade por embalagem
+function toggleCampoQtdEmbalagem() {
+    const tipo = document.getElementById('produto-tipo-embalagem').value;
+    const campoQtd = document.getElementById('campo-qtd-por-embalagem');
+    const unidadeSpan = document.getElementById('unidade-embalagem');
+    
+    if (tipo && tipo !== 'UN') {
+        campoQtd.style.display = 'block';
+        unidadeSpan.textContent = tipo;
+    } else {
+        campoQtd.style.display = 'none';
+        document.getElementById('produto-qtd-por-embalagem').value = 1;
+    }
+}
+
+// Mostrar/esconder campo de quantidade real
+function toggleCampoQuantidadeReal() {
+    const campoReal = document.getElementById('campo-quantidade-real');
+    campoReal.style.display = this.checked ? 'block' : 'none';
+    
+    if (!this.checked) {
+        calcularQuantidadeAutomatica();
+    }
+}
+
+// Calcular quantidade automática baseada no volume
+function calcularQuantidadeAutomatica() {
+    const sku = document.getElementById('unidade-sku').value;
+    if (!sku) return;
+    
+    const produto = produtos.find(p => p.sku === sku);
+    if (!produto) return;
+    
+    const volume = parseInt(document.getElementById('unidade-volume').value) || 1;
+    const qtdPorEmbalagem = parseInt(produto.qtdPorEmbalagem) || 1;
+    const foraPadrao = document.getElementById('unidade-fora-padrao').checked;
+    
+    if (!foraPadrao) {
+        const quantidadeTotal = volume * qtdPorEmbalagem;
+        document.getElementById('unidade-quantidade').value = quantidadeTotal;
+    }
+}
+
+// Atualizar informações da embalagem ao selecionar produto
+function atualizarInfoEmbalagem() {
+    const select = document.getElementById('unidade-sku');
+    const selectedOption = select.options[select.selectedIndex];
+    const tipoEmbalagem = selectedOption.dataset.tipo || 'UN';
+    const qtdPorEmbalagem = parseInt(selectedOption.dataset.qtd) || 1;
+    
+    document.getElementById('volume-label').textContent = `Volume (${tipoEmbalagem})`;
+    document.getElementById('quantidade-unidade').textContent = '(UN)';
+    document.getElementById('volume-descricao').textContent = `Número de ${tipoEmbalagem}`;
+    
+    calcularQuantidadeAutomatica();
+}
+
+// Preencher todos os filtros
+function preencherFiltros() {
+    // Filtro de categoria em produtos
+    const selectCategoria = document.getElementById('filtro-categoria-produto');
+    if (selectCategoria) {
+        selectCategoria.innerHTML = '<option value="">Todas as categorias</option>';
+        categorias.forEach(c => {
+            selectCategoria.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+        });
+    }
+    
+    // Filtro de produtos em unidades
+    preencherSelectProdutos();
+    
+    // Filtro de embalagem em unidades
+    const selectEmbalagem = document.getElementById('filtro-embalagem-unidades');
+    if (selectEmbalagem) {
+        selectEmbalagem.innerHTML = '<option value="">Todas embalagens</option>';
+        tiposEmbalagem.forEach(t => {
+            if (t !== 'UN') {
+                selectEmbalagem.innerHTML += `<option value="${t}">${t}</option>`;
+            }
+        });
+    }
+}
+
+// Preencher select de produtos
+function preencherSelectProdutos() {
+    const select = document.getElementById('unidade-sku');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Selecione um produto</option>';
+    produtos.forEach(p => {
+        const embalagem = p.tipoEmbalagem || 'UN';
+        const qtdInfo = p.qtdPorEmbalagem ? ` (${p.qtdPorEmbalagem} UN por ${embalagem})` : '';
+        select.innerHTML += `<option value="${p.sku}" data-tipo="${embalagem}" data-qtd="${p.qtdPorEmbalagem || 1}">${p.nome} - ${embalagem}${qtdInfo}</option>`;
+    });
 }
 
 // Mostrar view
@@ -78,25 +185,13 @@ function mostrarView(view) {
     const menu = document.getElementById(`menu-${view}`);
     if (menu) menu.classList.add('active');
     
-    // Ações específicas por view
     if (view === 'scanner') setupQRCode();
     if (view === 'unidades') {
-        preencherFiltrosUnidades();
+        preencherFiltros();
         atualizarTabelaUnidades();
     }
     if (view === 'relatorios') gerarRelatorios();
-    if (view === 'painel') atualizarGraficosPainel();
-}
-
-// Preencher filtros de categoria
-function preencherFiltrosCategoria() {
-    const select = document.getElementById('filtro-categoria-produto');
-    if (!select) return;
-    
-    select.innerHTML = '<option value="">Todas as categorias</option>';
-    categorias.forEach(c => {
-        select.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-    });
+    if (view === 'categorias') atualizarTabelaCategorias();
 }
 
 // Carregar dados
@@ -113,8 +208,10 @@ async function carregarDados() {
                 nome: row[1] || '',
                 descricao: row[2] || '',
                 categoria: row[3] || 'Insumos',
-                unidadeBase: row[4] || 'UN',
-                imagem: row[5] || ''
+                tipoEmbalagem: row[4] || 'UN',
+                qtdPorEmbalagem: parseInt(row[5]) || 1,
+                unidadeBase: row[6] || 'UN',
+                imagem: row[7] || ''
             })).filter(p => p.sku);
         }
 
@@ -129,10 +226,12 @@ async function carregarDados() {
                 validade: row[3] || '',
                 volume: parseInt(row[4]) || 1,
                 quantidade: parseFloat(row[5]) || 0,
-                unidade: row[6] || 'UN',
+                unidadeEmbalagem: row[6] || 'UN',
                 status: row[7] || 'Disponível',
                 localizacao: row[8] || '',
-                destino: row[9] || ''
+                destino: row[9] || '',
+                foraPadrao: row[10] === 'true',
+                qtdRealPorEmbalagem: parseInt(row[11]) || null
             })).filter(u => u.id);
         }
 
@@ -147,9 +246,10 @@ async function carregarDados() {
                 sku: row[3] || '',
                 volume: parseInt(row[4]) || 0,
                 quantidade: parseFloat(row[5]) || 0,
-                destino: row[6] || '',
-                responsavel: row[7] || '',
-                observacao: row[8] || ''
+                unidadeEmbalagem: row[6] || '',
+                destino: row[7] || '',
+                responsavel: row[8] || '',
+                observacao: row[9] || ''
             })).filter(m => m.data);
         }
 
@@ -163,11 +263,13 @@ async function carregarDados() {
 // Dados de exemplo
 function carregarDadosExemplo() {
     produtos = [
-        { sku: '00030786', nome: 'SC LAM/VAL 016X032', descricao: 'BELLA BRANCA RESERVA 25KG', categoria: 'Insumos', unidadeBase: 'KG', imagem: '' }
+        { sku: '300214', nome: 'Una especial 50Kg', descricao: 'Farinha de trigo', categoria: 'Insumos', tipoEmbalagem: 'MALA', qtdPorEmbalagem: 50, unidadeBase: 'KG', imagem: '' },
+        { sku: '303050', nome: 'saco vitella', descricao: 'Embalagem para farinha', categoria: 'Embalagem Sacaria', tipoEmbalagem: 'PCT', qtdPorEmbalagem: 100, unidadeBase: 'UN', imagem: '' }
     ];
     
     unidades = [
-        { id: 'UN-MKZF8ZNG-HUTE', sku: '00030786', lote: 'a1', validade: '2026-02-27', volume: 2, quantidade: 500, unidade: 'PLT', status: 'Disponível', localizacao: '-', destino: '' }
+        { id: 'UN-E53UOSQY-Z1D0', sku: '300214', lote: '5050', validade: '2026-05-05', volume: 10, quantidade: 500, unidadeEmbalagem: 'MALA', status: 'Disponível', localizacao: 'Prateleira A1', destino: '', foraPadrao: false, qtdRealPorEmbalagem: null },
+        { id: 'UN-5NZBIQR7-KQMG', sku: '303050', lote: 'vite01', validade: '2026-04-05', volume: 20, quantidade: 2000, unidadeEmbalagem: 'PCT', status: 'Disponível', localizacao: 'Prateleira B2', destino: '', foraPadrao: false, qtdRealPorEmbalagem: null }
     ];
     
     movimentacoes = [];
@@ -181,7 +283,7 @@ function atualizarInterface() {
     atualizarTabelaUnidades();
     atualizarTabelaMovimentacoes();
     atualizarUltimasMovimentacoes();
-    preencherSelectProdutos();
+    preencherFiltros();
     atualizarGraficosPainel();
 }
 
@@ -209,12 +311,17 @@ function atualizarCardsProdutos() {
     if (!container) return;
     
     const categoriaFiltro = document.getElementById('filtro-categoria-produto')?.value || '';
+    const embalagemFiltro = document.getElementById('filtro-embalagem-produto')?.value || '';
     const termoBusca = document.getElementById('search-produto')?.value.toLowerCase() || '';
     
     let produtosFiltrados = produtos;
     
     if (categoriaFiltro) {
         produtosFiltrados = produtosFiltrados.filter(p => p.categoria === categoriaFiltro);
+    }
+    
+    if (embalagemFiltro) {
+        produtosFiltrados = produtosFiltrados.filter(p => p.tipoEmbalagem === embalagemFiltro);
     }
     
     if (termoBusca) {
@@ -233,9 +340,8 @@ function atualizarCardsProdutos() {
     
     produtosFiltrados.forEach(produto => {
         const unidadesProduto = unidades.filter(u => u.sku === produto.sku);
-        const totalUnidades = unidadesProduto.length;
-        const quantidadeTotal = unidadesProduto.reduce((sum, u) => sum + u.quantidade, 0);
-        const categoria = categorias.find(c => c.nome === produto.categoria) || { tipo: 'Produto' };
+        const totalVolume = unidadesProduto.reduce((sum, u) => sum + u.volume, 0);
+        const totalQuantidade = unidadesProduto.reduce((sum, u) => sum + u.quantidade, 0);
         
         const card = document.createElement('div');
         card.className = 'col-md-4 mb-3';
@@ -246,13 +352,14 @@ function atualizarCardsProdutos() {
                     <h5 class="card-title">${produto.nome}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">SKU: ${produto.sku}</h6>
                     <span class="badge ${getCategoriaBadgeClass(produto.categoria)}">${produto.categoria}</span>
+                    <span class="badge bg-info">${produto.tipoEmbalagem}</span>
                     <p class="card-text mt-2">${produto.descricao || ''}</p>
                     <div class="row mt-3">
                         <div class="col-6">
-                            <small>Unidades: ${totalUnidades}</small>
+                            <small>Volume: ${totalVolume} ${produto.tipoEmbalagem}</small>
                         </div>
                         <div class="col-6">
-                            <small>Total: ${quantidadeTotal} ${produto.unidadeBase}</small>
+                            <small>Total: ${totalQuantidade} UN</small>
                         </div>
                     </div>
                     <div class="mt-3">
@@ -270,28 +377,6 @@ function atualizarCardsProdutos() {
     });
 }
 
-// Get classe da categoria
-function getCategoriaClass(categoria) {
-    switch(categoria) {
-        case 'Insumos': return 'border-primary';
-        case 'Embalagem Papelão': return 'border-warning';
-        case 'Embalagem Filme': return 'border-info';
-        case 'Embalagem Sacaria': return 'border-success';
-        default: return 'border-secondary';
-    }
-}
-
-// Get badge da categoria
-function getCategoriaBadgeClass(categoria) {
-    switch(categoria) {
-        case 'Insumos': return 'bg-primary';
-        case 'Embalagem Papelão': return 'bg-warning text-dark';
-        case 'Embalagem Filme': return 'bg-info';
-        case 'Embalagem Sacaria': return 'bg-success';
-        default: return 'bg-secondary';
-    }
-}
-
 // Filtrar produtos
 function filtrarProdutos() {
     atualizarCardsProdutos();
@@ -302,12 +387,9 @@ function verProduto(sku) {
     const produto = produtos.find(p => p.sku === sku);
     const unidadesProduto = unidades.filter(u => u.sku === sku);
     
-    const modalTitle = document.getElementById('modalVerProduto-titulo');
-    if (modalTitle) modalTitle.textContent = `${produto.nome} - SKU: ${sku}`;
+    document.getElementById('modalVerProduto-titulo').textContent = `${produto.nome} - SKU: ${sku} (${produto.tipoEmbalagem})`;
     
     const tbody = document.getElementById('tabela-unidades-produto');
-    if (!tbody) return;
-    
     tbody.innerHTML = '';
     
     if (unidadesProduto.length === 0) {
@@ -316,12 +398,12 @@ function verProduto(sku) {
         unidadesProduto.forEach(u => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${u.id}</td>
+                <td><small>${u.id}</small></td>
                 <td>${u.lote}</td>
                 <td>${formatarData(u.validade)}</td>
+                <td>${u.unidadeEmbalagem}</td>
                 <td>${u.volume}</td>
-                <td>${u.quantidade}</td>
-                <td>${u.unidade}</td>
+                <td>${u.quantidade} UN</td>
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.localizacao}</td>
                 <td>
@@ -346,36 +428,36 @@ function abrirModalUnidade(sku) {
     document.getElementById('unidade-sku').value = sku || '';
     document.getElementById('unidade-volume').value = '1';
     document.getElementById('unidade-status').value = 'Disponível';
+    document.getElementById('campo-quantidade-real').style.display = 'none';
+    
+    if (sku) {
+        atualizarInfoEmbalagem();
+    }
     
     const modal = new bootstrap.Modal(document.getElementById('modalUnidade'));
     modal.show();
 }
 
-// Preencher select de produtos
-function preencherSelectProdutos() {
-    const select = document.getElementById('unidade-sku');
-    if (!select) return;
-    
-    select.innerHTML = '<option value="">Selecione um produto</option>';
-    produtos.forEach(p => {
-        select.innerHTML += `<option value="${p.sku}">${p.nome} (${p.sku})</option>`;
-    });
-}
-
 // Salvar produto
 async function salvarProduto() {
+    const tipoEmbalagem = document.getElementById('produto-tipo-embalagem').value;
+    const qtdPorEmbalagem = tipoEmbalagem !== 'UN' ? 
+        parseInt(document.getElementById('produto-qtd-por-embalagem').value) : 1;
+    
     const produto = {
         tipo: 'produto',
         sku: document.getElementById('produto-sku').value,
         nome: document.getElementById('produto-nome').value,
         descricao: document.getElementById('produto-descricao').value,
         categoria: document.getElementById('produto-categoria').value,
+        tipoEmbalagem: tipoEmbalagem,
+        qtdPorEmbalagem: qtdPorEmbalagem,
         unidadeBase: document.getElementById('produto-unidade-base').value,
-        imagem: document.getElementById('produto-imagem').value
+        imagem: document.getElementById('produto-imagem').value || ''
     };
     
-    if (!produto.sku || !produto.nome || !produto.categoria) {
-        alert('SKU, Nome e Categoria são obrigatórios!');
+    if (!produto.sku || !produto.nome || !produto.categoria || !produto.tipoEmbalagem) {
+        alert('SKU, Nome, Categoria e Tipo de Embalagem são obrigatórios!');
         return;
     }
     
@@ -403,21 +485,38 @@ async function salvarProduto() {
 // Salvar unidade
 async function salvarUnidade() {
     const id = document.getElementById('unidade-id').value || gerarIdUnico();
+    const sku = document.getElementById('unidade-sku').value;
+    const produto = produtos.find(p => p.sku === sku);
+    
+    const volume = parseInt(document.getElementById('unidade-volume').value);
+    const foraPadrao = document.getElementById('unidade-fora-padrao').checked;
+    let quantidade = parseInt(document.getElementById('unidade-quantidade').value);
+    
+    // Se for fora do padrão, recalcular com a quantidade real
+    if (foraPadrao) {
+        const qtdReal = parseInt(document.getElementById('unidade-quantidade-real').value);
+        if (qtdReal) {
+            quantidade = volume * qtdReal;
+        }
+    }
+    
     const unidade = {
         tipo: 'unidade',
         id: id,
-        sku: document.getElementById('unidade-sku').value,
+        sku: sku,
         lote: document.getElementById('unidade-lote').value,
         validade: document.getElementById('unidade-validade').value,
-        volume: parseInt(document.getElementById('unidade-volume').value),
-        quantidade: parseFloat(document.getElementById('unidade-quantidade').value),
-        unidade: document.getElementById('unidade-medida').value,
+        volume: volume,
+        quantidade: quantidade,
+        unidadeEmbalagem: produto?.tipoEmbalagem || 'UN',
         status: document.getElementById('unidade-status').value,
         localizacao: document.getElementById('unidade-localizacao').value || '-',
-        destino: ''
+        destino: '',
+        foraPadrao: foraPadrao,
+        qtdRealPorEmbalagem: foraPadrao ? parseInt(document.getElementById('unidade-quantidade-real').value) : null
     };
     
-    if (!unidade.sku || !unidade.lote || !unidade.validade || !unidade.volume || !unidade.quantidade) {
+    if (!unidade.sku || !unidade.lote || !unidade.validade || !unidade.volume) {
         alert('Todos os campos são obrigatórios!');
         return;
     }
@@ -450,6 +549,7 @@ async function salvarUnidade() {
 // Salvar categoria
 async function salvarCategoria() {
     const categoria = {
+        id: categorias.length + 1,
         nome: document.getElementById('categoria-nome').value,
         tipo: document.getElementById('categoria-tipo').value,
         descricao: document.getElementById('categoria-descricao').value
@@ -460,17 +560,13 @@ async function salvarCategoria() {
         return;
     }
     
-    // Adicionar à lista local
-    categorias.push({
-        id: categorias.length + 1,
-        ...categoria
-    });
+    categorias.push(categoria);
     
     bootstrap.Modal.getInstance(document.getElementById('modalCategoria')).hide();
     document.getElementById('form-categoria').reset();
     
     atualizarTabelaCategorias();
-    preencherFiltrosCategoria();
+    preencherFiltros();
     
     alert('Categoria salva com sucesso!');
 }
@@ -492,8 +588,8 @@ function atualizarTabelaCategorias() {
             <td>${cat.descricao || ''}</td>
             <td>${totalProdutos}</td>
             <td>
-                <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
-                <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-sm btn-warning" onclick="editarCategoria(${cat.id})"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirCategoria(${cat.id})"><i class="bi bi-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -514,7 +610,7 @@ function gerarIdUnico() {
     return id;
 }
 
-// Ver unidade com QR Code
+// Ver unidade
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
     if (!unidadeAtual) return;
@@ -527,95 +623,153 @@ function verUnidade(id) {
     document.getElementById('detalhe-sku').textContent = unidadeAtual.sku;
     document.getElementById('detalhe-lote').textContent = unidadeAtual.lote;
     document.getElementById('detalhe-validade').textContent = formatarData(unidadeAtual.validade);
+    document.getElementById('detalhe-embalagem').textContent = unidadeAtual.unidadeEmbalagem;
     document.getElementById('detalhe-volume').textContent = unidadeAtual.volume;
-    document.getElementById('detalhe-unidade-volume').textContent = unidadeAtual.unidade;
     document.getElementById('detalhe-quantidade').textContent = unidadeAtual.quantidade;
-    document.getElementById('detalhe-unidade').textContent = unidadeAtual.unidade;
+    document.getElementById('detalhe-fora-padrao').textContent = unidadeAtual.foraPadrao ? 'Sim' : 'Não';
     document.getElementById('detalhe-status').innerHTML = `<span class="badge ${unidadeAtual.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${unidadeAtual.status}</span>`;
     document.getElementById('detalhe-localizacao').textContent = unidadeAtual.localizacao;
     document.getElementById('detalhe-destino').textContent = unidadeAtual.destino || '-';
     
-    // Gerar QR Code com fallback
+    // Gerar QR Code
     const qrContainer = document.getElementById('unidade-qr-code');
-    qrContainer.innerHTML = ''; // Limpar
+    qrContainer.innerHTML = '';
     
     try {
-        // Tentar usar a biblioteca QRCode
         if (typeof QRCode !== 'undefined') {
             new QRCode(qrContainer, {
                 text: unidadeAtual.id,
                 width: 150,
-                height: 150,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
+                height: 150
             });
-        } else {
-            // Fallback: criar QR Code manual
-            qrContainer.innerHTML = `
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    Clique para ver QR Code completo
-                    <button class="btn btn-sm btn-primary mt-2" onclick="verQRCodeCompleto('${unidadeAtual.id}')">
-                        Ver QR Code
-                    </button>
-                </div>
-            `;
         }
     } catch (e) {
         console.error('Erro ao gerar QR Code:', e);
-        qrContainer.innerHTML = `
-            <div class="alert alert-warning">
-                <i class="bi bi-exclamation-triangle"></i>
-                Erro ao gerar QR Code
-                <button class="btn btn-sm btn-primary mt-2" onclick="verQRCodeCompleto('${unidadeAtual.id}')">
-                    Ver QR Code completo
-                </button>
-            </div>
-        `;
     }
     
     const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
     modal.show();
 }
 
-// Ver QR Code completo em nova aba (versão corrigida)
-function verQRCodeCompleto(id) {
-    const unidade = unidades.find(u => u.id === id) || unidadeAtual;
-    if (!unidade) return;
+// Ver QR Code completo
+function verQRCodeCompleto() {
+    if (!unidadeAtual) return;
     
-    const produto = produtos.find(p => p.sku === unidade.sku);
+    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
     
-    // Abrir nova aba com o QR Code
-    const url = `qr-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidade}`;
+    const url = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}`;
     
     window.open(url, '_blank', 'width=600,height=700');
 }
 
-// Configurar QR Code scanner com verificação de câmera
+// Filtrar unidades
+function filtrarUnidades() {
+    const skuFiltro = document.getElementById('filtro-produto-unidades')?.value;
+    const statusFiltro = document.getElementById('filtro-status-unidades')?.value;
+    const destinoFiltro = document.getElementById('filtro-destino-unidades')?.value;
+    const embalagemFiltro = document.getElementById('filtro-embalagem-unidades')?.value;
+    
+    let unidadesFiltradas = [...unidades];
+    
+    if (skuFiltro) {
+        unidadesFiltradas = unidadesFiltradas.filter(u => u.sku === skuFiltro);
+    }
+    
+    if (statusFiltro) {
+        if (statusFiltro === 'Vencido') {
+            const hoje = new Date();
+            unidadesFiltradas = unidadesFiltradas.filter(u => {
+                if (!u.validade) return false;
+                const validade = new Date(u.validade);
+                return validade < hoje;
+            });
+        } else {
+            unidadesFiltradas = unidadesFiltradas.filter(u => u.status === statusFiltro);
+        }
+    }
+    
+    if (destinoFiltro) {
+        unidadesFiltradas = unidadesFiltradas.filter(u => u.destino === destinoFiltro);
+    }
+    
+    if (embalagemFiltro) {
+        unidadesFiltradas = unidadesFiltradas.filter(u => u.unidadeEmbalagem === embalagemFiltro);
+    }
+    
+    atualizarTabelaUnidades(unidadesFiltradas);
+}
+
+// Atualizar tabela de unidades
+function atualizarTabelaUnidades(unidadesFiltradas = null) {
+    const tbody = document.getElementById('tabela-unidades');
+    if (!tbody) return;
+    
+    const dados = unidadesFiltradas || unidades;
+    const hoje = new Date();
+    
+    tbody.innerHTML = '';
+    
+    if (dados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center">Nenhuma unidade encontrada</td></tr>';
+        return;
+    }
+    
+    dados.forEach(u => {
+        const produto = produtos.find(p => p.sku === u.sku);
+        const validadeDate = new Date(u.validade);
+        const vencido = validadeDate < hoje;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><small>${u.id}</small></td>
+            <td>${produto ? produto.nome : u.sku}</td>
+            <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
+            <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
+            <td>${u.lote}</td>
+            <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
+            <td>${u.volume}</td>
+            <td>${u.quantidade} UN</td>
+            <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
+            <td>${u.destino || '-'}</td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
+                    <i class="bi bi-eye"></i>
+                </button>
+                ${u.status === 'Disponível' ? `
+                    <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                ` : ''}
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Abrir modal de transferência
+function abrirModalTransferencia(id) {
+    const unidade = unidades.find(u => u.id === id);
+    if (!unidade) return;
+    
+    const produto = produtos.find(p => p.sku === unidade.sku);
+    
+    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidadeEmbalagem}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
+    
+    window.open(url, '_blank', 'width=700,height=800');
+}
+
+// Configurar QR Code scanner
 function setupQRCode() {
     const qrReaderElement = document.getElementById('qr-reader');
     if (!qrReaderElement) return;
     
-    // Verificar se a biblioteca está carregada
     if (typeof Html5Qrcode === 'undefined') {
-        console.error('Biblioteca Html5Qrcode não carregada!');
-        qrReaderElement.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle"></i>
-                Erro ao carregar leitor QR Code. 
-                <button class="btn btn-sm btn-primary mt-2" onclick="location.reload()">
-                    Recarregar página
-                </button>
-            </div>
-        `;
+        qrReaderElement.innerHTML = '<div class="alert alert-danger">Erro ao carregar leitor QR Code.</div>';
         return;
     }
     
-    // Verificar se a câmera está disponível
     Html5Qrcode.getCameras().then(devices => {
         if (devices && devices.length) {
-            // Tem câmera disponível
             const html5QrCode = new Html5Qrcode("qr-reader");
             
             const qrCodeSuccessCallback = (decodedText) => {
@@ -623,81 +777,23 @@ function setupQRCode() {
                 if (unidade) {
                     const produto = produtos.find(p => p.sku === unidade.sku);
                     
-                    // Abrir página de baixa
-                    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidade}`;
+                    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidadeEmbalagem}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
                     
                     window.open(url, '_blank', 'width=700,height=800');
                     
-                    document.getElementById('qr-resultado').innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>✅ Unidade encontrada!</h6>
-                            <p>Redirecionando para página de baixa...</p>
-                        </div>
-                    `;
+                    document.getElementById('qr-resultado').innerHTML = '<div class="alert alert-success">Redirecionando...</div>';
                 } else {
-                    document.getElementById('qr-resultado').innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="bi bi-x-circle"></i>
-                            Unidade não encontrada!<br>
-                            Código: ${decodedText}
-                        </div>
-                    `;
+                    document.getElementById('qr-resultado').innerHTML = `<div class="alert alert-danger">Unidade não encontrada: ${decodedText}</div>`;
                 }
             };
             
-            const config = { 
-                fps: 10, 
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
-            };
-            
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                config, 
-                qrCodeSuccessCallback
-            ).catch(err => {
-                console.error('Erro ao iniciar QR Code:', err);
-                qrReaderElement.innerHTML = `
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        Erro ao acessar câmera. Verifique as permissões.
-                        <button class="btn btn-sm btn-primary mt-2" onclick="location.reload()">
-                            Tentar novamente
-                        </button>
-                    </div>
-                `;
-            });
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, qrCodeSuccessCallback);
         } else {
-            // Nenhuma câmera encontrada
-            qrReaderElement.innerHTML = `
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    Nenhuma câmera encontrada no dispositivo.
-                </div>
-            `;
+            qrReaderElement.innerHTML = '<div class="alert alert-warning">Nenhuma câmera encontrada.</div>';
         }
     }).catch(err => {
-        console.error('Erro ao verificar câmeras:', err);
-        qrReaderElement.innerHTML = `
-            <div class="alert alert-warning">
-                <i class="bi bi-exclamation-triangle"></i>
-                Não foi possível acessar a câmera. Verifique as permissões.
-            </div>
-        `;
+        qrReaderElement.innerHTML = '<div class="alert alert-warning">Erro ao acessar câmera.</div>';
     });
-}
-
-// Função para testar QR Code manualmente (caso não tenha câmera)
-function testarQRCodeManual() {
-    const codigo = prompt('Digite o código da unidade:');
-    if (codigo) {
-        const unidade = unidades.find(u => u.id === codigo);
-        if (unidade) {
-            verUnidade(codigo);
-        } else {
-            alert('Unidade não encontrada!');
-        }
-    }
 }
 
 // Atualizar tabela de movimentações
@@ -710,7 +806,7 @@ function atualizarTabelaMovimentacoes(movFiltradas = null) {
     tbody.innerHTML = '';
     
     if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhuma movimentação registrada</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhuma movimentação registrada</td></tr>';
         return;
     }
     
@@ -722,8 +818,8 @@ function atualizarTabelaMovimentacoes(movFiltradas = null) {
             <td><span class="badge ${mov.tipo === 'Entrada' ? 'bg-success' : mov.tipo === 'Saída' ? 'bg-warning' : 'bg-info'}">${mov.tipo}</span></td>
             <td><small>${mov.idUnidade}</small></td>
             <td>${produto ? produto.nome : mov.sku}</td>
-            <td>${mov.volume || '-'}</td>
-            <td>${mov.quantidade}</td>
+            <td>${mov.volume} ${mov.unidadeEmbalagem}</td>
+            <td>${mov.quantidade} UN</td>
             <td>${mov.destino || '-'}</td>
             <td>${mov.responsavel}</td>
         `;
@@ -740,21 +836,10 @@ function filtrarMovimentacoes() {
     
     let filtradas = [...movimentacoes];
     
-    if (dataInicio) {
-        filtradas = filtradas.filter(m => m.data >= dataInicio);
-    }
-    
-    if (dataFim) {
-        filtradas = filtradas.filter(m => m.data <= dataFim);
-    }
-    
-    if (tipo) {
-        filtradas = filtradas.filter(m => m.tipo === tipo);
-    }
-    
-    if (destino) {
-        filtradas = filtradas.filter(m => m.destino === destino);
-    }
+    if (dataInicio) filtradas = filtradas.filter(m => m.data >= dataInicio);
+    if (dataFim) filtradas = filtradas.filter(m => m.data <= dataFim);
+    if (tipo) filtradas = filtradas.filter(m => m.tipo === tipo);
+    if (destino) filtradas = filtradas.filter(m => m.destino === destino);
     
     atualizarTabelaMovimentacoes(filtradas);
 }
@@ -778,7 +863,7 @@ function atualizarUltimasMovimentacoes() {
         div.innerHTML = `
             <div class="d-flex justify-content-between">
                 <span><strong>${formatarData(mov.data)}</strong> - ${mov.tipo}</span>
-                <span>${mov.quantidade}</span>
+                <span>${mov.volume} ${mov.unidadeEmbalagem}</span>
             </div>
             <small>${produto ? produto.nome : mov.sku} - ${mov.idUnidade}</small>
             ${mov.destino ? `<br><small>Destino: ${mov.destino}</small>` : ''}
@@ -789,7 +874,6 @@ function atualizarUltimasMovimentacoes() {
 
 // Atualizar gráficos do painel
 function atualizarGraficosPainel() {
-    // Gráfico de categorias
     const ctxCategorias = document.getElementById('grafico-categorias');
     if (ctxCategorias) {
         if (graficoCategorias) graficoCategorias.destroy();
@@ -805,7 +889,7 @@ function atualizarGraficosPainel() {
                 labels: categorias.map(c => c.nome),
                 datasets: [{
                     data: categoriasData,
-                    backgroundColor: ['#007bff', '#fd7e14', '#dc3545', '#28a745', '#6f42c1']
+                    backgroundColor: ['#007bff', '#fd7e14', '#dc3545', '#28a745']
                 }]
             }
         });
@@ -814,7 +898,7 @@ function atualizarGraficosPainel() {
 
 // Gerar relatórios
 function gerarRelatorios() {
-    // Gráfico de categorias (relatório)
+    // Gráfico de categorias
     const ctxCategorias = document.getElementById('grafico-relatorio-categorias');
     if (ctxCategorias) {
         const categoriasData = categorias.map(cat => {
@@ -895,7 +979,7 @@ function gerarRelatorios() {
                 containerEstoque.innerHTML += `
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         ${p.nome} (${p.sku})
-                        <span class="badge bg-danger rounded-pill">${total} ${p.unidadeBase}</span>
+                        <span class="badge bg-danger rounded-pill">${total} UN</span>
                     </li>
                 `;
             });
@@ -924,7 +1008,7 @@ function gerarRelatorios() {
                 const produto = produtos.find(p => p.sku === u.sku);
                 containerValidades.innerHTML += `
                     <li class="list-group-item d-flex justify-content-between align-items-center ${u.dias <= 7 ? 'list-group-item-danger' : u.dias <= 15 ? 'list-group-item-warning' : ''}">
-                        ${produto ? produto.nome : u.sku} - Lote ${u.lote}
+                        ${produto ? produto.nome : u.sku} - ${u.unidadeEmbalagem} ${u.volume}
                         <span class="badge ${u.dias <= 7 ? 'bg-danger' : 'bg-warning'} rounded-pill">${u.dias} dias</span>
                     </li>
                 `;
@@ -934,11 +1018,30 @@ function gerarRelatorios() {
     }
 }
 
-// Função auxiliar para formatar data
+// Funções auxiliares
+function getCategoriaClass(categoria) {
+    const classes = {
+        'Insumos': 'border-primary',
+        'Embalagem Papelão': 'border-warning',
+        'Embalagem Filme': 'border-info',
+        'Embalagem Sacaria': 'border-success'
+    };
+    return classes[categoria] || 'border-secondary';
+}
+
+function getCategoriaBadgeClass(categoria) {
+    const classes = {
+        'Insumos': 'bg-primary',
+        'Embalagem Papelão': 'bg-warning text-dark',
+        'Embalagem Filme': 'bg-info',
+        'Embalagem Sacaria': 'bg-success'
+    };
+    return classes[categoria] || 'bg-secondary';
+}
+
 function formatarData(data) {
     if (!data) return '';
     const d = new Date(data);
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
-
