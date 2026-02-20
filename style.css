@@ -179,7 +179,7 @@ body {
 }
 
 /* ============================================ */
-/* TABELAS - FUNDO ESCURO CORRIGIDO */
+/* S - FUNDO ESCURO CORRIGIDO */
 /* ============================================ */
 
 .table {
@@ -190,7 +190,7 @@ body {
     width: 100%;
 }
 
-/* Cabeçalho da tabela */
+/* Cabeçalho da  */
 .table thead th {
     background: #1a2634 !important; /* Fundo escuro para cabeçalho */
     color: #fbbf24 !important; /* Texto dourado */
@@ -204,7 +204,7 @@ body {
     white-space: nowrap;
 }
 
-/* Linhas do corpo da tabela */
+/* Linhas do corpo da  */
 .table tbody tr {
     background-color: #0f172a !important; /* Fundo escuro padrão */
     border-bottom: 1px solid #2d3748;
@@ -237,38 +237,72 @@ body {
 
 #tabela-unidades {
     color: #e2e8f0 !important;
+    width: 100%;
 }
 
 #tabela-unidades td {
     color: #e2e8f0 !important;
     background-color: transparent !important;
+    padding: 12px 8px;
 }
 
-/* IDs das unidades em dourado */
-#tabela-unidades td:first-child {
+/* IDs das unidades em dourado (coluna 1) */
+#tabela-unidades td:nth-child(1) {
     color: #fbbf24 !important;
     font-family: monospace;
     font-weight: 600;
 }
 
-/* Volume e Quantidade em dourado */
-#tabela-unidades td:nth-child(7),
-#tabela-unidades td:nth-child(8) {
+/* Categoria (coluna 3) */
+#tabela-unidades td:nth-child(3) {
     color: #fbbf24 !important;
-    font-weight: 600;
+    font-weight: 500;
 }
 
-/* Datas de validade */
+/* Embalagem (coluna 4) */
+#tabela-unidades td:nth-child(4) {
+    color: #94a3b8 !important;
+    font-weight: 500;
+}
+
+/* Lote (coluna 5) */
+#tabela-unidades td:nth-child(5) {
+    color: #e2e8f0 !important;
+}
+
+/* Validade (coluna 6) */
 #tabela-unidades td:nth-child(6) {
     color: #e2e8f0 !important;
 }
 
 #tabela-unidades td:nth-child(6).text-danger {
-    color: #fc8181 !important; /* Vermelho claro para vencidos */
+    color: #fc8181 !important;
     font-weight: 700;
 }
 
-/* Textos pequenos (como IDs reduzidos) */
+/* Volume (coluna 7) */
+#tabela-unidades td:nth-child(7) {
+    color: #fbbf24 !important;
+    font-weight: 600;
+}
+
+/* Quantidade (coluna 8) */
+#tabela-unidades td:nth-child(8) {
+    color: #fbbf24 !important;
+    font-weight: 600;
+}
+
+/* Status (coluna 9) */
+#tabela-unidades td:nth-child(9) {
+    font-weight: 500;
+}
+
+/* Destino (coluna 10) */
+#tabela-unidades td:nth-child(10) {
+    color: #94a3b8 !important;
+}
+
+/* Textos pequenos */
 #tabela-unidades td small {
     color: #a0aec0 !important;
 }
@@ -521,4 +555,5 @@ h2 {
 .card, .modal-content {
     animation: fadeIn 0.3s ease-out;
 }
+
 
