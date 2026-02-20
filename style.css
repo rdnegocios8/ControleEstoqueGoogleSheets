@@ -3,21 +3,20 @@
 /* ============================================ */
 
 :root {
-    --bg-primary: #0f172a;      /* Azul noturno profundo */
-    --bg-secondary: #1e293b;     /* Azul escuro médio */
-    --bg-tertiary: #334155;      /* Azul acinzentado */
-    --text-primary: #f1f5f9;     /* Branco gelo */
-    --text-secondary: #cbd5e1;   /* Cinza claro */
-    --text-muted: #94a3b8;       /* Cinza médio */
-    --accent-gold: #fbbf24;      /* Dourado */
-    --accent-amber: #f59e0b;     /* Âmbar */
-    --accent-teal: #2dd4bf;      /* Turquesa */
-    --accent-rose: #fb7185;      /* Rosa suave */
-    --border-color: #334155;      /* Cor da borda */
-    --success: #10b981;           /* Verde */
-    --danger: #ef4444;            /* Vermelho */
-    --warning: #f59e0b;           /* Laranja */
-    --info: #3b82f6;              /* Azul */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --accent-gold: #fbbf24;
+    --accent-amber: #f59e0b;
+    --accent-teal: #2dd4bf;
+    --border-color: #334155;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
 }
 
 body {
@@ -179,7 +178,7 @@ body {
 }
 
 /* ============================================ */
-/* TABELAS - FUNDO ESCURO */
+/* TABELAS */
 /* ============================================ */
 
 .table {
@@ -190,21 +189,19 @@ body {
     width: 100%;
 }
 
-/* Cabeçalho da tabela */
 .table thead th {
     background: #1a2634 !important;
-    color: #fbbf24 !important;
+    color: var(--accent-gold) !important;
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.8rem;
     letter-spacing: 0.5px;
     padding: 15px 8px !important;
-    border-bottom: 2px solid #fbbf24 !important;
+    border-bottom: 2px solid var(--accent-gold) !important;
     border: none;
     white-space: nowrap;
 }
 
-/* Linhas do corpo da tabela */
 .table tbody tr {
     background-color: #0f172a !important;
     border-bottom: 1px solid #2d3748;
@@ -222,7 +219,6 @@ body {
     border: none;
 }
 
-/* Linhas alternadas */
 .table-striped tbody tr:nth-of-type(odd) {
     background-color: #0f172a !important;
 }
@@ -247,13 +243,13 @@ body {
 }
 
 #tabela-unidades td:first-child {
-    color: #fbbf24 !important;
+    color: var(--accent-gold) !important;
     font-family: monospace;
     font-weight: 600;
 }
 
 #tabela-unidades td:nth-child(3) {
-    color: #fbbf24 !important;
+    color: var(--accent-gold) !important;
     font-weight: 500;
 }
 
@@ -262,35 +258,19 @@ body {
     font-weight: 500;
 }
 
-#tabela-unidades td:nth-child(5) {
-    color: #e2e8f0 !important;
+#tabela-unidades td:nth-child(7) {
+    color: var(--accent-gold) !important;
+    font-weight: 600;
 }
 
-#tabela-unidades td:nth-child(6) {
-    color: #e2e8f0 !important;
+#tabela-unidades td:nth-child(8) {
+    color: var(--accent-gold) !important;
+    font-weight: 600;
 }
 
 #tabela-unidades td:nth-child(6).text-danger {
     color: #fc8181 !important;
     font-weight: 700;
-}
-
-#tabela-unidades td:nth-child(7) {
-    color: #fbbf24 !important;
-    font-weight: 600;
-}
-
-#tabela-unidades td:nth-child(8) {
-    color: #fbbf24 !important;
-    font-weight: 600;
-}
-
-#tabela-unidades td:nth-child(9) {
-    font-weight: 500;
-}
-
-#tabela-unidades td:nth-child(10) {
-    color: #94a3b8 !important;
 }
 
 #tabela-unidades td small {
@@ -315,54 +295,59 @@ body {
 }
 
 /* ============================================ */
-/* TELA DE CATEGORIAS */
+/* TABELA DE RECEBIMENTOS */
 /* ============================================ */
 
-#categorias-view {
-    color: #e2e8f0;
+#tabela-recebimentos {
+    color: #e2e8f0 !important;
+    width: 100%;
 }
+
+#tabela-recebimentos td {
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+    padding: 12px 8px;
+}
+
+#tabela-recebimentos td:nth-child(4) {
+    color: var(--accent-gold) !important;
+    font-weight: 600;
+}
+
+#tabela-recebimentos td:nth-child(8),
+#tabela-recebimentos td:nth-child(10) {
+    color: var(--accent-gold) !important;
+    font-weight: 600;
+}
+
+/* ============================================ */
+/* TABELA DE CATEGORIAS */
+/* ============================================ */
 
 #categorias-view .card {
     background-color: #0f172a !important;
-    border: 1px solid #334155;
+    border: 1px solid var(--border-color);
     border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 
 #categorias-view .card-body {
-    padding: 1.5rem;
     background-color: #0f172a !important;
 }
 
-#categorias-view h2 {
-    color: #fbbf24 !important;
-    border-bottom: 3px solid #fbbf24;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-}
-
-#categorias-view .btn-primary {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-    color: white !important;
-}
-
-/* Tabela de categorias */
 #tabela-categorias {
     color: #e2e8f0 !important;
     width: 100%;
-    border-collapse: collapse;
 }
 
 #tabela-categorias thead th {
     background: #1a2634 !important;
-    color: #fbbf24 !important;
+    color: var(--accent-gold) !important;
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.8rem;
     letter-spacing: 0.5px;
     padding: 15px 12px !important;
-    border-bottom: 2px solid #fbbf24 !important;
-    border: none;
+    border-bottom: 2px solid var(--accent-gold) !important;
 }
 
 #tabela-categorias tbody tr {
@@ -384,7 +369,52 @@ body {
     border: none;
 }
 
-/* Botões de ação nas categorias */
+#tabela-categorias td:first-child {
+    color: var(--accent-gold) !important;
+    font-weight: 600;
+}
+
+/* ============================================ */
+/* BADGES */
+/* ============================================ */
+
+.badge {
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: white;
+}
+
+.badge.bg-primary {
+    background: var(--info) !important;
+}
+
+.badge.bg-success {
+    background: var(--success) !important;
+}
+
+.badge.bg-warning {
+    background: var(--warning) !important;
+    color: #0f172a !important;
+}
+
+.badge.bg-danger {
+    background: var(--danger) !important;
+}
+
+.badge.bg-info {
+    background: var(--accent-teal) !important;
+}
+
+/* ============================================ */
+/* BOTÕES DE AÇÃO */
+/* ============================================ */
+
+#tabela-unidades .btn-info,
+#tabela-unidades .btn-warning,
 #tabela-categorias .btn-warning,
 #tabela-categorias .btn-danger {
     padding: 4px 8px;
@@ -394,92 +424,24 @@ body {
     font-size: 0.8rem;
 }
 
+#tabela-unidades .btn-info {
+    background: var(--info) !important;
+    color: white !important;
+}
+
+#tabela-unidades .btn-warning,
 #tabela-categorias .btn-warning {
-    background: #fbbf24 !important;
+    background: var(--accent-gold) !important;
     color: #0f172a !important;
 }
 
 #tabela-categorias .btn-danger {
-    background: #b91c1c !important;
+    background: var(--danger) !important;
     color: white !important;
 }
 
 /* ============================================ */
-/* BADGES DENTRO DAS TABELAS */
-/* ============================================ */
-
-#tabela-unidades .badge,
-#tabela-movimentacoes .badge,
-#tabela-categorias .badge {
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    display: inline-block;
-}
-
-#tabela-unidades .badge.bg-success,
-#tabela-movimentacoes .badge.bg-success {
-    background: #059669 !important;
-    color: white !important;
-}
-
-#tabela-unidades .badge.bg-danger,
-#tabela-movimentacoes .badge.bg-danger {
-    background: #b91c1c !important;
-    color: white !important;
-}
-
-#tabela-unidades .badge.bg-warning,
-#tabela-movimentacoes .badge.bg-warning {
-    background: #d97706 !important;
-    color: #0f172a !important;
-}
-
-#tabela-unidades .badge.bg-primary,
-#tabela-movimentacoes .badge.bg-primary {
-    background: #1e40af !important;
-    color: white !important;
-}
-
-#tabela-unidades .badge.bg-info,
-#tabela-movimentacoes .badge.bg-info {
-    background: #0e7490 !important;
-    color: white !important;
-}
-
-/* ============================================ */
-/* BOTÕES DE AÇÃO NAS TABELAS */
-/* ============================================ */
-
-#tabela-unidades .btn-info,
-#tabela-unidades .btn-warning {
-    padding: 4px 8px;
-    margin: 0 2px;
-    border-radius: 6px;
-    border: none;
-    font-size: 0.8rem;
-}
-
-#tabela-unidades .btn-info {
-    background: #2563eb !important;
-    color: white !important;
-}
-
-#tabela-unidades .btn-warning {
-    background: #fbbf24 !important;
-    color: #0f172a !important;
-}
-
-#tabela-unidades .btn-info:hover,
-#tabela-unidades .btn-warning:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-/* ============================================ */
-/* FILTROS ACIMA DAS TABELAS */
+/* FILTROS */
 /* ============================================ */
 
 #filtro-produto-unidades,
@@ -490,6 +452,9 @@ body {
 #filtro-data-fim,
 #filtro-tipo-movimentacao,
 #filtro-destino-movimentacao,
+#filtro-recebimento-data-inicio,
+#filtro-recebimento-data-fim,
+#filtro-recebimento-fornecedor,
 #search-produto,
 #filtro-categoria-produto,
 #filtro-embalagem-produto {
@@ -504,7 +469,7 @@ body {
 #filtro-status-unidades:focus,
 #filtro-destino-unidades:focus,
 #filtro-embalagem-unidades:focus {
-    border-color: #fbbf24 !important;
+    border-color: var(--accent-gold) !important;
     outline: none;
 }
 
@@ -513,63 +478,145 @@ body {
 /* ============================================ */
 
 .modal-content {
-    background-color: #0f172a !important;
-    border: 2px solid #fbbf24;
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--accent-gold);
     border-radius: 24px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    border-bottom: 2px solid #fbbf24;
+    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+    border-bottom: 2px solid var(--accent-gold);
     border-radius: 24px 24px 0 0;
     padding: 1.5rem;
 }
 
 .modal-header .modal-title {
-    color: #fbbf24 !important;
+    color: var(--text-primary);
     font-weight: 700;
     font-size: 1.25rem;
 }
 
 .modal-header .btn-close {
-    background-color: #94a3b8;
+    background-color: var(--text-secondary);
     opacity: 0.8;
     filter: none;
 }
 
 .modal-body {
     padding: 1.5rem;
-    color: #e2e8f0 !important;
+    color: var(--text-secondary);
 }
 
 .modal-body label {
-    color: #fbbf24 !important;
+    color: var(--accent-gold) !important;
     font-weight: 600;
 }
 
 .modal-body .form-control,
 .modal-body .form-select {
-    background-color: #1e293b !important;
-    border: 2px solid #334155 !important;
-    color: #e2e8f0 !important;
+    background-color: var(--bg-tertiary) !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
     border-radius: 8px;
 }
 
 .modal-footer {
-    border-top: 1px solid #334155;
+    border-top: 1px solid var(--border-color);
     padding: 1.5rem;
 }
 
 /* ============================================ */
-/* TEXTOS "NENHUM REGISTRO ENCONTRADO" */
+/* QR CODE */
+/* ============================================ */
+
+#qr-reader {
+    border: 2px dashed var(--accent-gold);
+    border-radius: 20px;
+    background-color: var(--bg-tertiary);
+    padding: 1.5rem;
+    min-height: 300px;
+}
+
+/* ============================================ */
+/* ALERTAS DE VALIDADE */
+/* ============================================ */
+
+.alerta-vencimento {
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), transparent);
+    border-left: 4px solid var(--warning);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.alerta-vencido {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), transparent);
+    border-left: 4px solid var(--danger);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+/* ============================================ */
+/* CARDS DE PRODUTOS */
+/* ============================================ */
+
+#cards-produtos .card {
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border: 1px solid var(--border-color);
+}
+
+#cards-produtos .badge {
+    margin-right: 0.5rem;
+}
+
+#cards-produtos .col-6 small {
+    color: var(--text-muted);
+}
+
+#cards-produtos .col-6 strong {
+    color: var(--accent-gold);
+}
+
+/* ============================================ */
+/* TEXTOS ESPECÍFICOS */
+/* ============================================ */
+
+#volume-descricao, 
+#quantidade-descricao {
+    color: var(--accent-gold) !important;
+    font-weight: 500;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+#campo-qtd-por-embalagem small {
+    color: var(--accent-gold) !important;
+    font-style: italic;
+}
+
+.input-group-text {
+    background-color: var(--bg-tertiary) !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--accent-gold) !important;
+    font-weight: 600;
+}
+
+/* ============================================ */
+/* TEXTO "NENHUM REGISTRO" */
 /* ============================================ */
 
 #tabela-unidades td[colspan],
 #tabela-movimentacoes td[colspan],
+#tabela-recebimentos td[colspan],
 #tabela-categorias td[colspan],
 #cards-produtos .text-muted {
-    color: #a0aec0 !important;
+    color: var(--text-muted) !important;
     font-style: italic;
     text-align: center;
     padding: 40px !important;
@@ -577,39 +624,16 @@ body {
 }
 
 /* ============================================ */
-/* SCROLLBAR */
-/* ============================================ */
-
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: #0f172a;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-}
-
-/* ============================================ */
 /* TÍTULOS */
 /* ============================================ */
 
 h1, h2, h3, h4, h5, h6 {
-    color: #fbbf24 !important;
+    color: var(--accent-gold) !important;
     font-weight: 700;
-    letter-spacing: -0.5px;
 }
 
 h2 {
-    border-bottom: 3px solid #fbbf24;
+    border-bottom: 3px solid var(--accent-gold);
     padding-bottom: 0.75rem;
     margin-bottom: 2rem;
     display: inline-block;
@@ -619,25 +643,22 @@ h2 {
 /* UTILITÁRIOS */
 /* ============================================ */
 
-.text-muted, small, .form-text, .help-text {
-    color: #94a3b8 !important;
+.text-muted, small, .form-text {
+    color: var(--text-muted) !important;
 }
 
-.text-primary { color: #f1f5f9 !important; }
-.text-secondary { color: #cbd5e1 !important; }
-
-.border-primary { border-color: #3b82f6 !important; }
-.border-warning { border-color: #fbbf24 !important; }
-.border-danger { border-color: #ef4444 !important; }
-.border-success { border-color: #10b981 !important; }
+.border-primary { border-color: var(--info) !important; }
+.border-warning { border-color: var(--accent-gold) !important; }
+.border-danger { border-color: var(--danger) !important; }
+.border-success { border-color: var(--success) !important; }
 
 /* Loading */
 .loading {
     display: inline-block;
     width: 30px;
     height: 30px;
-    border: 3px solid #334155;
-    border-top-color: #fbbf24;
+    border: 3px solid var(--bg-tertiary);
+    border-top-color: var(--accent-gold);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -661,14 +682,6 @@ h2 {
     
     .table {
         font-size: 0.85rem;
-    }
-    
-    .card-header {
-        padding: 1rem;
-    }
-    
-    h2 {
-        font-size: 1.5rem;
     }
 }
 
