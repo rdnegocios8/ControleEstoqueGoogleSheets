@@ -663,3 +663,244 @@ i, .bi {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* ============================================ */
+/* CORREÇÕES ESPECÍFICAS PARA TEXTOS ESCUROS */
+/* ============================================ */
+
+/* Texto "Número de embalagens" no modal de unidade */
+#volume-descricao, 
+small#volume-descricao,
+.text-muted#volume-descricao {
+    color: #fd7e14 !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* Texto "Total de unidades" no modal de unidade */
+#quantidade-descricao,
+small#quantidade-descricao,
+.text-muted#quantidade-descricao {
+    color: #fd7e14 !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* Texto de exemplo no modal de produto */
+#campo-qtd-por-embalagem small.text-muted,
+#campo-qtd-por-embalagem small {
+    color: #fd7e14 !important;
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* Placeholder "Buscar produto..." */
+#search-produto::placeholder,
+input#search-produto::placeholder {
+    color: #adb5bd !important;
+    opacity: 1;
+}
+
+/* Texto "Selecione um produto" no select */
+#unidade-sku option[value=""] {
+    color: #6c757d !important;
+}
+
+/* Labels específicas do modal de unidade */
+label[for="unidade-volume"] span#volume-label,
+label[for="unidade-quantidade"] span#quantidade-unidade {
+    color: #fd7e14 !important;
+}
+
+/* Texto do checkbox "Embalagem fora do padrão" */
+label[for="unidade-fora-padrao"] {
+    color: #e9ecef !important;
+    font-weight: 400;
+}
+
+/* Texto no campo de quantidade real */
+#campo-quantidade-real small.text-muted,
+#campo-quantidade-real small {
+    color: #adb5bd !important;
+    font-style: italic;
+}
+
+/* Texto no select de categorias */
+#produto-categoria option[value=""] {
+    color: #6c757d !important;
+}
+
+/* Texto no select de tipo de embalagem */
+#produto-tipo-embalagem option[value=""] {
+    color: #6c757d !important;
+}
+
+/* Texto no input de quantidade por embalagem */
+#produto-qtd-por-embalagem {
+    color: #e9ecef !important;
+}
+
+/* Span da unidade no input de quantidade por embalagem */
+#unidade-embalagem {
+    background-color: #2c3034 !important;
+    border: 2px solid #3a3f45 !important;
+    color: #fd7e14 !important;
+    font-weight: 600;
+}
+
+/* Cards de produtos - Volume e Total */
+#cards-produtos .col-6 small {
+    color: #adb5bd !important;
+}
+
+#cards-produtos .col-6 small strong,
+#cards-produtos .col-6 span {
+    color: #fd7e14 !important;
+    font-weight: 600;
+}
+
+/* Badges de categoria e embalagem nos cards */
+#cards-produtos .badge.bg-info {
+    background: linear-gradient(135deg, #17a2b8, #138496) !important;
+    color: white !important;
+}
+
+#cards-produtos .badge.bg-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+}
+
+/* Texto "Selecione um produto" no modal de unidade */
+#unidade-sku option[value=""] {
+    color: #6c757d !important;
+}
+
+/* Inputs de data */
+input[type="date"] {
+    color-scheme: dark;
+}
+
+/* Texto nos inputs de data */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
+/* Texto nos selects */
+select.form-control option {
+    background-color: #1a1e24;
+    color: #e9ecef;
+}
+
+select.form-control option:hover {
+    background-color: #fd7e14;
+}
+
+/* Melhorar visibilidade dos textos nos modais */
+.modal-body .form-label {
+    color: #fd7e14 !important;
+    font-weight: 600;
+}
+
+.modal-body small.text-muted {
+    color: #adb5bd !important;
+    display: block;
+    margin-top: 4px;
+}
+
+/* Input groups (como o campo de quantidade por embalagem) */
+.input-group-text {
+    background-color: #2c3034 !important;
+    border: 2px solid #3a3f45 !important;
+    color: #fd7e14 !important;
+    font-weight: 600;
+}
+
+/* Texto de ajuda nos modais */
+.help-text, .form-text {
+    color: #adb5bd !important;
+    font-size: 0.85rem;
+}
+
+/* Títulos dentro dos cards de produtos */
+#cards-produtos .card-title {
+    color: #fd7e14 !important;
+    font-size: 1.1rem;
+}
+
+#cards-produtos .card-subtitle {
+    color: #adb5bd !important;
+    font-size: 0.9rem;
+}
+
+/* Texto de "Nenhum produto encontrado" */
+#cards-produtos .text-muted,
+.col-12 .text-muted {
+    color: #fd7e14 !important;
+    font-size: 1.1rem;
+    font-style: italic;
+    text-align: center;
+    padding: 40px;
+    background: rgba(253, 126, 20, 0.1);
+    border-radius: 8px;
+}
+
+/* ============================================ */
+/* CORREÇÕES PARA O MODO ESCURO EM TODOS OS ELEMENTOS */
+/* ============================================ */
+
+/* Garantir que todos os textos sejam visíveis */
+* {
+    color: inherit;
+}
+
+/* Textos específicos que ainda estiverem escuros */
+small, .small, .text-muted, .form-text, .help-text {
+    color: #adb5bd !important;
+}
+
+/* Labels em negrito */
+label, .form-label {
+    color: #fd7e14 !important;
+    font-weight: 600;
+}
+
+/* Inputs e seus valores */
+input, select, textarea {
+    color: #e9ecef !important;
+}
+
+/* Placeholders */
+::placeholder {
+    color: #6c757d !important;
+    opacity: 1;
+}
+
+/* Forçar cor dos textos nos modais */
+.modal-body p,
+.modal-body div:not(.form-check):not(.input-group),
+.modal-body span {
+    color: #e9ecef !important;
+}
+
+/* Texto nos botões */
+.btn {
+    color: white !important;
+}
+
+/* Ícones nos botões */
+.btn i {
+    color: white !important;
+}
+
+/* Texto nos cards */
+.card-body {
+    color: #e9ecef !important;
+}
+
+.card-header {
+    color: white !important;
+}
+
+.card-header i {
+    color: #fd7e14 !important;
+}
