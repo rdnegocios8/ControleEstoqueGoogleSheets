@@ -161,12 +161,40 @@
         
         .info-id {
             background: #2c3034;
-            padding: 8px 15px;
+            padding: 12px 15px;
             border-radius: 8px;
             font-family: monospace;
             font-size: 0.9rem;
             color: #fd7e14;
             word-break: break-all;
+            margin: 15px 0;
+            border: 1px solid #fd7e14;
+        }
+        
+        .volume-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: #2c3034;
+            border-radius: 10px;
+        }
+        
+        .volume-item {
+            text-align: center;
+        }
+        
+        .volume-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fd7e14;
+            display: block;
+        }
+        
+        .volume-label {
+            font-size: 0.8rem;
+            color: #adb5bd;
+            text-transform: uppercase;
         }
         
         @media print {
@@ -185,11 +213,7 @@
     <div class="qr-container">
         <div class="qr-card">
             <div class="badge-unidade">
-                <i class="bi bi-qr-code-scan"></i> CÓDIGO ÚNICO
-            </div>
-            
-            <div class="qr-header">
-                <h2>QR Code da Unidade</h2>
+                <i class="bi bi-qr-code-scan"></i> QR CODE DA UNIDADE
             </div>
             
             <div class="qr-code-box">
@@ -198,6 +222,10 @@
             
             <div class="qr-info" id="qr-info">
                 <!-- Informações serão preenchidas via JavaScript -->
+            </div>
+            
+            <div class="volume-info" id="volume-info">
+                <!-- Informações de volume -->
             </div>
             
             <div class="info-id" id="info-id"></div>
@@ -224,19 +252,24 @@
         const lote = urlParams.get('lote');
         const validade = urlParams.get('validade');
         const produtoNome = decodeURIComponent(urlParams.get('produto') || '');
-        const volume = urlParams.get('volume') || '1';
+        const volume = urlParams.get('volume') || '0';
         const quantidade = urlParams.get('quantidade') || '0';
         const unidade = urlParams.get('unidade') || 'UN';
 
-        // Função para gerar QR Code
+        // Construir o link completo para a página de baixa
+        const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
+        const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
+
+        // Função para gerar QR Code com o link completo
         function gerarQRCode() {
             const qrcodeDiv = document.getElementById('qrcode');
             qrcodeDiv.innerHTML = ''; // Limpar
             
             if (typeof QRCode !== 'undefined' && unidadeId) {
                 try {
+                    // Gerar QR Code com o LINK COMPLETO
                     new QRCode(qrcodeDiv, {
-                        text: unidadeId,
+                        text: linkCompleto,  // Agora usa o link completo!
                         width: 250,
                         height: 250,
                         colorDark: '#000000',
@@ -244,19 +277,31 @@
                         correctLevel: QRCode.CorrectLevel.H
                     });
                     
-                    // Preencher informações
+                    // Preencher informações do produto
                     const infoDiv = document.getElementById('qr-info');
                     infoDiv.innerHTML = `
                         <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
                         <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
                         <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
                         <p><strong>Validade:</strong> ${validade ? new Date(validade).toLocaleDateString('pt-BR') : 'N/A'}</p>
-                        <p><strong>Volume:</strong> ${volume} ${unidade}</p>
-                        <p><strong>Quantidade:</strong> ${quantidade} ${unidade}</p>
                     `;
                     
+                    // Preencher informações de volume
+                    document.getElementById('volume-info').innerHTML = `
+                        <div class="volume-item">
+                            <span class="volume-value">${volume}</span>
+                            <span class="volume-label">Volume (${unidade})</span>
+                        </div>
+                        <div class="volume-item">
+                            <span class="volume-value">${quantidade}</span>
+                            <span class="volume-label">Quantidade</span>
+                        </div>
+                    `;
+                    
+                    // Mostrar o ID e o link
                     document.getElementById('info-id').innerHTML = `
-                        <i class="bi bi-upc-scan"></i> ID: ${unidadeId}
+                        <i class="bi bi-upc-scan"></i> ID: ${unidadeId}<br>
+                        <small style="font-size: 0.7rem; color: #adb5bd;">${linkCompleto}</small>
                     `;
                     
                 } catch (e) {
@@ -283,6 +328,11 @@
             link.download = `qrcode-${unidadeId}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
+        }
+
+        // Função para testar o link (opcional)
+        function testarLink() {
+            window.open(linkCompleto, '_blank');
         }
     </script>
 </body>
