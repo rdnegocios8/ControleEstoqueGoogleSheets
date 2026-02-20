@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code da Unidade</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0c0f 0%, #1a1e24 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .qr-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .qr-card {
+            background-color: #1a1e24;
+            border: 2px solid #fd7e14;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(220,53,69,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .qr-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #dc3545, #fd7e14, #0d6efd);
+        }
+        
+        .qr-header {
+            margin-bottom: 30px;
+        }
+        
+        .qr-header h2 {
+            color: #fd7e14;
+            font-weight: 700;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .qr-code-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 20px 0;
+            border: 3px solid #fd7e14;
+            box-shadow: 0 0 20px rgba(253,126,20,0.3);
+        }
+        
+        .qr-code-box canvas {
+            width: 250px;
+            height: 250px;
+            image-rendering: pixelated;
+        }
+        
+        .qr-info {
+            background: linear-gradient(135deg, #2c3034 0%, #1a1e24 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #dc3545;
+            text-align: left;
+        }
+        
+        .qr-info p {
+            margin: 10px 0;
+            font-size: 1.1rem;
+            color: #e9ecef;
+            border-bottom: 1px solid #2c3034;
+            padding-bottom: 8px;
+        }
+        
+        .qr-info strong {
+            color: #fd7e14;
+            width: 120px;
+            display: inline-block;
+        }
+        
+        .qr-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        
+        .qr-actions button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            color: white;
+        }
+        
+        .btn-print {
+            background: linear-gradient(135deg, #fd7e14, #cc7a00);
+            color: white;
+        }
+        
+        .btn-close {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+        }
+        
+        .qr-actions button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(253,126,20,0.4);
+        }
+        
+        .badge-unidade {
+            display: inline-block;
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        @media print {
+            .qr-actions {
+                display: none;
+            }
+            
+            .qr-card {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="qr-container">
+        <div class="qr-card" id="qr-card">
+            <div class="badge-unidade">
+                <i class="bi bi-qr-code"></i> CÓDIGO ÚNICO
+            </div>
+            
+            <div class="qr-header">
+                <h2>QR Code da Unidade</h2>
+            </div>
+            
+            <div class="qr-code-box" id="qr-code-box">
+                <!-- QR Code será gerado aqui -->
+            </div>
+            
+            <div class="qr-info" id="qr-info">
+                <!-- Informações serão preenchidas via JavaScript -->
+            </div>
+            
+            <div class="qr-actions">
+                <button class="btn-download" onclick="baixarQR()">
+                    <i class="bi bi-download"></i> Baixar
+                </button>
+                <button class="btn-print" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Imprimir
+                </button>
+                <button class="btn-close" onclick="window.close()">
+                    <i class="bi bi-x"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script>
+        // Carregar dados da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const unidadeId = urlParams.get('id');
+        const sku = urlParams.get('sku');
+        const lote = urlParams.get('lote');
+        const validade = urlParams.get('validade');
+        const produtoNome = decodeURIComponent(urlParams.get('produto') || '');
+        const volume = urlParams.get('volume') || '1';
+        const quantidade = urlParams.get('quantidade') || '0';
+        const unidade = urlParams.get('unidade') || 'UN';
+
+        // Gerar QR Code
+        if (unidadeId) {
+            QRCode.toCanvas(document.createElement('canvas'), unidadeId, { 
+                width: 250,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function(err, canvas) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                const container = document.getElementById('qr-code-box');
+                container.innerHTML = '';
+                canvas.classList.add('qr-code-img');
+                container.appendChild(canvas);
+            });
+
+            // Preencher informações
+            const infoDiv = document.getElementById('qr-info');
+            infoDiv.innerHTML = `
+                <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
+                <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
+                <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
+                <p><strong>Validade:</strong> ${validade ? new Date(validade).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                <p><strong>Volume:</strong> ${volume} ${unidade}</p>
+                <p><strong>Quantidade:</strong> ${quantidade} ${unidade}</p>
+                <p><strong>ID:</strong> <small>${unidadeId}</small></p>
+            `;
+        }
+
+        // Função para baixar QR Code
+        function baixarQR() {
+            const canvas = document.querySelector('#qr-code-box canvas');
+            if (!canvas) return;
+            
+            const link = document.createElement('a');
+            link.download = `qrcode-${unidadeId}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
