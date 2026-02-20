@@ -514,7 +514,7 @@ function gerarIdUnico() {
     return id;
 }
 
-// Ver unidade
+// Ver unidade com QR Code
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
     if (!unidadeAtual) return;
@@ -535,191 +535,169 @@ function verUnidade(id) {
     document.getElementById('detalhe-localizacao').textContent = unidadeAtual.localizacao;
     document.getElementById('detalhe-destino').textContent = unidadeAtual.destino || '-';
     
-    // Gerar QR Code pequeno
-    document.getElementById('unidade-qr-code').innerHTML = '';
-    new QRCode(document.getElementById('unidade-qr-code'), {
-        text: unidadeAtual.id,
-        width: 150,
-        height: 150
-    });
+    // Gerar QR Code com fallback
+    const qrContainer = document.getElementById('unidade-qr-code');
+    qrContainer.innerHTML = ''; // Limpar
+    
+    try {
+        // Tentar usar a biblioteca QRCode
+        if (typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+                text: unidadeAtual.id,
+                width: 150,
+                height: 150,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        } else {
+            // Fallback: criar QR Code manual
+            qrContainer.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Clique para ver QR Code completo
+                    <button class="btn btn-sm btn-primary mt-2" onclick="verQRCodeCompleto('${unidadeAtual.id}')">
+                        Ver QR Code
+                    </button>
+                </div>
+            `;
+        }
+    } catch (e) {
+        console.error('Erro ao gerar QR Code:', e);
+        qrContainer.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                Erro ao gerar QR Code
+                <button class="btn btn-sm btn-primary mt-2" onclick="verQRCodeCompleto('${unidadeAtual.id}')">
+                    Ver QR Code completo
+                </button>
+            </div>
+        `;
+    }
     
     const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
     modal.show();
 }
 
-// Ver QR Code completo em nova aba
-function verQRCodeCompleto() {
-    if (!unidadeAtual) return;
+// Ver QR Code completo em nova aba (versão corrigida)
+function verQRCodeCompleto(id) {
+    const unidade = unidades.find(u => u.id === id) || unidadeAtual;
+    if (!unidade) return;
     
-    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
+    const produto = produtos.find(p => p.sku === unidade.sku);
     
     // Abrir nova aba com o QR Code
-    const url = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidade}`;
+    const url = `qr-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidade}`;
     
     window.open(url, '_blank', 'width=600,height=700');
 }
 
-// Preencher filtros de unidades
-function preencherFiltrosUnidades() {
-    const selectProduto = document.getElementById('filtro-produto-unidades');
-    if (selectProduto) {
-        selectProduto.innerHTML = '<option value="">Todos os produtos</option>';
-        produtos.forEach(p => {
-            selectProduto.innerHTML += `<option value="${p.sku}">${p.nome}</option>`;
-        });
-    }
-    
-    const selectDestino = document.getElementById('filtro-destino-unidades');
-    if (selectDestino) {
-        selectDestino.innerHTML = '<option value="">Todos os destinos</option>';
-        destinos.forEach(d => {
-            selectDestino.innerHTML += `<option value="${d}">${d}</option>`;
-        });
-    }
-}
-
-// Filtrar unidades
-function filtrarUnidades() {
-    const skuFiltro = document.getElementById('filtro-produto-unidades')?.value;
-    const statusFiltro = document.getElementById('filtro-status-unidades')?.value;
-    const destinoFiltro = document.getElementById('filtro-destino-unidades')?.value;
-    
-    let unidadesFiltradas = [...unidades];
-    
-    if (skuFiltro) {
-        unidadesFiltradas = unidadesFiltradas.filter(u => u.sku === skuFiltro);
-    }
-    
-    if (statusFiltro) {
-        if (statusFiltro === 'Vencido') {
-            const hoje = new Date();
-            unidadesFiltradas = unidadesFiltradas.filter(u => {
-                if (!u.validade) return false;
-                const validade = new Date(u.validade);
-                return validade < hoje;
-            });
-        } else {
-            unidadesFiltradas = unidadesFiltradas.filter(u => u.status === statusFiltro);
-        }
-    }
-    
-    if (destinoFiltro) {
-        unidadesFiltradas = unidadesFiltradas.filter(u => u.destino === destinoFiltro);
-    }
-    
-    atualizarTabelaUnidades(unidadesFiltradas);
-}
-
-// Atualizar tabela de unidades
-function atualizarTabelaUnidades(unidadesFiltradas = null) {
-    const tbody = document.getElementById('tabela-unidades');
-    if (!tbody) return;
-    
-    const dados = unidadesFiltradas || unidades;
-    const hoje = new Date();
-    
-    tbody.innerHTML = '';
-    
-    if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center">Nenhuma unidade encontrada</td></tr>';
-        return;
-    }
-    
-    dados.forEach(u => {
-        const produto = produtos.find(p => p.sku === u.sku);
-        const validadeDate = new Date(u.validade);
-        const vencido = validadeDate < hoje;
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><small>${u.id}</small></td>
-            <td>${produto ? produto.nome : u.sku}</td>
-            <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
-            <td>${u.lote}</td>
-            <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
-            <td>${u.volume}</td>
-            <td>${u.quantidade} ${u.unidade}</td>
-            <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
-            <td>${u.destino || '-'}</td>
-            <td>
-                <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
-                    <i class="bi bi-eye"></i>
-                </button>
-                ${u.status === 'Disponível' ? `
-                    <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
-                        <i class="bi bi-arrow-right"></i>
-                    </button>
-                ` : ''}
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-// Abrir modal de transferência
-function abrirModalTransferencia(id) {
-    unidadeAtual = unidades.find(u => u.id === id);
-    if (!unidadeAtual) return;
-    
-    // Redirecionar para página de baixa
-    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
-    
-    const url = `baixa-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidade}`;
-    
-    window.open(url, '_blank', 'width=700,height=800');
-}
-
-// Configurar QR Code scanner
+// Configurar QR Code scanner com verificação de câmera
 function setupQRCode() {
+    const qrReaderElement = document.getElementById('qr-reader');
+    if (!qrReaderElement) return;
+    
+    // Verificar se a biblioteca está carregada
     if (typeof Html5Qrcode === 'undefined') {
         console.error('Biblioteca Html5Qrcode não carregada!');
-        document.getElementById('qr-reader').innerHTML = `
+        qrReaderElement.innerHTML = `
             <div class="alert alert-danger">
-                Erro ao carregar leitor QR Code.
+                <i class="bi bi-exclamation-triangle"></i>
+                Erro ao carregar leitor QR Code. 
+                <button class="btn btn-sm btn-primary mt-2" onclick="location.reload()">
+                    Recarregar página
+                </button>
             </div>
         `;
         return;
     }
     
-    const html5QrCode = new Html5Qrcode("qr-reader");
-    
-    const qrCodeSuccessCallback = (decodedText) => {
-        const unidade = unidades.find(u => u.id === decodedText);
-        if (unidade) {
-            const produto = produtos.find(p => p.sku === unidade.sku);
+    // Verificar se a câmera está disponível
+    Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+            // Tem câmera disponível
+            const html5QrCode = new Html5Qrcode("qr-reader");
             
-            // Abrir página de baixa automaticamente
-            const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidade}`;
+            const qrCodeSuccessCallback = (decodedText) => {
+                const unidade = unidades.find(u => u.id === decodedText);
+                if (unidade) {
+                    const produto = produtos.find(p => p.sku === unidade.sku);
+                    
+                    // Abrir página de baixa
+                    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidade}`;
+                    
+                    window.open(url, '_blank', 'width=700,height=800');
+                    
+                    document.getElementById('qr-resultado').innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ Unidade encontrada!</h6>
+                            <p>Redirecionando para página de baixa...</p>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('qr-resultado').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-x-circle"></i>
+                            Unidade não encontrada!<br>
+                            Código: ${decodedText}
+                        </div>
+                    `;
+                }
+            };
             
-            window.open(url, '_blank', 'width=700,height=800');
+            const config = { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
             
-            document.getElementById('qr-resultado').innerHTML = `
-                <div class="alert alert-success">
-                    <h6>✅ Redirecionando para página de baixa...</h6>
-                    <p>Unidade: ${unidade.id}</p>
-                </div>
-            `;
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                qrCodeSuccessCallback
+            ).catch(err => {
+                console.error('Erro ao iniciar QR Code:', err);
+                qrReaderElement.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Erro ao acessar câmera. Verifique as permissões.
+                        <button class="btn btn-sm btn-primary mt-2" onclick="location.reload()">
+                            Tentar novamente
+                        </button>
+                    </div>
+                `;
+            });
         } else {
-            document.getElementById('qr-resultado').innerHTML = `
-                <div class="alert alert-danger">
-                    ❌ Unidade não encontrada!<br>
-                    Código: ${decodedText}
+            // Nenhuma câmera encontrada
+            qrReaderElement.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Nenhuma câmera encontrada no dispositivo.
                 </div>
             `;
         }
-    };
-    
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-    
-    html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-        .catch(err => {
-            console.error('Erro ao iniciar QR Code:', err);
-            document.getElementById('qr-reader').innerHTML = `
-                <div class="alert alert-warning">
-                    Não foi possível acessar a câmera.
-                </div>
-            `;
-        });
+    }).catch(err => {
+        console.error('Erro ao verificar câmeras:', err);
+        qrReaderElement.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                Não foi possível acessar a câmera. Verifique as permissões.
+            </div>
+        `;
+    });
+}
+
+// Função para testar QR Code manualmente (caso não tenha câmera)
+function testarQRCodeManual() {
+    const codigo = prompt('Digite o código da unidade:');
+    if (codigo) {
+        const unidade = unidades.find(u => u.id === codigo);
+        if (unidade) {
+            verUnidade(codigo);
+        } else {
+            alert('Unidade não encontrada!');
+        }
+    }
 }
 
 // Atualizar tabela de movimentações
@@ -963,3 +941,4 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
