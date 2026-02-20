@@ -15,7 +15,6 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .qr-container {
@@ -44,27 +43,19 @@
             background: linear-gradient(90deg, #dc3545, #fd7e14, #0d6efd);
         }
         
-        .qr-header {
-            margin-bottom: 30px;
-        }
-        
         .qr-header h2 {
             color: #fd7e14;
             font-weight: 700;
-            font-size: 2rem;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            margin-bottom: 30px;
         }
         
         .qr-code-box {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            padding: 25px;
+            background: white;
+            padding: 20px;
             border-radius: 15px;
             display: inline-block;
             margin: 20px 0;
             border: 3px solid #fd7e14;
-            box-shadow: 0 0 30px rgba(253,126,20,0.3);
         }
         
         #qrcode {
@@ -73,34 +64,26 @@
             margin: 0 auto;
         }
         
-        #qrcode canvas, #qrcode img {
-            width: 100%;
-            height: 100%;
-            image-rendering: pixelated;
-        }
-        
         .qr-info {
-            background: linear-gradient(135deg, #2c3034 0%, #1a1e24 100%);
+            background: #2c3034;
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             margin: 20px 0;
             border: 1px solid #dc3545;
             text-align: left;
         }
         
         .qr-info p {
-            margin: 12px 0;
-            font-size: 1rem;
+            margin: 10px 0;
             color: #e9ecef;
-            border-bottom: 1px solid #2c3034;
-            padding-bottom: 8px;
+            border-bottom: 1px solid #3a3f45;
+            padding-bottom: 5px;
         }
         
         .qr-info strong {
             color: #fd7e14;
             width: 120px;
             display: inline-block;
-            font-size: 0.95rem;
         }
         
         .qr-actions {
@@ -122,8 +105,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            min-width: 120px;
-            justify-content: center;
         }
         
         .btn-download {
@@ -143,7 +124,7 @@
         
         .qr-actions button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(253,126,20,0.4);
+            box-shadow: 0 5px 15px rgba(253,126,20,0.4);
         }
         
         .badge-unidade {
@@ -152,19 +133,14 @@
             background: linear-gradient(135deg, #dc3545, #fd7e14);
             color: white;
             border-radius: 30px;
-            font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
         
         .info-id {
             background: #2c3034;
-            padding: 12px 15px;
+            padding: 12px;
             border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.9rem;
             color: #fd7e14;
             word-break: break-all;
             margin: 15px 0;
@@ -180,32 +156,10 @@
             border-radius: 10px;
         }
         
-        .volume-item {
-            text-align: center;
-        }
-        
         .volume-value {
             font-size: 1.5rem;
             font-weight: 700;
             color: #fd7e14;
-            display: block;
-        }
-        
-        .volume-label {
-            font-size: 0.8rem;
-            color: #adb5bd;
-            text-transform: uppercase;
-        }
-        
-        @media print {
-            .qr-actions {
-                display: none;
-            }
-            
-            .qr-card {
-                box-shadow: none;
-                border: 1px solid #000;
-            }
         }
     </style>
 </head>
@@ -220,13 +174,9 @@
                 <div id="qrcode"></div>
             </div>
             
-            <div class="qr-info" id="qr-info">
-                <!-- Informações serão preenchidas via JavaScript -->
-            </div>
+            <div class="qr-info" id="qr-info"></div>
             
-            <div class="volume-info" id="volume-info">
-                <!-- Informações de volume -->
-            </div>
+            <div class="volume-info" id="volume-info"></div>
             
             <div class="info-id" id="info-id"></div>
             
@@ -245,7 +195,6 @@
     </div>
 
     <script>
-        // Carregar dados da URL
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id');
         const sku = urlParams.get('sku');
@@ -256,83 +205,54 @@
         const quantidade = urlParams.get('quantidade') || '0';
         const unidade = urlParams.get('unidade') || 'UN';
 
-        // Construir o link completo para a página de baixa
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
 
-        // Função para gerar QR Code com o link completo
         function gerarQRCode() {
             const qrcodeDiv = document.getElementById('qrcode');
-            qrcodeDiv.innerHTML = ''; // Limpar
+            qrcodeDiv.innerHTML = '';
             
-            if (typeof QRCode !== 'undefined' && unidadeId) {
-                try {
-                    // Gerar QR Code com o LINK COMPLETO
-                    new QRCode(qrcodeDiv, {
-                        text: linkCompleto,  // Agora usa o link completo!
-                        width: 250,
-                        height: 250,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                    
-                    // Preencher informações do produto
-                    const infoDiv = document.getElementById('qr-info');
-                    infoDiv.innerHTML = `
-                        <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
-                        <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
-                        <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
-                        <p><strong>Validade:</strong> ${validade ? new Date(validade).toLocaleDateString('pt-BR') : 'N/A'}</p>
-                    `;
-                    
-                    // Preencher informações de volume
-                    document.getElementById('volume-info').innerHTML = `
-                        <div class="volume-item">
-                            <span class="volume-value">${volume}</span>
-                            <span class="volume-label">Volume (${unidade})</span>
-                        </div>
-                        <div class="volume-item">
-                            <span class="volume-value">${quantidade}</span>
-                            <span class="volume-label">Quantidade</span>
-                        </div>
-                    `;
-                    
-                    // Mostrar o ID e o link
-                    document.getElementById('info-id').innerHTML = `
-                        <i class="bi bi-upc-scan"></i> ID: ${unidadeId}<br>
-                        <small style="font-size: 0.7rem; color: #adb5bd;">${linkCompleto}</small>
-                    `;
-                    
-                } catch (e) {
-                    console.error('Erro ao gerar QR Code:', e);
-                    qrcodeDiv.innerHTML = '<p class="text-danger">Erro ao gerar QR Code</p>';
-                }
-            } else {
-                qrcodeDiv.innerHTML = '<p class="text-danger">ID da unidade não encontrado</p>';
+            if (unidadeId) {
+                new QRCode(qrcodeDiv, {
+                    text: linkCompleto,
+                    width: 250,
+                    height: 250
+                });
+                
+                document.getElementById('qr-info').innerHTML = `
+                    <p><strong>Produto:</strong> ${produtoNome}</p>
+                    <p><strong>SKU:</strong> ${sku}</p>
+                    <p><strong>Lote:</strong> ${lote}</p>
+                    <p><strong>Validade:</strong> ${validade ? new Date(validade).toLocaleDateString('pt-BR') : ''}</p>
+                `;
+                
+                document.getElementById('volume-info').innerHTML = `
+                    <div>
+                        <div class="volume-value">${volume}</div>
+                        <div>${unidade}</div>
+                    </div>
+                    <div>
+                        <div class="volume-value">${quantidade}</div>
+                        <div>UNIDADES</div>
+                    </div>
+                `;
+                
+                document.getElementById('info-id').innerHTML = `
+                    <i class="bi bi-upc-scan"></i> ID: ${unidadeId}
+                `;
             }
         }
 
-        // Gerar QR Code quando a página carregar
         window.onload = gerarQRCode;
 
-        // Função para baixar QR Code
         function baixarQR() {
             const canvas = document.querySelector('#qrcode canvas');
-            if (!canvas) {
-                alert('QR Code ainda não foi gerado!');
-                return;
-            }
+            if (!canvas) return;
             
             const link = document.createElement('a');
             link.download = `qrcode-${unidadeId}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-        }
-
-        // Função para testar o link (opcional)
-        function testarLink() {
-            window.open(linkCompleto, '_blank');
         }
     </script>
 </body>
