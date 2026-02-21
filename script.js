@@ -1268,3 +1268,83 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
+// ============================================
+// FUNÇÃO PARA LIMPAR TODAS AS UNIDADES ZERADAS DA PLANILHA
+// ============================================
+
+function limparUnidadesZeradasDaPlanilha() {
+  try {
+    const planilha = SpreadsheetApp.getActiveSpreadsheet();
+    const abaUnidades = planilha.getSheetByName("Unidades");
+    
+    if (!abaUnidades) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: false, erro: "Aba Unidades não encontrada" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const dados = abaUnidades.getDataRange().getValues();
+    if (dados.length <= 1) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, message: "Nenhuma unidade para limpar" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Manter cabeçalho
+    const linhasParaManter = [dados[0]];
+    let linhasRemovidas = 0;
+    
+    // Verificar cada linha (pular cabeçalho)
+    for (let i = 1; i < dados.length; i++) {
+      const quantidade = dados[i][5]; // Coluna da quantidade (índice 5)
+      
+      // Se quantidade > 0, manter a linha
+      if (quantidade > 0) {
+        linhasParaManter.push(dados[i]);
+      } else {
+        linhasRemovidas++;
+      }
+    }
+    
+    // Limpar a aba completamente
+    abaUnidades.clearContents();
+    
+    // Reescrever apenas as linhas com quantidade > 0
+    if (linhasParaManter.length > 0) {
+      const range = abaUnidades.getRange(1, 1, linhasParaManter.length, linhasParaManter[0].length);
+      range.setValues(linhasParaManter);
+    }
+    
+    console.log(`Limpeza concluída: ${linhasRemovidas} unidades removidas`);
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        success: true, 
+        message: `${linhasRemovidas} unidades zeradas removidas da planilha.` 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch(erro) {
+    console.error('Erro ao limpar unidades:', erro);
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, erro: erro.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ============================================
+// FUNÇÃO PARA EXECUTAR VIA GET (para chamada manual)
+// ============================================
+
+function doGet(e) {
+  // Se tiver parâmetro 'acao=limpar', executa a limpeza
+  if (e && e.parameter && e.parameter.acao === 'limpar') {
+    return limparUnidadesZeradasDaPlanilha();
+  }
+  
+  // Resposta padrão
+  return ContentService
+    .createTextOutput('Web App está funcionando! Use POST para enviar dados ou GET com ?acao=limpar para limpar unidades zeradas.')
+    .setMimeType(ContentService.MimeType.TEXT);
+}
