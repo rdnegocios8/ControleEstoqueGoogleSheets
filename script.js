@@ -331,7 +331,7 @@ function filtrarRecebimentos() {
 }
 
 // ============================================
-// FUNÇÕES EXISTENTES (manter todas as outras funções)
+// FUNÇÕES PRINCIPAIS
 // ============================================
 
 // Mostrar view
@@ -501,13 +501,19 @@ function atualizarInterface() {
     atualizarGraficosPainel();
 }
 
-// Atualizar painel
+// ============================================
+// FUNÇÕES CORRIGIDAS - FILTRO DE UNIDADES ATIVAS
+// ============================================
+
+// Atualizar painel - MOSTRAR APENAS UNIDADES COM QUANTIDADE > 0
 function atualizarPainel() {
+    const unidadesAtivas = unidades.filter(u => u.quantidade > 0);
+    
     document.getElementById('total-produtos').textContent = produtos.length;
-    document.getElementById('total-unidades').textContent = unidades.length;
+    document.getElementById('total-unidades').textContent = unidadesAtivas.length;
     
     const hoje = new Date();
-    const proximosVencer = unidades.filter(u => {
+    const proximosVencer = unidadesAtivas.filter(u => {
         if (!u.validade) return false;
         const validade = new Date(u.validade);
         const dias = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
@@ -515,7 +521,7 @@ function atualizarPainel() {
     }).length;
     document.getElementById('proximos-vencer').textContent = proximosVencer;
     
-    const estoqueBaixo = unidades.filter(u => u.quantidade < 10).length;
+    const estoqueBaixo = unidadesAtivas.filter(u => u.quantidade < 10).length;
     document.getElementById('estoque-baixo').textContent = estoqueBaixo;
 }
 
@@ -553,7 +559,8 @@ function atualizarCardsProdutos() {
     }
     
     produtosFiltrados.forEach(produto => {
-        const unidadesProduto = unidades.filter(u => u.sku === produto.sku);
+        // Considerar apenas unidades ativas (quantidade > 0)
+        const unidadesProduto = unidades.filter(u => u.sku === produto.sku && u.quantidade > 0);
         const totalVolume = unidadesProduto.reduce((sum, u) => sum + u.volume, 0);
         const totalQuantidade = unidadesProduto.reduce((sum, u) => sum + u.quantidade, 0);
         
@@ -596,10 +603,11 @@ function filtrarProdutos() {
     atualizarCardsProdutos();
 }
 
-// Ver produto
+// Ver produto - MOSTRAR APENAS UNIDADES ATIVAS
 function verProduto(sku) {
     const produto = produtos.find(p => p.sku === sku);
-    const unidadesProduto = unidades.filter(u => u.sku === sku);
+    // Mostrar apenas unidades ativas (quantidade > 0)
+    const unidadesProduto = unidades.filter(u => u.sku === sku && u.quantidade > 0);
     
     document.getElementById('modalVerProduto-titulo').textContent = `${produto.nome} - SKU: ${sku} (${produto.tipoEmbalagem})`;
     
@@ -607,7 +615,7 @@ function verProduto(sku) {
     tbody.innerHTML = '';
     
     if (unidadesProduto.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhuma unidade encontrada</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhuma unidade ativa encontrada</td></tr>';
     } else {
         unidadesProduto.forEach(u => {
             const tr = document.createElement('tr');
@@ -874,14 +882,19 @@ function verQRCodeCompleto() {
     window.open(url, '_blank', 'width=600,height=700');
 }
 
-// Filtrar unidades
+// ============================================
+// FUNÇÕES CORRIGIDAS - FILTRO DE UNIDADES
+// ============================================
+
+// Filtrar unidades - CONSIDERAR APENAS QUANTIDADE > 0
 function filtrarUnidades() {
     const skuFiltro = document.getElementById('filtro-produto-unidades')?.value;
     const statusFiltro = document.getElementById('filtro-status-unidades')?.value;
     const destinoFiltro = document.getElementById('filtro-destino-unidades')?.value;
     const embalagemFiltro = document.getElementById('filtro-embalagem-unidades')?.value;
     
-    let unidadesFiltradas = [...unidades];
+    // Começar com unidades que têm quantidade > 0
+    let unidadesFiltradas = unidades.filter(u => u.quantidade > 0);
     
     if (skuFiltro) {
         unidadesFiltradas = unidadesFiltradas.filter(u => u.sku === skuFiltro);
@@ -911,18 +924,19 @@ function filtrarUnidades() {
     atualizarTabelaUnidades(unidadesFiltradas);
 }
 
-// Atualizar tabela de unidades
+// Atualizar tabela de unidades - MOSTRAR APENAS UNIDADES COM QUANTIDADE > 0
 function atualizarTabelaUnidades(unidadesFiltradas = null) {
     const tbody = document.getElementById('tabela-unidades');
     if (!tbody) return;
     
-    const dados = unidadesFiltradas || unidades;
+    // Se não veio filtro, mostrar apenas unidades ativas
+    const dados = unidadesFiltradas || unidades.filter(u => u.quantidade > 0);
     const hoje = new Date();
     
     tbody.innerHTML = '';
     
     if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="text-center">Nenhuma unidade encontrada</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center">Nenhuma unidade ativa encontrada</td></tr>';
         return;
     }
     
@@ -947,7 +961,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                 <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
                     <i class="bi bi-eye"></i>
                 </button>
-                ${u.status === 'Disponível' ? `
+                ${u.status === 'Disponível' && u.quantidade > 0 ? `
                     <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
                         <i class="bi bi-arrow-right"></i>
                     </button>
@@ -986,7 +1000,7 @@ function setupQRCode() {
             
             const qrCodeSuccessCallback = (decodedText) => {
                 const unidade = unidades.find(u => u.id === decodedText);
-                if (unidade) {
+                if (unidade && unidade.quantidade > 0) {
                     const produto = produtos.find(p => p.sku === unidade.sku);
                     
                     const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidadeEmbalagem}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
@@ -995,7 +1009,7 @@ function setupQRCode() {
                     
                     document.getElementById('qr-resultado').innerHTML = '<div class="alert alert-success">Redirecionando...</div>';
                 } else {
-                    document.getElementById('qr-resultado').innerHTML = `<div class="alert alert-danger">Unidade não encontrada: ${decodedText}</div>`;
+                    document.getElementById('qr-resultado').innerHTML = `<div class="alert alert-danger">Unidade não encontrada ou sem estoque: ${decodedText}</div>`;
                 }
             };
             
@@ -1108,8 +1122,10 @@ function atualizarGraficosPainel() {
     }
 }
 
-// Gerar relatórios
+// Gerar relatórios - CONSIDERAR APENAS UNIDADES ATIVAS
 function gerarRelatorios() {
+    const unidadesAtivas = unidades.filter(u => u.quantidade > 0);
+    
     const ctxCategorias = document.getElementById('grafico-relatorio-categorias');
     if (ctxCategorias) {
         const categoriasData = categorias.map(cat => {
@@ -1132,9 +1148,9 @@ function gerarRelatorios() {
     
     const ctxStatus = document.getElementById('grafico-status');
     if (ctxStatus) {
-        const disponiveis = unidades.filter(u => u.status === 'Disponível').length;
-        const bloqueados = unidades.filter(u => u.status === 'Bloqueado').length;
-        const transferidos = unidades.filter(u => u.destino).length;
+        const disponiveis = unidadesAtivas.filter(u => u.status === 'Disponível').length;
+        const bloqueados = unidadesAtivas.filter(u => u.status === 'Bloqueado').length;
+        const transferidos = unidadesAtivas.filter(u => u.destino).length;
         
         new Chart(ctxStatus, {
             type: 'pie',
@@ -1151,7 +1167,7 @@ function gerarRelatorios() {
     const ctxDestinos = document.getElementById('grafico-destinos');
     if (ctxDestinos) {
         const destinosData = destinos.map(d => {
-            return unidades.filter(u => u.destino === d).length;
+            return unidadesAtivas.filter(u => u.destino === d).length;
         });
         
         new Chart(ctxDestinos, {
@@ -1170,7 +1186,7 @@ function gerarRelatorios() {
     const containerEstoque = document.getElementById('lista-estoque-baixo');
     if (containerEstoque) {
         const estoqueBaixo = produtos.filter(p => {
-            const total = unidades
+            const total = unidadesAtivas
                 .filter(u => u.sku === p.sku)
                 .reduce((sum, u) => sum + u.quantidade, 0);
             return total < 10;
@@ -1181,7 +1197,7 @@ function gerarRelatorios() {
         } else {
             containerEstoque.innerHTML = '<ul class="list-group">';
             estoqueBaixo.forEach(p => {
-                const total = unidades
+                const total = unidadesAtivas
                     .filter(u => u.sku === p.sku)
                     .reduce((sum, u) => sum + u.quantidade, 0);
                 containerEstoque.innerHTML += `
@@ -1198,7 +1214,7 @@ function gerarRelatorios() {
     const containerValidades = document.getElementById('lista-validades');
     if (containerValidades) {
         const hoje = new Date();
-        const validades = unidades
+        const validades = unidadesAtivas
             .filter(u => u.validade)
             .map(u => {
                 const dias = Math.ceil((new Date(u.validade) - hoje) / (1000 * 60 * 60 * 24));
