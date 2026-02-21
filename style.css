@@ -474,7 +474,7 @@ body {
 }
 
 /* ============================================ */
-/* MODAIS */
+/* MODAIS GERAIS */
 /* ============================================ */
 
 .modal-content {
@@ -524,6 +524,151 @@ body {
 .modal-footer {
     border-top: 1px solid var(--border-color);
     padding: 1.5rem;
+}
+
+/* ============================================ */
+/* MODAL VER PRODUTO - CORREÇÃO FUNDO ESCURO */
+/* ============================================ */
+
+#modalVerProduto {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+#modalVerProduto .modal-content {
+    background-color: #0f172a !important;
+    border: 2px solid var(--accent-gold);
+    border-radius: 24px;
+}
+
+#modalVerProduto .modal-header {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-bottom: 2px solid var(--accent-gold);
+    border-radius: 24px 24px 0 0;
+    padding: 1.5rem;
+}
+
+#modalVerProduto .modal-title {
+    color: var(--accent-gold) !important;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+#modalVerProduto .modal-body {
+    padding: 1.5rem;
+    background-color: #0f172a !important;
+}
+
+/* Tabela dentro do modal */
+#tabela-unidades-produto {
+    color: #e2e8f0 !important;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#tabela-unidades-produto thead th {
+    background: #1a2634 !important;
+    color: var(--accent-gold) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 15px 12px !important;
+    border-bottom: 2px solid var(--accent-gold) !important;
+    border: none;
+}
+
+#tabela-unidades-produto tbody tr {
+    background-color: #0f172a !important;
+    border-bottom: 1px solid #2d3748;
+}
+
+#tabela-unidades-produto tbody tr:hover {
+    background-color: #1e293b !important;
+}
+
+#tabela-unidades-produto tbody tr:nth-child(even) {
+    background-color: #1a1f2e !important;
+}
+
+#tabela-unidades-produto td {
+    padding: 12px 12px;
+    color: #e2e8f0 !important;
+    border: none;
+}
+
+/* IDs das unidades em dourado */
+#tabela-unidades-produto td:first-child {
+    color: var(--accent-gold) !important;
+    font-family: monospace;
+    font-weight: 600;
+}
+
+/* Volume e quantidade em dourado */
+#tabela-unidades-produto td:nth-child(5),
+#tabela-unidades-produto td:nth-child(6) {
+    color: var(--accent-gold) !important;
+    font-weight: 600;
+}
+
+/* Badges de status */
+#tabela-unidades-produto .badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+#tabela-unidades-produto .badge.bg-success {
+    background: var(--success) !important;
+    color: white !important;
+}
+
+#tabela-unidades-produto .badge.bg-danger {
+    background: var(--danger) !important;
+    color: white !important;
+}
+
+/* Botão de ação */
+#tabela-unidades-produto .btn-info {
+    background: var(--info) !important;
+    color: white !important;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+#tabela-unidades-produto .btn-info:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+#tabela-unidades-produto .btn-info i {
+    color: white !important;
+}
+
+/* SKU do produto */
+#modalVerProduto .modal-body small,
+#modalVerProduto .modal-body .text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Linha de informações do produto */
+.produto-info-header {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.produto-info-header span {
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+.produto-info-header .badge {
+    margin-right: 8px;
 }
 
 /* ============================================ */
