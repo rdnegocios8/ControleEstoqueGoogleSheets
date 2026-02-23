@@ -1053,3 +1053,65 @@ h2 {
     padding: 2rem !important;
     background-color: #1a2634 !important;
 }
+
+/* ============================================ */
+/* ESTILO DOS FILTROS DE RECEBIMENTO */
+/* ============================================ */
+
+#recebimentos-view .form-label {
+    color: #fbbf24 !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.5rem;
+}
+
+#recebimentos-view .form-control,
+#recebimentos-view .form-select {
+    background-color: #1e293b !important;
+    border: 2px solid #334155 !important;
+    color: #e2e8f0 !important;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+}
+
+#recebimentos-view .form-control:focus,
+#recebimentos-view .form-select:focus {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2) !important;
+    outline: none;
+}
+
+#recebimentos-view .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    border: none;
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+#recebimentos-view .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+
+/* Estilo para os campos de data personalizada */
+#filtro-data-inicio-container,
+#filtro-data-fim-container {
+    transition: all 0.3s ease;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #recebimentos-view .row {
+        gap: 1rem;
+    }
+    
+    #filtro-data-inicio-container,
+    #filtro-data-fim-container {
+        margin-top: 0.5rem;
+    }
+}
