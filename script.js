@@ -8,6 +8,7 @@ const PRODUTOS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/
 const UNIDADES_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Unidades?key=${API_KEY}`;
 const MOVIMENTACOES_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Movimentações?key=${API_KEY}`;
 const RECEBIMENTOS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Recebimentos?key=${API_KEY}`;
+const ESTOQUE_GERAL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Estoque Geral?key=${API_KEY}`;
 
 // Variáveis globais
 let produtos = [];
@@ -437,63 +438,45 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÕES DO ESTOQUE GERAL
+// FUNÇÕES DO ESTOQUE GERAL - AGORA LENDO DA PLANILHA
 // ============================================
 
-// Calcular estoque geral
-function calcularEstoqueGeral() {
-    estoqueGeral = [];
-    
-    produtos.forEach(produto => {
-        // Calcular quantidade anterior (soma de todas as unidades)
-        const quantidadeAnterior = unidades
-            .filter(u => u.sku === produto.sku)
-            .reduce((sum, u) => sum + u.quantidade, 0);
+// Carregar estoque geral da planilha
+async function carregarEstoqueGeral() {
+    try {
+        console.log('📊 Carregando estoque geral da planilha...');
         
-        // Calcular lançamentos (recebimentos)
-        const lancamentos = recebimentos
-            .filter(r => r.sku === produto.sku)
-            .reduce((sum, r) => sum + (parseFloat(r.quantidade) || 0), 0);
+        const response = await fetch(ESTOQUE_GERAL_URL);
+        const data = await response.json();
         
-        // Calcular abastecimentos (saídas/transferências)
-        const abastecimentos = movimentacoes
-            .filter(m => m.sku === produto.sku && (m.tipo === 'Saída' || m.tipo === 'Transferência'))
-            .reduce((sum, m) => sum + (parseFloat(m.quantidade) || 0), 0);
-        
-        // Calcular totais
-        const quantidadeTotal = quantidadeAnterior + lancamentos;
-        const fisicoAtual = quantidadeTotal - abastecimentos;
-        
-        // Determinar status
-        let status = 'NORMAL';
-        if (fisicoAtual <= 0) {
-            status = 'ESTOQUE ZERADO';
-        } else if (fisicoAtual < 10) {
-            status = 'ESTOQUE BAIXO';
+        if (data.values && data.values.length > 1) {
+            // Mapear os dados da planilha (pular cabeçalho)
+            estoqueGeral = data.values.slice(1).map(row => ({
+                codigo: row[0] || '',
+                unidade: row[1] || '',
+                descricao: row[2] || '',
+                quantidadeAnterior: parseFloat(row[3]) || 0,
+                lancamentos: parseFloat(row[4]) || 0,
+                quantidadeTotal: parseFloat(row[5]) || 0,
+                abastecimentos: parseFloat(row[6]) || 0,
+                fisicoAtual: parseFloat(row[7]) || 0,
+                status: row[8] || 'NORMAL'
+            })).filter(item => item.codigo); // Remove linhas vazias
+            
+            console.log(`✅ ${estoqueGeral.length} itens carregados do estoque geral`);
+        } else {
+            estoqueGeral = [];
+            console.log('⚠️ Nenhum dado encontrado na aba Estoque Geral');
         }
         
-        estoqueGeral.push({
-            codigo: produto.sku,
-            unidade: produto.unidadeBase || 'UN',
-            descricao: produto.nome,
-            quantidadeAnterior: quantidadeAnterior,
-            lancamentos: lancamentos,
-            quantidadeTotal: quantidadeTotal,
-            abastecimentos: abastecimentos,
-            fisicoAtual: fisicoAtual,
-            status: status
-        });
-    });
-    
-    // Ordenar por código
-    estoqueGeral.sort((a, b) => a.codigo.localeCompare(b.codigo));
-}
-
-// Carregar estoque geral
-function carregarEstoqueGeral() {
-    calcularEstoqueGeral();
-    atualizarCardsEstoqueGeral();
-    atualizarTabelaEstoqueGeral();
+        // Atualizar a interface
+        atualizarCardsEstoqueGeral();
+        atualizarTabelaEstoqueGeral();
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar estoque geral:', error);
+        estoqueGeral = [];
+    }
 }
 
 // Atualizar cards do estoque geral
@@ -519,7 +502,7 @@ function atualizarTabelaEstoqueGeral(dadosFiltrados = null) {
     tbody.innerHTML = '';
     
     if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhum item encontrado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhum item encontrado na aba Estoque Geral</td></tr>';
         return;
     }
     
@@ -584,7 +567,7 @@ function filtrarEstoqueGeral() {
 // FUNÇÕES PRINCIPAIS
 // ============================================
 
-// Mostrar view - ATUALIZADA (removida opção estoque-geral)
+// Mostrar view
 function mostrarView(view) {
     const views = ['painel', 'produtos', 'unidades', 'scanner', 'recebimentos', 'movimentacoes', 'relatorios', 'categorias'];
     views.forEach(v => {
@@ -612,10 +595,11 @@ function mostrarView(view) {
     if (view === 'relatorios') gerarRelatorios();
     if (view === 'categorias') atualizarTabelaCategorias();
     if (view === 'painel') {
-        // Atualizar todos os dados do painel
+        // Carregar os dados do estoque geral da planilha
+        carregarEstoqueGeral();
+        // Atualizar outros dados do painel
         atualizarPainel();
         atualizarGraficosPainel();
-        carregarEstoqueGeral(); // Carrega os dados do estoque geral
     }
 }
 
@@ -1518,3 +1502,4 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
