@@ -55,6 +55,10 @@
                     <a href="#" class="list-group-item list-group-item-action" id="menu-categorias">
                         <i class="bi bi-tags"></i> Categorias
                     </a>
+                    <!-- NOVO ITEM: ESTOQUE GERAL -->
+                    <a href="#" class="list-group-item list-group-item-action" id="menu-estoque-geral">
+                        <i class="bi bi-clipboard-data"></i> Estoque Geral
+                    </a>
                 </div>
             </div>
 
@@ -267,80 +271,79 @@
                     </div>
                 </div>
 
-               <!-- Recebimentos View - FILTROS CORRIGIDOS -->
-<div id="recebimentos-view" style="display: none;">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2>Recebimentos</h2>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRecebimento">
-            <i class="bi bi-truck"></i> Novo Recebimento
-        </button>
-    </div>
+                <!-- Recebimentos View -->
+                <div id="recebimentos-view" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2>Recebimentos</h2>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRecebimento">
+                            <i class="bi bi-truck"></i> Novo Recebimento
+                        </button>
+                    </div>
 
-    <!-- NOVOS FILTROS -->
-    <div class="row mt-4">
-        <div class="col-md-3">
-            <label class="form-label">Período</label>
-            <select class="form-control" id="filtro-recebimento-periodo">
-                <option value="hoje">Hoje</option>
-                <option value="semana">Esta Semana</option>
-                <option value="mes" selected>Este Mês</option>
-                <option value="ano">Este Ano</option>
-                <option value="personalizado">Personalizado</option>
-            </select>
-        </div>
-        <div class="col-md-2" id="filtro-data-inicio-container" style="display: none;">
-            <label class="form-label">Data Início</label>
-            <input type="date" class="form-control" id="filtro-recebimento-data-inicio">
-        </div>
-        <div class="col-md-2" id="filtro-data-fim-container" style="display: none;">
-            <label class="form-label">Data Fim</label>
-            <input type="date" class="form-control" id="filtro-recebimento-data-fim">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Número da NF</label>
-            <input type="text" class="form-control" id="filtro-recebimento-nf" placeholder="Digite o número da NF">
-        </div>
-        <div class="col-md-2">
-            <label class="form-label">Código SKU</label>
-            <select class="form-control" id="filtro-recebimento-sku">
-                <option value="">Todos os SKUs</option>
-                <!-- Opções serão preenchidas via JavaScript -->
-            </select>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-            <button class="btn btn-primary w-100" onclick="filtrarRecebimentos()">
-                <i class="bi bi-search"></i> Filtrar
-            </button>
-        </div>
-    </div>
+                    <!-- Filtros de Recebimento -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <label class="form-label">Período</label>
+                            <select class="form-control" id="filtro-recebimento-periodo">
+                                <option value="hoje">Hoje</option>
+                                <option value="semana">Esta Semana</option>
+                                <option value="mes" selected>Este Mês</option>
+                                <option value="ano">Este Ano</option>
+                                <option value="personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2" id="filtro-data-inicio-container" style="display: none;">
+                            <label class="form-label">Data Início</label>
+                            <input type="date" class="form-control" id="filtro-recebimento-data-inicio">
+                        </div>
+                        <div class="col-md-2" id="filtro-data-fim-container" style="display: none;">
+                            <label class="form-label">Data Fim</label>
+                            <input type="date" class="form-control" id="filtro-recebimento-data-fim">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Número da NF</label>
+                            <input type="text" class="form-control" id="filtro-recebimento-nf" placeholder="Digite o número da NF">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Código SKU</label>
+                            <select class="form-control" id="filtro-recebimento-sku">
+                                <option value="">Todos os SKUs</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" onclick="filtrarRecebimentos()">
+                                <i class="bi bi-search"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
 
-    <!-- TABELA DE RECEBIMENTOS -->
-    <div class="table-responsive mt-4">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>DATA</th>
-                    <th>NF</th>
-                    <th>FORNECEDOR</th>
-                    <th>SKU</th>
-                    <th>PRODUTO</th>
-                    <th>LOTE</th>
-                    <th>VALIDADE</th>
-                    <th>VOLUME</th>
-                    <th>UNID</th>
-                    <th>QTD TOTAL</th>
-                    <th>LOCAL</th>
-                    <th>RESP</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-recebimentos">
-                <tr>
-                    <td colspan="12" class="text-center">Nenhum recebimento encontrado</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+                    <!-- Tabela de Recebimentos -->
+                    <div class="table-responsive mt-4">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>DATA</th>
+                                    <th>NF</th>
+                                    <th>FORNECEDOR</th>
+                                    <th>SKU</th>
+                                    <th>PRODUTO</th>
+                                    <th>LOTE</th>
+                                    <th>VALIDADE</th>
+                                    <th>VOLUME</th>
+                                    <th>UNID</th>
+                                    <th>QTD TOTAL</th>
+                                    <th>LOCAL</th>
+                                    <th>RESP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-recebimentos">
+                                <tr>
+                                    <td colspan="12" class="text-center">Nenhum recebimento encontrado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <!-- Movimentações View -->
                 <div id="movimentacoes-view" style="display: none;">
@@ -531,10 +534,114 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ============================================ -->
+                <!-- NOVA VIEW: ESTOQUE GERAL -->
+                <!-- ============================================ -->
+                <div id="estoque-geral-view" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2>Estoque Geral</h2>
+                        <button class="btn btn-primary" onclick="carregarEstoqueGeral()">
+                            <i class="bi bi-arrow-repeat"></i> Atualizar
+                        </button>
+                    </div>
+
+                    <!-- Filtros do Estoque Geral -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" id="filtro-estoque-sku" placeholder="Buscar por SKU...">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" id="filtro-estoque-descricao" placeholder="Buscar por descrição...">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-control" id="filtro-estoque-status">
+                                <option value="">Todos os status</option>
+                                <option value="NORMAL">Normal</option>
+                                <option value="ESTOQUE BAIXO">Estoque Baixo</option>
+                                <option value="ESTOQUE ZERADO">Estoque Zerado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-control" id="filtro-estoque-unidade">
+                                <option value="">Todas unidades</option>
+                                <option value="KG">KG</option>
+                                <option value="LT">LT</option>
+                                <option value="UN">UN</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100" onclick="filtrarEstoqueGeral()">
+                                <i class="bi bi-search"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cards de Resumo -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card text-white bg-gradient-primary mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Itens</h5>
+                                    <h2 id="estoque-total-itens">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-gradient-success mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estoque Normal</h5>
+                                    <h2 id="estoque-normal">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-gradient-warning mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estoque Baixo</h5>
+                                    <h2 id="estoque-baixo-geral">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-gradient-danger mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estoque Zerado</h5>
+                                    <h2 id="estoque-zerado">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Estoque Geral -->
+                    <div class="table-responsive mt-4">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>CÓDIGO</th>
+                                    <th>UN</th>
+                                    <th>DESCRIÇÃO</th>
+                                    <th>QTD ANTERIOR</th>
+                                    <th>LANÇADO</th>
+                                    <th>TOTAL</th>
+                                    <th>ABASTECIDO</th>
+                                    <th>FÍSICO ATUAL</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-estoque-geral">
+                                <tr>
+                                    <td colspan="9" class="text-center">Carregando dados...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Modais (mantidos iguais) -->
     <!-- Modal Produto -->
     <div class="modal fade" id="modalProduto" tabindex="-1">
         <div class="modal-dialog">
@@ -897,4 +1004,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
