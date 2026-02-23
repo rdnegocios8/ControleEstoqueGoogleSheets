@@ -1253,3 +1253,151 @@ h2 {
         margin-top: 0.5rem;
     }
 }
+
+/* ============================================ */
+/* CORREÇÃO DO FUNDO DA TABELA DE ESTOQUE GERAL */
+/* ============================================ */
+
+/* Garantir que a tabela de estoque geral tenha fundo escuro */
+#painel-view #tabela-estoque-geral {
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Cabeçalho da tabela */
+#painel-view #tabela-estoque-geral thead th {
+    background: #1a2634 !important;
+    color: #fbbf24 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 15px 8px !important;
+    border-bottom: 2px solid #fbbf24 !important;
+    border: none;
+    white-space: nowrap;
+}
+
+/* Linhas do corpo da tabela */
+#painel-view #tabela-estoque-geral tbody tr {
+    background-color: #0f172a !important;
+    border-bottom: 1px solid #2d3748;
+    transition: all 0.2s ease;
+}
+
+#painel-view #tabela-estoque-geral tbody tr:hover {
+    background-color: #1e293b !important;
+}
+
+/* Células da tabela */
+#painel-view #tabela-estoque-geral td {
+    padding: 12px 8px;
+    vertical-align: middle;
+    color: #e2e8f0 !important;
+    border: none;
+    background-color: transparent !important;
+}
+
+/* Linhas alternadas */
+#painel-view #tabela-estoque-geral tbody tr:nth-child(even) {
+    background-color: #1a1f2e !important;
+}
+
+/* Linhas coloridas baseadas no status */
+#painel-view #tabela-estoque-geral tbody tr.table-danger {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    border-left: 3px solid #ef4444;
+}
+
+#painel-view #tabela-estoque-geral tbody tr.table-warning {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+    border-left: 3px solid #f59e0b;
+}
+
+/* Primeira coluna (código) em dourado */
+#painel-view #tabela-estoque-geral td:first-child {
+    color: #fbbf24 !important;
+    font-weight: 600;
+}
+
+/* Colunas numéricas com fonte monoespaçada */
+#painel-view #tabela-estoque-geral td:nth-child(4),
+#painel-view #tabela-estoque-geral td:nth-child(5),
+#painel-view #tabela-estoque-geral td:nth-child(6),
+#painel-view #tabela-estoque-geral td:nth-child(7),
+#painel-view #tabela-estoque-geral td:nth-child(8) {
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    text-align: right;
+}
+
+/* Última coluna (físico atual) em negrito */
+#painel-view #tabela-estoque-geral td:nth-child(8) {
+    font-weight: 700;
+}
+
+/* Cores para os valores */
+#painel-view #tabela-estoque-geral .text-success {
+    color: #10b981 !important;
+}
+
+#painel-view #tabela-estoque-geral .text-warning {
+    color: #f59e0b !important;
+}
+
+#painel-view #tabela-estoque-geral .text-danger {
+    color: #ef4444 !important;
+}
+
+/* Badges de status */
+#painel-view #tabela-estoque-geral .badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#painel-view #tabela-estoque-geral .badge.bg-success {
+    background: #10b981 !important;
+    color: white !important;
+}
+
+#painel-view #tabela-estoque-geral .badge.bg-warning {
+    background: #f59e0b !important;
+    color: #0f172a !important;
+}
+
+#painel-view #tabela-estoque-geral .badge.bg-danger {
+    background: #ef4444 !important;
+    color: white !important;
+}
+
+/* Filtros do estoque geral */
+#painel-view #filtro-estoque-sku,
+#painel-view #filtro-estoque-descricao,
+#painel-view #filtro-estoque-status,
+#painel-view #filtro-estoque-unidade {
+    background-color: #1a2634 !important;
+    color: #e2e8f0 !important;
+    border: 2px solid #2d3748 !important;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+#painel-view #filtro-estoque-sku:focus,
+#painel-view #filtro-estoque-descricao:focus {
+    border-color: #fbbf24 !important;
+    outline: none;
+}
+
+/* Texto "Nenhum item encontrado" */
+#painel-view #tabela-estoque-geral td[colspan] {
+    color: #94a3b8 !important;
+    font-style: italic;
+    text-align: center;
+    padding: 40px !important;
+    background-color: #0f172a !important;
+}
