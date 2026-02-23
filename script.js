@@ -736,8 +736,14 @@ function atualizarInterface() {
 function atualizarPainel() {
     const unidadesAtivas = unidades.filter(u => u.quantidade > 0);
     
-    document.getElementById('total-produtos').textContent = produtos.length;
-    document.getElementById('total-unidades').textContent = unidadesAtivas.length;
+    // Verificar se os elementos existem antes de atualizar
+    const totalProdutosEl = document.getElementById('total-produtos');
+    const totalUnidadesEl = document.getElementById('total-unidades');
+    const proximosVencerEl = document.getElementById('proximos-vencer');
+    const estoqueBaixoEl = document.getElementById('estoque-baixo');
+    
+    if (totalProdutosEl) totalProdutosEl.textContent = produtos.length;
+    if (totalUnidadesEl) totalUnidadesEl.textContent = unidadesAtivas.length;
     
     const hoje = new Date();
     const proximosVencer = unidadesAtivas.filter(u => {
@@ -746,10 +752,11 @@ function atualizarPainel() {
         const dias = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
         return dias <= 30 && dias > 0;
     }).length;
-    document.getElementById('proximos-vencer').textContent = proximosVencer;
+    
+    if (proximosVencerEl) proximosVencerEl.textContent = proximosVencer;
     
     const estoqueBaixo = unidadesAtivas.filter(u => u.quantidade < 10).length;
-    document.getElementById('estoque-baixo').textContent = estoqueBaixo;
+    if (estoqueBaixoEl) estoqueBaixoEl.textContent = estoqueBaixo;
 }
 
 // Atualizar cards de produtos
@@ -1487,6 +1494,7 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
 
 
