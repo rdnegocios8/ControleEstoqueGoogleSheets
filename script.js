@@ -20,6 +20,9 @@ let graficoDestinos = null;
 let graficoCategorias = null;
 let unidadeAtual = null;
 
+// Dados do Estoque Geral
+let estoqueGeral = [];
+
 // Categorias pré-definidas
 let categorias = [
     { id: 1, nome: 'Insumos', tipo: 'Matéria Prima', descricao: 'Insumos para produção' },
@@ -57,6 +60,7 @@ function setupEventListeners() {
     document.getElementById('menu-movimentacoes').addEventListener('click', () => mostrarView('movimentacoes'));
     document.getElementById('menu-relatorios').addEventListener('click', () => mostrarView('relatorios'));
     document.getElementById('menu-categorias').addEventListener('click', () => mostrarView('categorias'));
+    document.getElementById('menu-estoque-geral').addEventListener('click', () => mostrarView('estoque-geral'));
     
     document.getElementById('salvar-produto').addEventListener('click', salvarProduto);
     document.getElementById('salvar-unidade').addEventListener('click', salvarUnidade);
@@ -99,6 +103,17 @@ function setupEventListeners() {
             }
         });
     }
+    
+    // Event listeners para filtros do Estoque Geral
+    const filtroSku = document.getElementById('filtro-estoque-sku');
+    const filtroDescricao = document.getElementById('filtro-estoque-descricao');
+    const filtroStatus = document.getElementById('filtro-estoque-status');
+    const filtroUnidade = document.getElementById('filtro-estoque-unidade');
+    
+    if (filtroSku) filtroSku.addEventListener('keyup', filtrarEstoqueGeral);
+    if (filtroDescricao) filtroDescricao.addEventListener('keyup', filtrarEstoqueGeral);
+    if (filtroStatus) filtroStatus.addEventListener('change', filtrarEstoqueGeral);
+    if (filtroUnidade) filtroUnidade.addEventListener('change', filtrarEstoqueGeral);
 }
 
 // Mostrar/esconder campo de quantidade por embalagem
@@ -159,7 +174,7 @@ function atualizarInfoEmbalagem() {
 }
 
 // ============================================
-// FUNÇÕES DE RECEBIMENTO - ATUALIZADAS
+// FUNÇÕES DE RECEBIMENTO
 // ============================================
 
 // Preencher select de SKUs nos filtros
@@ -225,7 +240,7 @@ function calcularDatasPorPeriodo(periodo) {
     };
 }
 
-// Filtrar recebimentos - VERSÃO CORRIGIDA
+// Filtrar recebimentos
 function filtrarRecebimentos() {
     const periodo = document.getElementById('filtro-recebimento-periodo')?.value || 'mes';
     const nfFiltro = document.getElementById('filtro-recebimento-nf')?.value.toLowerCase() || '';
@@ -423,12 +438,156 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
+// FUNÇÕES DO ESTOQUE GERAL
+// ============================================
+
+// Calcular estoque geral
+function calcularEstoqueGeral() {
+    estoqueGeral = [];
+    
+    produtos.forEach(produto => {
+        // Calcular quantidade anterior (soma de todas as unidades)
+        const quantidadeAnterior = unidades
+            .filter(u => u.sku === produto.sku)
+            .reduce((sum, u) => sum + u.quantidade, 0);
+        
+        // Calcular lançamentos (recebimentos)
+        const lancamentos = recebimentos
+            .filter(r => r.sku === produto.sku)
+            .reduce((sum, r) => sum + (parseFloat(r.quantidade) || 0), 0);
+        
+        // Calcular abastecimentos (saídas/transferências)
+        const abastecimentos = movimentacoes
+            .filter(m => m.sku === produto.sku && (m.tipo === 'Saída' || m.tipo === 'Transferência'))
+            .reduce((sum, m) => sum + (parseFloat(m.quantidade) || 0), 0);
+        
+        // Calcular totais
+        const quantidadeTotal = quantidadeAnterior + lancamentos;
+        const fisicoAtual = quantidadeTotal - abastecimentos;
+        
+        // Determinar status
+        let status = 'NORMAL';
+        if (fisicoAtual <= 0) {
+            status = 'ESTOQUE ZERADO';
+        } else if (fisicoAtual < 10) {
+            status = 'ESTOQUE BAIXO';
+        }
+        
+        estoqueGeral.push({
+            codigo: produto.sku,
+            unidade: produto.unidadeBase || 'UN',
+            descricao: produto.nome,
+            quantidadeAnterior: quantidadeAnterior,
+            lancamentos: lancamentos,
+            quantidadeTotal: quantidadeTotal,
+            abastecimentos: abastecimentos,
+            fisicoAtual: fisicoAtual,
+            status: status
+        });
+    });
+    
+    // Ordenar por código
+    estoqueGeral.sort((a, b) => a.codigo.localeCompare(b.codigo));
+}
+
+// Carregar estoque geral
+function carregarEstoqueGeral() {
+    calcularEstoqueGeral();
+    atualizarCardsEstoqueGeral();
+    atualizarTabelaEstoqueGeral();
+}
+
+// Atualizar cards do estoque geral
+function atualizarCardsEstoqueGeral() {
+    const totalItens = estoqueGeral.length;
+    const normal = estoqueGeral.filter(e => e.status === 'NORMAL').length;
+    const baixo = estoqueGeral.filter(e => e.status === 'ESTOQUE BAIXO').length;
+    const zerado = estoqueGeral.filter(e => e.status === 'ESTOQUE ZERADO').length;
+    
+    document.getElementById('estoque-total-itens').textContent = totalItens;
+    document.getElementById('estoque-normal').textContent = normal;
+    document.getElementById('estoque-baixo-geral').textContent = baixo;
+    document.getElementById('estoque-zerado').textContent = zerado;
+}
+
+// Atualizar tabela do estoque geral
+function atualizarTabelaEstoqueGeral(dadosFiltrados = null) {
+    const tbody = document.getElementById('tabela-estoque-geral');
+    if (!tbody) return;
+    
+    const dados = dadosFiltrados || estoqueGeral;
+    
+    tbody.innerHTML = '';
+    
+    if (dados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhum item encontrado</td></tr>';
+        return;
+    }
+    
+    dados.forEach(item => {
+        const tr = document.createElement('tr');
+        
+        // Definir classe de status para a linha
+        let statusClass = '';
+        if (item.status === 'ESTOQUE ZERADO') statusClass = 'table-danger';
+        else if (item.status === 'ESTOQUE BAIXO') statusClass = 'table-warning';
+        
+        tr.className = statusClass;
+        
+        tr.innerHTML = `
+            <td><strong>${item.codigo}</strong></td>
+            <td>${item.unidade}</td>
+            <td>${item.descricao}</td>
+            <td class="text-end">${item.quantidadeAnterior.toFixed(2)}</td>
+            <td class="text-end">${item.lancamentos.toFixed(2)}</td>
+            <td class="text-end"><strong>${item.quantidadeTotal.toFixed(2)}</strong></td>
+            <td class="text-end text-danger">${item.abastecimentos.toFixed(2)}</td>
+            <td class="text-end"><strong class="${item.fisicoAtual <= 0 ? 'text-danger' : item.fisicoAtual < 10 ? 'text-warning' : 'text-success'}">${item.fisicoAtual.toFixed(2)}</strong></td>
+            <td>
+                <span class="badge ${item.status === 'NORMAL' ? 'bg-success' : item.status === 'ESTOQUE BAIXO' ? 'bg-warning' : 'bg-danger'}">
+                    ${item.status}
+                </span>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Filtrar estoque geral
+function filtrarEstoqueGeral() {
+    const skuFiltro = document.getElementById('filtro-estoque-sku')?.value.toLowerCase() || '';
+    const descricaoFiltro = document.getElementById('filtro-estoque-descricao')?.value.toLowerCase() || '';
+    const statusFiltro = document.getElementById('filtro-estoque-status')?.value || '';
+    const unidadeFiltro = document.getElementById('filtro-estoque-unidade')?.value || '';
+    
+    let filtrados = [...estoqueGeral];
+    
+    if (skuFiltro) {
+        filtrados = filtrados.filter(item => item.codigo.toLowerCase().includes(skuFiltro));
+    }
+    
+    if (descricaoFiltro) {
+        filtrados = filtrados.filter(item => item.descricao.toLowerCase().includes(descricaoFiltro));
+    }
+    
+    if (statusFiltro) {
+        filtrados = filtrados.filter(item => item.status === statusFiltro);
+    }
+    
+    if (unidadeFiltro) {
+        filtrados = filtrados.filter(item => item.unidade === unidadeFiltro);
+    }
+    
+    atualizarTabelaEstoqueGeral(filtrados);
+}
+
+// ============================================
 // FUNÇÕES PRINCIPAIS
 // ============================================
 
 // Mostrar view
 function mostrarView(view) {
-    const views = ['painel', 'produtos', 'unidades', 'scanner', 'recebimentos', 'movimentacoes', 'relatorios', 'categorias'];
+    const views = ['painel', 'produtos', 'unidades', 'scanner', 'recebimentos', 'movimentacoes', 'relatorios', 'categorias', 'estoque-geral'];
     views.forEach(v => {
         const el = document.getElementById(`${v}-view`);
         if (el) el.style.display = 'none';
@@ -453,6 +612,9 @@ function mostrarView(view) {
     }
     if (view === 'relatorios') gerarRelatorios();
     if (view === 'categorias') atualizarTabelaCategorias();
+    if (view === 'estoque-geral') {
+        carregarEstoqueGeral();
+    }
 }
 
 // Preencher select de produtos no recebimento
@@ -592,13 +754,14 @@ function atualizarInterface() {
     atualizarUltimasMovimentacoes();
     preencherFiltros();
     atualizarGraficosPainel();
+    calcularEstoqueGeral();
 }
 
 // ============================================
-// FUNÇÕES CORRIGIDAS - FILTRO DE UNIDADES ATIVAS
+// FUNÇÕES DE UNIDADES
 // ============================================
 
-// Atualizar painel - MOSTRAR APENAS UNIDADES COM QUANTIDADE > 0
+// Atualizar painel
 function atualizarPainel() {
     const unidadesAtivas = unidades.filter(u => u.quantidade > 0);
     
@@ -652,7 +815,6 @@ function atualizarCardsProdutos() {
     }
     
     produtosFiltrados.forEach(produto => {
-        // Considerar apenas unidades ativas (quantidade > 0)
         const unidadesProduto = unidades.filter(u => u.sku === produto.sku && u.quantidade > 0);
         const totalVolume = unidadesProduto.reduce((sum, u) => sum + u.volume, 0);
         const totalQuantidade = unidadesProduto.reduce((sum, u) => sum + u.quantidade, 0);
@@ -696,10 +858,9 @@ function filtrarProdutos() {
     atualizarCardsProdutos();
 }
 
-// Ver produto - MOSTRAR APENAS UNIDADES ATIVAS
+// Ver produto
 function verProduto(sku) {
     const produto = produtos.find(p => p.sku === sku);
-    // Mostrar apenas unidades ativas (quantidade > 0)
     const unidadesProduto = unidades.filter(u => u.sku === sku && u.quantidade > 0);
     
     document.getElementById('modalVerProduto-titulo').textContent = `${produto.nome} - SKU: ${sku} (${produto.tipoEmbalagem})`;
@@ -902,8 +1063,8 @@ function atualizarTabelaCategorias() {
             <td>${cat.descricao || ''}</td>
             <td>${totalProdutos}</td>
             <td>
-                <button class="btn btn-sm btn-warning" onclick="editarCategoria(${cat.id})"><i class="bi bi-pencil"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="excluirCategoria(${cat.id})"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -975,18 +1136,13 @@ function verQRCodeCompleto() {
     window.open(url, '_blank', 'width=600,height=700');
 }
 
-// ============================================
-// FUNÇÕES CORRIGIDAS - FILTRO DE UNIDADES
-// ============================================
-
-// Filtrar unidades - CONSIDERAR APENAS QUANTIDADE > 0
+// Filtrar unidades
 function filtrarUnidades() {
     const skuFiltro = document.getElementById('filtro-produto-unidades')?.value;
     const statusFiltro = document.getElementById('filtro-status-unidades')?.value;
     const destinoFiltro = document.getElementById('filtro-destino-unidades')?.value;
     const embalagemFiltro = document.getElementById('filtro-embalagem-unidades')?.value;
     
-    // Começar com unidades que têm quantidade > 0
     let unidadesFiltradas = unidades.filter(u => u.quantidade > 0);
     
     if (skuFiltro) {
@@ -1017,12 +1173,11 @@ function filtrarUnidades() {
     atualizarTabelaUnidades(unidadesFiltradas);
 }
 
-// Atualizar tabela de unidades - MOSTRAR APENAS UNIDADES COM QUANTIDADE > 0
+// Atualizar tabela de unidades
 function atualizarTabelaUnidades(unidadesFiltradas = null) {
     const tbody = document.getElementById('tabela-unidades');
     if (!tbody) return;
     
-    // Se não veio filtro, mostrar apenas unidades ativas
     const dados = unidadesFiltradas || unidades.filter(u => u.quantidade > 0);
     const hoje = new Date();
     
@@ -1215,7 +1370,7 @@ function atualizarGraficosPainel() {
     }
 }
 
-// Gerar relatórios - CONSIDERAR APENAS UNIDADES ATIVAS
+// Gerar relatórios
 function gerarRelatorios() {
     const unidadesAtivas = unidades.filter(u => u.quantidade > 0);
     
