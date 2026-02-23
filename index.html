@@ -55,7 +55,6 @@
                     <a href="#" class="list-group-item list-group-item-action" id="menu-categorias">
                         <i class="bi bi-tags"></i> Categorias
                     </a>
-                    <!-- NOVO ITEM: ESTOQUE GERAL -->
                     <a href="#" class="list-group-item list-group-item-action" id="menu-estoque-geral">
                         <i class="bi bi-clipboard-data"></i> Estoque Geral
                     </a>
@@ -64,9 +63,11 @@
 
             <!-- Conteúdo Principal -->
             <div class="col-md-10">
-                <!-- Painel View -->
+                <!-- Painel Unificado -->
                 <div id="painel-view">
-                    <h2>Painel</h2>
+                    <h2>Dashboard</h2>
+                    
+                    <!-- Cards de Resumo Rápido -->
                     <div class="row mt-4">
                         <div class="col-md-3">
                             <div class="card text-white bg-gradient-primary mb-3">
@@ -101,7 +102,8 @@
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Gráficos e Alertas -->
                     <div class="row mt-4">
                         <div class="col-md-6">
                             <div class="card border-primary">
@@ -118,13 +120,50 @@
                                 <div class="card-header bg-dark text-white">
                                     <i class="bi bi-exclamation-triangle"></i> Alertas de Validade
                                 </div>
-                                <div class="card-body">
-                                    <div id="alertas-validade"></div>
+                                <div class="card-body" id="alertas-validade">
+                                    <!-- Alertas serão inseridos aqui -->
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Cards do Estoque Geral -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card text-white bg-gradient-info mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Itens</h5>
+                                    <h2 id="estoque-total-itens">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-gradient-success mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estoque Normal</h5>
+                                    <h2 id="estoque-normal">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-gradient-warning mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estoque Baixo</h5>
+                                    <h2 id="estoque-baixo-geral">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-gradient-danger mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estoque Zerado</h5>
+                                    <h2 id="estoque-zerado">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Últimas Movimentações -->
                     <div class="row mt-4">
                         <div class="col-md-12">
                             <div class="card border-warning">
@@ -280,7 +319,6 @@
                         </button>
                     </div>
 
-                    <!-- Filtros de Recebimento -->
                     <div class="row mt-4">
                         <div class="col-md-3">
                             <label class="form-label">Período</label>
@@ -317,7 +355,6 @@
                         </div>
                     </div>
 
-                    <!-- Tabela de Recebimentos -->
                     <div class="table-responsive mt-4">
                         <table class="table table-striped">
                             <thead>
@@ -535,9 +572,7 @@
                     </div>
                 </div>
 
-                <!-- ============================================ -->
-                <!-- NOVA VIEW: ESTOQUE GERAL -->
-                <!-- ============================================ -->
+                <!-- Estoque Geral View -->
                 <div id="estoque-geral-view" style="display: none;">
                     <div class="d-flex justify-content-between align-items-center">
                         <h2>Estoque Geral</h2>
@@ -546,7 +581,6 @@
                         </button>
                     </div>
 
-                    <!-- Filtros do Estoque Geral -->
                     <div class="row mt-4">
                         <div class="col-md-3">
                             <input type="text" class="form-control" id="filtro-estoque-sku" placeholder="Buscar por SKU...">
@@ -577,43 +611,6 @@
                         </div>
                     </div>
 
-                    <!-- Cards de Resumo -->
-                    <div class="row mt-4">
-                        <div class="col-md-3">
-                            <div class="card text-white bg-gradient-primary mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Total Itens</h5>
-                                    <h2 id="estoque-total-itens">0</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-gradient-success mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Estoque Normal</h5>
-                                    <h2 id="estoque-normal">0</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-gradient-warning mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Estoque Baixo</h5>
-                                    <h2 id="estoque-baixo-geral">0</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-gradient-danger mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Estoque Zerado</h5>
-                                    <h2 id="estoque-zerado">0</h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tabela de Estoque Geral -->
                     <div class="table-responsive mt-4">
                         <table class="table table-striped">
                             <thead>
@@ -641,8 +638,7 @@
         </div>
     </div>
 
-    <!-- Modais (mantidos iguais) -->
-    <!-- Modal Produto -->
+    <!-- Modais -->
     <div class="modal fade" id="modalProduto" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -716,7 +712,6 @@
         </div>
     </div>
 
-    <!-- Modal Unidade -->
     <div class="modal fade" id="modalUnidade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -797,7 +792,6 @@
         </div>
     </div>
 
-    <!-- Modal Recebimento -->
     <div class="modal fade" id="modalRecebimento" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -892,7 +886,6 @@
         </div>
     </div>
 
-    <!-- Modal Categoria -->
     <div class="modal fade" id="modalCategoria" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -929,7 +922,6 @@
         </div>
     </div>
 
-    <!-- Modal Detalhes da Unidade -->
     <div class="modal fade" id="modalDetalhesUnidade" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -966,7 +958,6 @@
         </div>
     </div>
 
-    <!-- Modal Ver Produto -->
     <div class="modal fade" id="modalVerProduto" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
