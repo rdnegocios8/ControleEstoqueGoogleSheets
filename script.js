@@ -470,26 +470,12 @@ async function carregarEstoqueGeral() {
         }
         
         // Atualizar a interface
-        atualizarCardsEstoqueGeral();
         atualizarTabelaEstoqueGeral();
         
     } catch (error) {
         console.error('❌ Erro ao carregar estoque geral:', error);
         estoqueGeral = [];
     }
-}
-
-// Atualizar cards do estoque geral
-function atualizarCardsEstoqueGeral() {
-    const totalItens = estoqueGeral.length;
-    const normal = estoqueGeral.filter(e => e.status === 'NORMAL').length;
-    const baixo = estoqueGeral.filter(e => e.status === 'ESTOQUE BAIXO').length;
-    const zerado = estoqueGeral.filter(e => e.status === 'ESTOQUE ZERADO').length;
-    
-    document.getElementById('estoque-total-itens').textContent = totalItens;
-    document.getElementById('estoque-normal').textContent = normal;
-    document.getElementById('estoque-baixo-geral').textContent = baixo;
-    document.getElementById('estoque-zerado').textContent = zerado;
 }
 
 // Atualizar tabela do estoque geral
@@ -1501,5 +1487,6 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
 
