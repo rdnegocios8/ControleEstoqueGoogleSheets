@@ -60,7 +60,6 @@ function setupEventListeners() {
     document.getElementById('menu-movimentacoes').addEventListener('click', () => mostrarView('movimentacoes'));
     document.getElementById('menu-relatorios').addEventListener('click', () => mostrarView('relatorios'));
     document.getElementById('menu-categorias').addEventListener('click', () => mostrarView('categorias'));
-    document.getElementById('menu-estoque-geral').addEventListener('click', () => mostrarView('estoque-geral'));
     
     document.getElementById('salvar-produto').addEventListener('click', salvarProduto);
     document.getElementById('salvar-unidade').addEventListener('click', salvarUnidade);
@@ -585,9 +584,9 @@ function filtrarEstoqueGeral() {
 // FUNÇÕES PRINCIPAIS
 // ============================================
 
-// Mostrar view
+// Mostrar view - ATUALIZADA (removida opção estoque-geral)
 function mostrarView(view) {
-    const views = ['painel', 'produtos', 'unidades', 'scanner', 'recebimentos', 'movimentacoes', 'relatorios', 'categorias', 'estoque-geral'];
+    const views = ['painel', 'produtos', 'unidades', 'scanner', 'recebimentos', 'movimentacoes', 'relatorios', 'categorias'];
     views.forEach(v => {
         const el = document.getElementById(`${v}-view`);
         if (el) el.style.display = 'none';
@@ -612,8 +611,11 @@ function mostrarView(view) {
     }
     if (view === 'relatorios') gerarRelatorios();
     if (view === 'categorias') atualizarTabelaCategorias();
-    if (view === 'estoque-geral') {
-        carregarEstoqueGeral();
+    if (view === 'painel') {
+        // Atualizar todos os dados do painel
+        atualizarPainel();
+        atualizarGraficosPainel();
+        carregarEstoqueGeral(); // Carrega os dados do estoque geral
     }
 }
 
