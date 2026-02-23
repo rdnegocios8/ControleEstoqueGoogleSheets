@@ -79,6 +79,26 @@ function setupEventListeners() {
     
     document.getElementById('recebimento-sku').addEventListener('change', atualizarInfoRecebimento);
     document.getElementById('recebimento-volume').addEventListener('input', calcularQuantidadeRecebimento);
+    
+    // Event listener para o filtro de período
+    const periodoFilter = document.getElementById('filtro-recebimento-periodo');
+    if (periodoFilter) {
+        periodoFilter.addEventListener('change', function() {
+            const periodo = this.value;
+            const containerInicio = document.getElementById('filtro-data-inicio-container');
+            const containerFim = document.getElementById('filtro-data-fim-container');
+            
+            if (containerInicio && containerFim) {
+                if (periodo === 'personalizado') {
+                    containerInicio.style.display = 'block';
+                    containerFim.style.display = 'block';
+                } else {
+                    containerInicio.style.display = 'none';
+                    containerFim.style.display = 'none';
+                }
+            }
+        });
+    }
 }
 
 // Mostrar/esconder campo de quantidade por embalagem
@@ -139,8 +159,103 @@ function atualizarInfoEmbalagem() {
 }
 
 // ============================================
-// FUNÇÕES DE RECEBIMENTO
+// FUNÇÕES DE RECEBIMENTO - ATUALIZADAS
 // ============================================
+
+// Preencher select de SKUs nos filtros
+function preencherFiltroSKU() {
+    const select = document.getElementById('filtro-recebimento-sku');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Todos os SKUs</option>';
+    
+    // Pegar SKUs únicos dos produtos
+    const skusUnicos = [...new Set(produtos.map(p => p.sku))];
+    skusUnicos.sort().forEach(sku => {
+        const produto = produtos.find(p => p.sku === sku);
+        select.innerHTML += `<option value="${sku}">${sku} - ${produto?.nome || ''}</option>`;
+    });
+}
+
+// Função para calcular datas baseado no período
+function calcularDatasPorPeriodo(periodo) {
+    const hoje = new Date();
+    let dataInicio = new Date();
+    let dataFim = new Date();
+    
+    // Ajustar para o fuso horário local
+    const ajustarData = (data) => {
+        return data.toISOString().split('T')[0];
+    };
+    
+    switch(periodo) {
+        case 'hoje':
+            dataInicio = new Date(hoje.setHours(0,0,0,0));
+            dataFim = new Date(hoje.setHours(23,59,59,999));
+            break;
+            
+        case 'semana':
+            const primeiroDiaSemana = hoje.getDate() - hoje.getDay();
+            dataInicio = new Date(hoje.setDate(primeiroDiaSemana));
+            dataInicio.setHours(0,0,0,0);
+            dataFim = new Date(hoje.setDate(primeiroDiaSemana + 6));
+            dataFim.setHours(23,59,59,999);
+            break;
+            
+        case 'mes':
+            dataInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            dataFim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59);
+            break;
+            
+        case 'ano':
+            dataInicio = new Date(hoje.getFullYear(), 0, 1);
+            dataFim = new Date(hoje.getFullYear(), 11, 31, 23, 59, 59);
+            break;
+            
+        case 'personalizado':
+            return {
+                inicio: document.getElementById('filtro-recebimento-data-inicio')?.value || '',
+                fim: document.getElementById('filtro-recebimento-data-fim')?.value || ''
+            };
+    }
+    
+    return {
+        inicio: ajustarData(dataInicio),
+        fim: ajustarData(dataFim)
+    };
+}
+
+// Filtrar recebimentos - VERSÃO CORRIGIDA
+function filtrarRecebimentos() {
+    const periodo = document.getElementById('filtro-recebimento-periodo')?.value || 'mes';
+    const nfFiltro = document.getElementById('filtro-recebimento-nf')?.value.toLowerCase() || '';
+    const skuFiltro = document.getElementById('filtro-recebimento-sku')?.value || '';
+    
+    let filtrados = [...recebimentos];
+    
+    // Filtrar por período
+    if (periodo) {
+        const datas = calcularDatasPorPeriodo(periodo);
+        if (datas.inicio && datas.fim) {
+            filtrados = filtrados.filter(r => {
+                const dataRecebimento = r.data;
+                return dataRecebimento >= datas.inicio && dataRecebimento <= datas.fim;
+            });
+        }
+    }
+    
+    // Filtrar por NF
+    if (nfFiltro) {
+        filtrados = filtrados.filter(r => r.nf && r.nf.toLowerCase().includes(nfFiltro));
+    }
+    
+    // Filtrar por SKU
+    if (skuFiltro) {
+        filtrados = filtrados.filter(r => r.sku === skuFiltro);
+    }
+    
+    atualizarTabelaRecebimentos(filtrados);
+}
 
 // Atualizar informações no recebimento
 function atualizarInfoRecebimento() {
@@ -307,29 +422,6 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     });
 }
 
-// Filtrar recebimentos
-function filtrarRecebimentos() {
-    const dataInicio = document.getElementById('filtro-recebimento-data-inicio').value;
-    const dataFim = document.getElementById('filtro-recebimento-data-fim').value;
-    const fornecedor = document.getElementById('filtro-recebimento-fornecedor').value.toLowerCase();
-    
-    let filtrados = [...recebimentos];
-    
-    if (dataInicio) {
-        filtrados = filtrados.filter(r => r.data >= dataInicio);
-    }
-    
-    if (dataFim) {
-        filtrados = filtrados.filter(r => r.data <= dataFim);
-    }
-    
-    if (fornecedor) {
-        filtrados = filtrados.filter(r => r.fornecedor && r.fornecedor.toLowerCase().includes(fornecedor));
-    }
-    
-    atualizarTabelaRecebimentos(filtrados);
-}
-
 // ============================================
 // FUNÇÕES PRINCIPAIS
 // ============================================
@@ -356,6 +448,7 @@ function mostrarView(view) {
     }
     if (view === 'recebimentos') {
         preencherSelectProdutosRecebimento();
+        preencherFiltroSKU();
         carregarRecebimentos();
     }
     if (view === 'relatorios') gerarRelatorios();
@@ -1267,84 +1360,4 @@ function formatarData(data) {
     const d = new Date(data);
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
-}
-
-// ============================================
-// FUNÇÃO PARA LIMPAR TODAS AS UNIDADES ZERADAS DA PLANILHA
-// ============================================
-
-function limparUnidadesZeradasDaPlanilha() {
-  try {
-    const planilha = SpreadsheetApp.getActiveSpreadsheet();
-    const abaUnidades = planilha.getSheetByName("Unidades");
-    
-    if (!abaUnidades) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ success: false, erro: "Aba Unidades não encontrada" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const dados = abaUnidades.getDataRange().getValues();
-    if (dados.length <= 1) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ success: true, message: "Nenhuma unidade para limpar" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    // Manter cabeçalho
-    const linhasParaManter = [dados[0]];
-    let linhasRemovidas = 0;
-    
-    // Verificar cada linha (pular cabeçalho)
-    for (let i = 1; i < dados.length; i++) {
-      const quantidade = dados[i][5]; // Coluna da quantidade (índice 5)
-      
-      // Se quantidade > 0, manter a linha
-      if (quantidade > 0) {
-        linhasParaManter.push(dados[i]);
-      } else {
-        linhasRemovidas++;
-      }
-    }
-    
-    // Limpar a aba completamente
-    abaUnidades.clearContents();
-    
-    // Reescrever apenas as linhas com quantidade > 0
-    if (linhasParaManter.length > 0) {
-      const range = abaUnidades.getRange(1, 1, linhasParaManter.length, linhasParaManter[0].length);
-      range.setValues(linhasParaManter);
-    }
-    
-    console.log(`Limpeza concluída: ${linhasRemovidas} unidades removidas`);
-    
-    return ContentService
-      .createTextOutput(JSON.stringify({ 
-        success: true, 
-        message: `${linhasRemovidas} unidades zeradas removidas da planilha.` 
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch(erro) {
-    console.error('Erro ao limpar unidades:', erro);
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, erro: erro.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// ============================================
-// FUNÇÃO PARA EXECUTAR VIA GET (para chamada manual)
-// ============================================
-
-function doGet(e) {
-  // Se tiver parâmetro 'acao=limpar', executa a limpeza
-  if (e && e.parameter && e.parameter.acao === 'limpar') {
-    return limparUnidadesZeradasDaPlanilha();
-  }
-  
-  // Resposta padrão
-  return ContentService
-    .createTextOutput('Web App está funcionando! Use POST para enviar dados ou GET com ?acao=limpar para limpar unidades zeradas.')
-    .setMimeType(ContentService.MimeType.TEXT);
 }
