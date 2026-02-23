@@ -740,7 +740,6 @@ function atualizarInterface() {
     atualizarUltimasMovimentacoes();
     preencherFiltros();
     atualizarGraficosPainel();
-    calcularEstoqueGeral();
 }
 
 // ============================================
@@ -1502,4 +1501,5 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
