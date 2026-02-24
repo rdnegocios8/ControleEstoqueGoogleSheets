@@ -455,12 +455,14 @@ async function carregarEstoqueGeral() {
                 codigo: row[0] || '',
                 unidade: row[1] || '',
                 descricao: row[2] || '',
-                quantidadeAnterior: parseFloat(row[3]) || 0,
-                lancamentos: parseFloat(row[4]) || 0,
-                quantidadeTotal: parseFloat(row[5]) || 0,
-                abastecimentos: parseFloat(row[6]) || 0,
-                fisicoAtual: parseFloat(row[7]) || 0,
-                status: row[8] || 'NORMAL'
+                qtdSistema: parseFloat(row[3]) || 0,        // Coluna D - QTD ESTOQUE SISTEMA
+                quantidadeAnterior: parseFloat(row[4]) || 0, // Coluna E - QTD ESTOQUE ANTERIOR
+                lancamentos: parseFloat(row[5]) || 0,        // Coluna F - QTD ESTOQUE LANÇADO
+                quantidadeTotal: parseFloat(row[6]) || 0,    // Coluna G - QTD ESTOQUE TOTAL
+                abastecimentos: parseFloat(row[7]) || 0,     // Coluna H - QTD ESTOQUE ABASTECIDO
+                fisicoAtual: parseFloat(row[8]) || 0,        // Coluna I - QTD ESTOQUE FÍSICO ATUAL
+                estSistemaReal: parseFloat(row[9]) || 0,     // Coluna J - EST. SISTEMA / EST. REAL
+                status: row[10] || 'NORMAL'                   // Coluna K - STATUS
             })).filter(item => item.codigo); // Remove linhas vazias
             
             console.log(`✅ ${estoqueGeral.length} itens carregados do estoque geral`);
@@ -469,7 +471,7 @@ async function carregarEstoqueGeral() {
             console.log('⚠️ Nenhum dado encontrado na aba Estoque Geral');
         }
         
-        // Atualizar a interface
+        // Atualizar a tabela
         atualizarTabelaEstoqueGeral();
         
     } catch (error) {
@@ -488,7 +490,7 @@ function atualizarTabelaEstoqueGeral(dadosFiltrados = null) {
     tbody.innerHTML = '';
     
     if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhum item encontrado na aba Estoque Geral</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center">Nenhum item encontrado na aba Estoque Geral</td></tr>';
         return;
     }
     
@@ -497,8 +499,8 @@ function atualizarTabelaEstoqueGeral(dadosFiltrados = null) {
         
         // Definir classe de status para a linha
         let statusClass = '';
-        if (item.status === 'ESTOQUE ZERADO') statusClass = 'table-danger';
-        else if (item.status === 'ESTOQUE BAIXO') statusClass = 'table-warning';
+        if (item.status === 'ESTOQUE ZERADO' || item.fisicoAtual <= 0) statusClass = 'table-danger';
+        else if (item.status === 'ESTOQUE BAIXO' || (item.fisicoAtual > 0 && item.fisicoAtual < 10)) statusClass = 'table-warning';
         
         tr.className = statusClass;
         
@@ -506,11 +508,13 @@ function atualizarTabelaEstoqueGeral(dadosFiltrados = null) {
             <td><strong>${item.codigo}</strong></td>
             <td>${item.unidade}</td>
             <td>${item.descricao}</td>
+            <td class="text-end">${item.qtdSistema.toFixed(2)}</td>
             <td class="text-end">${item.quantidadeAnterior.toFixed(2)}</td>
             <td class="text-end">${item.lancamentos.toFixed(2)}</td>
             <td class="text-end"><strong>${item.quantidadeTotal.toFixed(2)}</strong></td>
             <td class="text-end text-danger">${item.abastecimentos.toFixed(2)}</td>
             <td class="text-end"><strong class="${item.fisicoAtual <= 0 ? 'text-danger' : item.fisicoAtual < 10 ? 'text-warning' : 'text-success'}">${item.fisicoAtual.toFixed(2)}</strong></td>
+            <td class="text-end">${item.estSistemaReal.toFixed(2)}</td>
             <td>
                 <span class="badge ${item.status === 'NORMAL' ? 'bg-success' : item.status === 'ESTOQUE BAIXO' ? 'bg-warning' : 'bg-danger'}">
                     ${item.status}
@@ -1494,6 +1498,7 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
 
 
