@@ -159,16 +159,22 @@ function calcularQuantidadeAutomatica() {
     }
 }
 
-// Atualizar informações da embalagem ao selecionar produto
+// Atualizar informações da embalagem e unidade base ao selecionar produto
 function atualizarInfoEmbalagem() {
     const select = document.getElementById('unidade-sku');
     const selectedOption = select.options[select.selectedIndex];
     const tipoEmbalagem = selectedOption.dataset.tipo || 'UN';
     const qtdPorEmbalagem = parseInt(selectedOption.dataset.qtd) || 1;
+    const sku = select.value;
+    const produto = produtos.find(p => p.sku === sku);
     
     document.getElementById('volume-label').textContent = `Volume (${tipoEmbalagem})`;
-    document.getElementById('quantidade-unidade').textContent = '(UN)';
     document.getElementById('volume-descricao').textContent = `Número de ${tipoEmbalagem}`;
+    
+    // Atualizar a unidade base no modal
+    const unidadeBase = produto?.unidadeBase || 'UN';
+    document.getElementById('quantidade-unidade').textContent = `(${unidadeBase})`;
+    document.getElementById('quantidade-descricao').textContent = `Total em ${unidadeBase}`;
     
     calcularQuantidadeAutomatica();
 }
@@ -438,7 +444,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÕES DO ESTOQUE GERAL - AGORA LENDO DA PLANILHA
+// FUNÇÕES DO ESTOQUE GERAL
 // ============================================
 
 // Carregar estoque geral da planilha
@@ -817,7 +823,7 @@ function atualizarCardsProdutos() {
                             <small>Volume: ${totalVolume} ${produto.tipoEmbalagem}</small>
                         </div>
                         <div class="col-6">
-                            <small>Total: ${totalQuantidade} UN</small>
+                            <small>Total: ${totalQuantidade} ${produto.unidadeBase || 'UN'}</small>
                         </div>
                     </div>
                     <div class="mt-3">
@@ -861,7 +867,7 @@ function verProduto(sku) {
                 <td>${formatarData(u.validade)}</td>
                 <td>${u.unidadeEmbalagem}</td>
                 <td>${u.volume}</td>
-                <td>${u.quantidade} ${produto?.unidadeBase || 'UN'}</td>
+                <td>${u.quantidade}</td>
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.localizacao}</td>
                 <td>
@@ -890,6 +896,10 @@ function abrirModalUnidade(sku) {
     
     if (sku) {
         atualizarInfoEmbalagem();
+    } else {
+        // Resetar para valor padrão se não houver SKU
+        document.getElementById('quantidade-unidade').textContent = '(UN)';
+        document.getElementById('quantidade-descricao').textContent = 'Total de unidades';
     }
     
     const modal = new bootstrap.Modal(document.getElementById('modalUnidade'));
@@ -1184,7 +1194,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
             <td>${u.lote}</td>
             <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
             <td>${u.volume}</td>
-            <td>${u.quantidade} ${produto?.unidadeBase || 'UN'}</td>
+            <td>${u.quantidade}</td>
             <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
             <td>${u.destino || '-'}</td>
             <td>
@@ -1275,7 +1285,7 @@ function atualizarTabelaMovimentacoes(movFiltradas = null) {
             <td><small>${mov.idUnidade}</small></td>
             <td>${produto ? produto.nome : mov.sku}</td>
             <td>${mov.volume} ${mov.unidadeEmbalagem}</td>
-            <td>${mov.quantidade} UN</td>
+            <td>${mov.quantidade}</td>
             <td>${mov.destino || '-'}</td>
             <td>${mov.responsavel}</td>
         `;
@@ -1498,9 +1508,3 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
-
-
-
-
-
-
