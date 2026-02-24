@@ -1255,10 +1255,9 @@ h2 {
 }
 
 /* ============================================ */
-/* CORREÇÃO DO FUNDO DA TABELA DE ESTOQUE GERAL */
+/* TABELA DE ESTOQUE GERAL (VERSÃO ATUALIZADA) */
 /* ============================================ */
 
-/* Garantir que a tabela de estoque geral tenha fundo escuro */
 #painel-view #tabela-estoque-geral {
     color: #e2e8f0 !important;
     background-color: transparent !important;
@@ -1327,27 +1326,48 @@ h2 {
 #painel-view #tabela-estoque-geral td:nth-child(5),
 #painel-view #tabela-estoque-geral td:nth-child(6),
 #painel-view #tabela-estoque-geral td:nth-child(7),
-#painel-view #tabela-estoque-geral td:nth-child(8) {
+#painel-view #tabela-estoque-geral td:nth-child(8),
+#painel-view #tabela-estoque-geral td:nth-child(9),
+#painel-view #tabela-estoque-geral td:nth-child(10) {
     font-family: 'Courier New', monospace;
     font-size: 0.95rem;
     text-align: right;
 }
 
-/* Última coluna (físico atual) em negrito */
-#painel-view #tabela-estoque-geral td:nth-child(8) {
+/* Cores específicas para cada coluna */
+#painel-view #tabela-estoque-geral td:nth-child(4) { /* QTD SISTEMA */
+    color: #3b82f6 !important; /* Azul */
+    font-weight: 600;
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(7) { /* TOTAL */
+    color: #fbbf24 !important; /* Dourado */
     font-weight: 700;
 }
 
-/* Cores para os valores */
-#painel-view #tabela-estoque-geral .text-success {
+#painel-view #tabela-estoque-geral td:nth-child(8) { /* ABASTECIDO */
+    color: #ef4444 !important; /* Vermelho */
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(9) { /* FÍSICO ATUAL */
+    font-weight: 700;
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(10) { /* EST. SIST/REAL */
+    color: #f59e0b !important; /* Laranja */
+    font-weight: 600;
+}
+
+/* Cores condicionais para FÍSICO ATUAL */
+#painel-view #tabela-estoque-geral td:nth-child(9).text-success {
     color: #10b981 !important;
 }
 
-#painel-view #tabela-estoque-geral .text-warning {
+#painel-view #tabela-estoque-geral td:nth-child(9).text-warning {
     color: #f59e0b !important;
 }
 
-#painel-view #tabela-estoque-geral .text-danger {
+#painel-view #tabela-estoque-geral td:nth-child(9).text-danger {
     color: #ef4444 !important;
 }
 
@@ -1375,24 +1395,6 @@ h2 {
     color: white !important;
 }
 
-/* Filtros do estoque geral */
-#painel-view #filtro-estoque-sku,
-#painel-view #filtro-estoque-descricao,
-#painel-view #filtro-estoque-status,
-#painel-view #filtro-estoque-unidade {
-    background-color: #1a2634 !important;
-    color: #e2e8f0 !important;
-    border: 2px solid #2d3748 !important;
-    border-radius: 8px;
-    padding: 8px 12px;
-}
-
-#painel-view #filtro-estoque-sku:focus,
-#painel-view #filtro-estoque-descricao:focus {
-    border-color: #fbbf24 !important;
-    outline: none;
-}
-
 /* Texto "Nenhum item encontrado" */
 #painel-view #tabela-estoque-geral td[colspan] {
     color: #94a3b8 !important;
@@ -1400,28 +1402,4 @@ h2 {
     text-align: center;
     padding: 40px !important;
     background-color: #0f172a !important;
-}
-
-/* ============================================ */
-/* NOVAS COLUNAS DO ESTOQUE GERAL */
-/* ============================================ */
-
-#painel-view #tabela-estoque-geral th,
-#painel-view #tabela-estoque-geral td {
-    white-space: nowrap;
-}
-
-#painel-view #tabela-estoque-geral td:nth-child(4),  /* QTD SISTEMA */
-#painel-view #tabela-estoque-geral td:nth-child(10) { /* EST. SIST/REAL */
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    color: #fbbf24 !important;
-}
-
-#painel-view #tabela-estoque-geral td:nth-child(4) {
-    color: #3b82f6 !important; /* Azul para QTD SISTEMA */
-}
-
-#painel-view #tabela-estoque-geral td:nth-child(10) {
-    color: #f59e0b !important; /* Laranja para EST. SIST/REAL */
 }
