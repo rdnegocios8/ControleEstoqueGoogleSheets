@@ -1188,13 +1188,12 @@ h2 {
     border-collapse: collapse;
 }
 
-/* Cabeçalho da tabela - usando a primeira linha */
-#painel-view #tabela-estoque-geral tr:first-child {
+/* Cabeçalho da tabela - CORREÇÃO: usar thead */
+#painel-view #tabela-estoque-geral thead tr {
     background: #1a2634 !important;
 }
 
-#painel-view #tabela-estoque-geral tr:first-child td,
-#painel-view #tabela-estoque-geral tr:first-child th {
+#painel-view #tabela-estoque-geral thead th {
     background: #1a2634 !important;
     color: #fbbf24 !important;
     font-weight: 700;
@@ -1206,29 +1205,29 @@ h2 {
     white-space: nowrap;
 }
 
-/* Linhas do corpo da tabela */
-#painel-view #tabela-estoque-geral tr {
+/* Linhas do corpo da tabela - CORREÇÃO: usar tbody */
+#painel-view #tabela-estoque-geral tbody tr {
     background-color: #0f172a !important;
     border-bottom: 1px solid #2d3748;
     transition: all 0.2s ease;
 }
 
-#painel-view #tabela-estoque-geral tr:hover {
+#painel-view #tabela-estoque-geral tbody tr:hover {
     background-color: #1e293b !important;
 }
 
 /* Linhas alternadas */
-#painel-view #tabela-estoque-geral tr:nth-child(even) {
+#painel-view #tabela-estoque-geral tbody tr:nth-child(even) {
     background-color: #1a1f2e !important;
 }
 
 /* Linhas coloridas baseadas no status */
-#painel-view #tabela-estoque-geral tr.table-danger {
+#painel-view #tabela-estoque-geral tbody tr.table-danger {
     background-color: rgba(220, 53, 69, 0.2) !important;
     border-left: 3px solid #ef4444;
 }
 
-#painel-view #tabela-estoque-geral tr.table-warning {
+#painel-view #tabela-estoque-geral tbody tr.table-warning {
     background-color: rgba(245, 158, 11, 0.2) !important;
     border-left: 3px solid #f59e0b;
 }
@@ -1329,22 +1328,4 @@ h2 {
     text-align: center;
     padding: 40px !important;
     background-color: #0f172a !important;
-}
-
-/* Filtros do estoque geral */
-#painel-view #filtro-estoque-sku,
-#painel-view #filtro-estoque-descricao,
-#painel-view #filtro-estoque-status,
-#painel-view #filtro-estoque-unidade {
-    background-color: #1a2634 !important;
-    color: #e2e8f0 !important;
-    border: 2px solid #2d3748 !important;
-    border-radius: 8px;
-    padding: 8px 12px;
-}
-
-#painel-view #filtro-estoque-sku:focus,
-#painel-view #filtro-estoque-descricao:focus {
-    border-color: #fbbf24 !important;
-    outline: none;
 }
