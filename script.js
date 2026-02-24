@@ -867,7 +867,7 @@ function verProduto(sku) {
                 <td>${formatarData(u.validade)}</td>
                 <td>${u.unidadeEmbalagem}</td>
                 <td>${u.volume}</td>
-                <td>${u.quantidade}</td>
+                <td>${u.quantidade} ${produto?.unidadeBase || 'UN'}</td>
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.localizacao}</td>
                 <td>
@@ -1194,7 +1194,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
             <td>${u.lote}</td>
             <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
             <td>${u.volume}</td>
-            <td>${u.quantidade}</td>
+            <td>${u.quantidade} ${produto?.unidadeBase || 'UN'}</td>
             <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
             <td>${u.destino || '-'}</td>
             <td>
@@ -1508,3 +1508,4 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
