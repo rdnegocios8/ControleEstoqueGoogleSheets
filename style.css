@@ -393,52 +393,6 @@ body {
     color: var(--accent-gold) !important;
     font-weight: 600;
 }
-
-/* ============================================ */
-/* TABELA DE ESTOQUE GERAL (AGORA NO PAINEL) */
-/* ============================================ */
-
-#painel-view #tabela-estoque-geral {
-    color: #e2e8f0 !important;
-    width: 100%;
-}
-
-#painel-view #tabela-estoque-geral td {
-    padding: 12px 8px;
-    vertical-align: middle;
-    color: #e2e8f0 !important;
-}
-
-#painel-view #tabela-estoque-geral td:first-child {
-    color: var(--accent-gold) !important;
-    font-weight: 600;
-}
-
-#painel-view #tabela-estoque-geral td:nth-child(4),
-#painel-view #tabela-estoque-geral td:nth-child(5),
-#painel-view #tabela-estoque-geral td:nth-child(6),
-#painel-view #tabela-estoque-geral td:nth-child(7),
-#painel-view #tabela-estoque-geral td:nth-child(8) {
-    font-family: 'Courier New', monospace;
-    font-size: 0.95rem;
-}
-
-#painel-view #tabela-estoque-geral td:nth-child(8) {
-    font-weight: 700;
-}
-
-#painel-view #tabela-estoque-geral .text-success {
-    color: #10b981 !important;
-}
-
-#painel-view #tabela-estoque-geral .text-warning {
-    color: #f59e0b !important;
-}
-
-#painel-view #tabela-estoque-geral .text-danger {
-    color: #ef4444 !important;
-}
-
 /* ============================================ */
 /* BADGES */
 /* ============================================ */
@@ -1403,3 +1357,4 @@ h2 {
     padding: 40px !important;
     background-color: #0f172a !important;
 }
+
