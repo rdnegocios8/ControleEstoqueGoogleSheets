@@ -182,7 +182,7 @@ body {
 }
 
 /* ============================================ */
-/* TABELAS */
+/* TABELAS GERAIS */
 /* ============================================ */
 
 .table {
@@ -393,6 +393,7 @@ body {
     color: var(--accent-gold) !important;
     font-weight: 600;
 }
+
 /* ============================================ */
 /* BADGES */
 /* ============================================ */
@@ -443,32 +444,8 @@ body {
 }
 
 /* ============================================ */
-/* CARDS DE RESUMO DO ESTOQUE GERAL */
+/* CARDS DE RESUMO DO ESTOQUE GERAL (removidos) */
 /* ============================================ */
-
-#painel-view #estoque-total-itens,
-#painel-view #estoque-normal,
-#painel-view #estoque-baixo-geral,
-#painel-view #estoque-zerado {
-    font-size: 2rem;
-    font-weight: 700;
-}
-
-#painel-view #estoque-total-itens {
-    color: var(--info);
-}
-
-#painel-view #estoque-normal {
-    color: var(--success);
-}
-
-#painel-view #estoque-baixo-geral {
-    color: var(--warning);
-}
-
-#painel-view #estoque-zerado {
-    color: var(--danger);
-}
 
 /* ============================================ */
 /* BOTÕES DE AÇÃO */
@@ -909,14 +886,6 @@ h2 {
     .table {
         font-size: 0.85rem;
     }
-    
-    #painel-view #tabela-estoque-geral td:nth-child(4),
-    #painel-view #tabela-estoque-geral td:nth-child(5),
-    #painel-view #tabela-estoque-geral td:nth-child(6),
-    #painel-view #tabela-estoque-geral td:nth-child(7),
-    #painel-view #tabela-estoque-geral td:nth-child(8) {
-        font-size: 0.8rem;
-    }
 }
 
 /* ============================================ */
@@ -1209,18 +1178,23 @@ h2 {
 }
 
 /* ============================================ */
-/* TABELA DE ESTOQUE GERAL (VERSÃO ATUALIZADA) */
+/* TABELA DE ESTOQUE GERAL - VERSÃO CORRIGIDA */
 /* ============================================ */
 
+/* Forçar fundo escuro em toda a tabela */
 #painel-view #tabela-estoque-geral {
-    color: #e2e8f0 !important;
     background-color: transparent !important;
     width: 100%;
     border-collapse: collapse;
 }
 
-/* Cabeçalho da tabela */
-#painel-view #tabela-estoque-geral thead th {
+/* Cabeçalho da tabela - usando a primeira linha */
+#painel-view #tabela-estoque-geral tr:first-child {
+    background: #1a2634 !important;
+}
+
+#painel-view #tabela-estoque-geral tr:first-child td,
+#painel-view #tabela-estoque-geral tr:first-child th {
     background: #1a2634 !important;
     color: #fbbf24 !important;
     font-weight: 700;
@@ -1229,19 +1203,34 @@ h2 {
     letter-spacing: 0.5px;
     padding: 15px 8px !important;
     border-bottom: 2px solid #fbbf24 !important;
-    border: none;
     white-space: nowrap;
 }
 
 /* Linhas do corpo da tabela */
-#painel-view #tabela-estoque-geral tbody tr {
+#painel-view #tabela-estoque-geral tr {
     background-color: #0f172a !important;
     border-bottom: 1px solid #2d3748;
     transition: all 0.2s ease;
 }
 
-#painel-view #tabela-estoque-geral tbody tr:hover {
+#painel-view #tabela-estoque-geral tr:hover {
     background-color: #1e293b !important;
+}
+
+/* Linhas alternadas */
+#painel-view #tabela-estoque-geral tr:nth-child(even) {
+    background-color: #1a1f2e !important;
+}
+
+/* Linhas coloridas baseadas no status */
+#painel-view #tabela-estoque-geral tr.table-danger {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    border-left: 3px solid #ef4444;
+}
+
+#painel-view #tabela-estoque-geral tr.table-warning {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+    border-left: 3px solid #f59e0b;
 }
 
 /* Células da tabela */
@@ -1249,24 +1238,8 @@ h2 {
     padding: 12px 8px;
     vertical-align: middle;
     color: #e2e8f0 !important;
-    border: none;
     background-color: transparent !important;
-}
-
-/* Linhas alternadas */
-#painel-view #tabela-estoque-geral tbody tr:nth-child(even) {
-    background-color: #1a1f2e !important;
-}
-
-/* Linhas coloridas baseadas no status */
-#painel-view #tabela-estoque-geral tbody tr.table-danger {
-    background-color: rgba(220, 53, 69, 0.2) !important;
-    border-left: 3px solid #ef4444;
-}
-
-#painel-view #tabela-estoque-geral tbody tr.table-warning {
-    background-color: rgba(245, 158, 11, 0.2) !important;
-    border-left: 3px solid #f59e0b;
+    border: none;
 }
 
 /* Primeira coluna (código) em dourado */
@@ -1290,17 +1263,17 @@ h2 {
 
 /* Cores específicas para cada coluna */
 #painel-view #tabela-estoque-geral td:nth-child(4) { /* QTD SISTEMA */
-    color: #3b82f6 !important; /* Azul */
+    color: #3b82f6 !important;
     font-weight: 600;
 }
 
 #painel-view #tabela-estoque-geral td:nth-child(7) { /* TOTAL */
-    color: #fbbf24 !important; /* Dourado */
+    color: #fbbf24 !important;
     font-weight: 700;
 }
 
 #painel-view #tabela-estoque-geral td:nth-child(8) { /* ABASTECIDO */
-    color: #ef4444 !important; /* Vermelho */
+    color: #ef4444 !important;
 }
 
 #painel-view #tabela-estoque-geral td:nth-child(9) { /* FÍSICO ATUAL */
@@ -1308,7 +1281,7 @@ h2 {
 }
 
 #painel-view #tabela-estoque-geral td:nth-child(10) { /* EST. SIST/REAL */
-    color: #f59e0b !important; /* Laranja */
+    color: #f59e0b !important;
     font-weight: 600;
 }
 
@@ -1349,7 +1322,7 @@ h2 {
     color: white !important;
 }
 
-/* Texto "Nenhum item encontrado" */
+/* Texto "Carregando dados" ou "Nenhum item" */
 #painel-view #tabela-estoque-geral td[colspan] {
     color: #94a3b8 !important;
     font-style: italic;
@@ -1358,46 +1331,20 @@ h2 {
     background-color: #0f172a !important;
 }
 
-/* ============================================ */
-/* FORÇAR FUNDO ESCURO NA TABELA DE ESTOQUE GERAL */
-/* ============================================ */
-
-/* Forçar fundo em todas as células */
-#painel-view #tabela-estoque-geral,
-#painel-view #tabela-estoque-geral * {
-    background-color: transparent !important;
-}
-
-/* Cabeçalho */
-#painel-view #tabela-estoque-geral thead,
-#painel-view #tabela-estoque-geral thead tr,
-#painel-view #tabela-estoque-geral thead th {
-    background: #1a2634 !important;
+/* Filtros do estoque geral */
+#painel-view #filtro-estoque-sku,
+#painel-view #filtro-estoque-descricao,
+#painel-view #filtro-estoque-status,
+#painel-view #filtro-estoque-unidade {
     background-color: #1a2634 !important;
-}
-
-/* Linhas do corpo */
-#painel-view #tabela-estoque-geral tbody,
-#painel-view #tabela-estoque-geral tbody tr,
-#painel-view #tabela-estoque-geral tbody td {
-    background-color: #0f172a !important;
-}
-
-/* Linhas alternadas */
-#painel-view #tabela-estoque-geral tbody tr:nth-child(even) {
-    background-color: #1a1f2e !important;
-}
-
-/* Hover */
-#painel-view #tabela-estoque-geral tbody tr:hover {
-    background-color: #1e293b !important;
-}
-
-/* Garantir que texto fique visível */
-#painel-view #tabela-estoque-geral td {
     color: #e2e8f0 !important;
+    border: 2px solid #2d3748 !important;
+    border-radius: 8px;
+    padding: 8px 12px;
 }
 
-#painel-view #tabela-estoque-geral td:first-child {
-    color: #fbbf24 !important;
+#painel-view #filtro-estoque-sku:focus,
+#painel-view #filtro-estoque-descricao:focus {
+    border-color: #fbbf24 !important;
+    outline: none;
 }
