@@ -1329,3 +1329,160 @@ h2 {
     padding: 40px !important;
     background-color: #0f172a !important;
 }
+
+/* ============================================ */
+/* FORÇAR FUNDO ESCURO NA TABELA DE ESTOQUE GERAL - VERSÃO ULTRA FORTE */
+/* ============================================ */
+
+/* Reset completo da tabela */
+#painel-view #tabela-estoque-geral,
+#painel-view #tabela-estoque-geral * {
+    all: revert !important;
+}
+
+/* Forçar fundo em todos os elementos da tabela */
+#painel-view #tabela-estoque-geral,
+#painel-view #tabela-estoque-geral thead,
+#painel-view #tabela-estoque-geral tbody,
+#painel-view #tabela-estoque-geral tr,
+#painel-view #tabela-estoque-geral th,
+#painel-view #tabela-estoque-geral td {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* Cabeçalho */
+#painel-view #tabela-estoque-geral thead {
+    background: #1a2634 !important;
+}
+
+#painel-view #tabela-estoque-geral thead tr {
+    background: #1a2634 !important;
+}
+
+#painel-view #tabela-estoque-geral thead th {
+    background: #1a2634 !important;
+    color: #fbbf24 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 0.8rem !important;
+    padding: 15px 8px !important;
+    border-bottom: 2px solid #fbbf24 !important;
+}
+
+/* Linhas do corpo */
+#painel-view #tabela-estoque-geral tbody {
+    background: transparent !important;
+}
+
+#painel-view #tabela-estoque-geral tbody tr {
+    background-color: #0f172a !important;
+    border-bottom: 1px solid #2d3748 !important;
+}
+
+#painel-view #tabela-estoque-geral tbody tr:hover {
+    background-color: #1e293b !important;
+}
+
+/* Linhas alternadas */
+#painel-view #tabela-estoque-geral tbody tr:nth-child(even) {
+    background-color: #1a1f2e !important;
+}
+
+/* Células */
+#painel-view #tabela-estoque-geral td {
+    padding: 12px 8px !important;
+    vertical-align: middle !important;
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* Primeira coluna */
+#painel-view #tabela-estoque-geral td:first-child {
+    color: #fbbf24 !important;
+    font-weight: 600 !important;
+}
+
+/* Colunas numéricas */
+#painel-view #tabela-estoque-geral td:nth-child(4),
+#painel-view #tabela-estoque-geral td:nth-child(5),
+#painel-view #tabela-estoque-geral td:nth-child(6),
+#painel-view #tabela-estoque-geral td:nth-child(7),
+#painel-view #tabela-estoque-geral td:nth-child(8),
+#painel-view #tabela-estoque-geral td:nth-child(9),
+#painel-view #tabela-estoque-geral td:nth-child(10) {
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.95rem !important;
+    text-align: right !important;
+}
+
+/* Cores específicas */
+#painel-view #tabela-estoque-geral td:nth-child(4) {
+    color: #3b82f6 !important;
+    font-weight: 600 !important;
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(7) {
+    color: #fbbf24 !important;
+    font-weight: 700 !important;
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(8) {
+    color: #ef4444 !important;
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(9) {
+    font-weight: 700 !important;
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(10) {
+    color: #f59e0b !important;
+    font-weight: 600 !important;
+}
+
+/* Cores condicionais */
+#painel-view #tabela-estoque-geral td:nth-child(9).text-success {
+    color: #10b981 !important;
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(9).text-warning {
+    color: #f59e0b !important;
+}
+
+#painel-view #tabela-estoque-geral td:nth-child(9).text-danger {
+    color: #ef4444 !important;
+}
+
+/* Badges */
+#painel-view #tabela-estoque-geral .badge {
+    padding: 4px 8px !important;
+    border-radius: 20px !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+}
+
+#painel-view #tabela-estoque-geral .badge.bg-success {
+    background: #10b981 !important;
+    color: white !important;
+}
+
+#painel-view #tabela-estoque-geral .badge.bg-warning {
+    background: #f59e0b !important;
+    color: #0f172a !important;
+}
+
+#painel-view #tabela-estoque-geral .badge.bg-danger {
+    background: #ef4444 !important;
+    color: white !important;
+}
+
+/* Texto de carregamento */
+#painel-view #tabela-estoque-geral td[colspan] {
+    color: #94a3b8 !important;
+    font-style: italic !important;
+    text-align: center !important;
+    padding: 40px !important;
+    background-color: #0f172a !important;
+}
