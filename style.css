@@ -1358,3 +1358,46 @@ h2 {
     background-color: #0f172a !important;
 }
 
+/* ============================================ */
+/* FORÇAR FUNDO ESCURO NA TABELA DE ESTOQUE GERAL */
+/* ============================================ */
+
+/* Forçar fundo em todas as células */
+#painel-view #tabela-estoque-geral,
+#painel-view #tabela-estoque-geral * {
+    background-color: transparent !important;
+}
+
+/* Cabeçalho */
+#painel-view #tabela-estoque-geral thead,
+#painel-view #tabela-estoque-geral thead tr,
+#painel-view #tabela-estoque-geral thead th {
+    background: #1a2634 !important;
+    background-color: #1a2634 !important;
+}
+
+/* Linhas do corpo */
+#painel-view #tabela-estoque-geral tbody,
+#painel-view #tabela-estoque-geral tbody tr,
+#painel-view #tabela-estoque-geral tbody td {
+    background-color: #0f172a !important;
+}
+
+/* Linhas alternadas */
+#painel-view #tabela-estoque-geral tbody tr:nth-child(even) {
+    background-color: #1a1f2e !important;
+}
+
+/* Hover */
+#painel-view #tabela-estoque-geral tbody tr:hover {
+    background-color: #1e293b !important;
+}
+
+/* Garantir que texto fique visível */
+#painel-view #tabela-estoque-geral td {
+    color: #e2e8f0 !important;
+}
+
+#painel-view #tabela-estoque-geral td:first-child {
+    color: #fbbf24 !important;
+}
