@@ -1528,3 +1528,45 @@ h2 {
     background: #fbbf24;
     border-radius: 4px;
 }
+
+/* ============================================ */
+/* ESTILO PARA LISTA DE PRODUTOS NO RECEBIMENTO */
+/* ============================================ */
+
+#lista-recebimento-produtos {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#lista-recebimento-produtos .list-group-item {
+    cursor: pointer;
+    padding: 10px 15px;
+    transition: all 0.2s ease;
+}
+
+#lista-recebimento-produtos .list-group-item:hover {
+    background-color: #2d3748 !important;
+    transform: translateX(3px);
+}
+
+#lista-recebimento-produtos .list-group-item .text-info {
+    color: #fbbf24 !important;
+}
+
+#busca-recebimento-produto {
+    margin-bottom: 5px;
+}
+
+/* Scrollbar personalizada */
+#lista-recebimento-produtos::-webkit-scrollbar {
+    width: 8px;
+}
+
+#lista-recebimento-produtos::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+#lista-recebimento-produtos::-webkit-scrollbar-thumb {
+    background: #fbbf24;
+    border-radius: 4px;
+}
