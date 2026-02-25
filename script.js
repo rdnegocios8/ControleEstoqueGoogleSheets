@@ -1019,16 +1019,23 @@ async function salvarUnidade() {
     const sku = document.getElementById('unidade-sku').value;
     const produto = produtos.find(p => p.sku === sku);
     
-    const volume = parseInt(document.getElementById('unidade-volume').value);
+    const volume = parseFloat(document.getElementById('unidade-volume').value);
     const foraPadrao = document.getElementById('unidade-fora-padrao').checked;
-    let quantidade = parseInt(document.getElementById('unidade-quantidade').value);
+    
+    // CORREÇÃO CRÍTICA: usar parseFloat em vez de parseInt
+    let quantidade = parseFloat(document.getElementById('unidade-quantidade').value);
+    
+    // Se for NaN, definir como 0
+    if (isNaN(quantidade)) quantidade = 0;
     
     if (foraPadrao) {
-        const qtdReal = parseInt(document.getElementById('unidade-quantidade-real').value);
-        if (qtdReal) {
+        const qtdReal = parseFloat(document.getElementById('unidade-quantidade-real').value);
+        if (!isNaN(qtdReal)) {
             quantidade = volume * qtdReal;
         }
     }
+    
+    console.log('📤 Quantidade a ser enviada:', quantidade); // Debug
     
     const unidade = {
         tipo: 'unidade',
@@ -1037,19 +1044,14 @@ async function salvarUnidade() {
         lote: document.getElementById('unidade-lote').value,
         validade: document.getElementById('unidade-validade').value,
         volume: volume,
-        quantidade: quantidade,
+        quantidade: quantidade,  // Agora é número com decimais
         unidadeEmbalagem: produto?.tipoEmbalagem || 'UN',
         status: document.getElementById('unidade-status').value,
         localizacao: document.getElementById('unidade-localizacao').value || '-',
         destino: '',
         foraPadrao: foraPadrao,
-        qtdRealPorEmbalagem: foraPadrao ? parseInt(document.getElementById('unidade-quantidade-real').value) : null
+        qtdRealPorEmbalagem: foraPadrao ? parseFloat(document.getElementById('unidade-quantidade-real').value) : null
     };
-    
-    if (!unidade.sku || !unidade.lote || !unidade.validade || !unidade.volume) {
-        alert('Todos os campos são obrigatórios!');
-        return;
-    }
     
     try {
         await fetch(WEB_APP_URL, {
@@ -1574,6 +1576,7 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
 
 
