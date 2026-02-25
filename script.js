@@ -1157,29 +1157,71 @@ function verUnidade(id) {
     document.getElementById('detalhe-validade').textContent = formatarData(unidadeAtual.validade);
     document.getElementById('detalhe-embalagem').textContent = unidadeAtual.unidadeEmbalagem;
     document.getElementById('detalhe-volume').textContent = unidadeAtual.volume;
-    document.getElementById('detalhe-quantidade').textContent = unidadeAtual.quantidade;
+    document.getElementById('detalhe-quantidade').textContent = unidadeAtual.quantidade.toFixed(2) + ' ' + (produto?.unidadeBase || 'UN');
     document.getElementById('detalhe-fora-padrao').textContent = unidadeAtual.foraPadrao ? 'Sim' : 'Não';
     document.getElementById('detalhe-status').innerHTML = `<span class="badge ${unidadeAtual.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${unidadeAtual.status}</span>`;
     document.getElementById('detalhe-localizacao').textContent = unidadeAtual.localizacao;
     document.getElementById('detalhe-destino').textContent = unidadeAtual.destino || '-';
     
+    // GERAR QR CODE - VERSÃO CORRIGIDA
     const qrContainer = document.getElementById('unidade-qr-code');
-    qrContainer.innerHTML = '';
+    qrContainer.innerHTML = ''; // Limpar
     
-    try {
-        if (typeof QRCode !== 'undefined') {
-            new QRCode(qrContainer, {
-                text: unidadeAtual.id,
-                width: 150,
-                height: 150
-            });
+    // Pequeno delay para garantir que o container está pronto
+    setTimeout(() => {
+        try {
+            // Verificar se a biblioteca está disponível
+            if (typeof QRCode !== 'undefined') {
+                // Limpar o container novamente
+                qrContainer.innerHTML = '';
+                
+                // Criar novo QR Code
+                new QRCode(qrContainer, {
+                    text: unidadeAtual.id,
+                    width: 150,
+                    height: 150,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                console.log('✅ QR Code gerado com sucesso!');
+            } else {
+                console.error('❌ Biblioteca QRCode não encontrada');
+                // Fallback para API externa
+                qrContainer.innerHTML = `
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(unidadeAtual.id)}" 
+                         alt="QR Code" 
+                         style="width: 150px; height: 150px; border-radius: 8px; border: 2px solid #fbbf24;">
+                `;
+            }
+        } catch (e) {
+            console.error('❌ Erro ao gerar QR Code:', e);
+            // Fallback de emergência
+            qrContainer.innerHTML = `
+                <div class="alert alert-warning p-2 text-center">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <p class="mb-1">Clique para ver o QR Code</p>
+                    <button class="btn btn-sm btn-primary" onclick="verQRCodeCompleto()">
+                        <i class="bi bi-qr-code"></i> Ver QR Code
+                    </button>
+                </div>
+            `;
         }
-    } catch (e) {
-        console.error('Erro ao gerar QR Code:', e);
-    }
+    }, 100); // Pequeno delay para garantir
     
     const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
     modal.show();
+}
+
+// Ver QR Code completo (usando API externa)
+function verQRCodeCompleto() {
+    if (!unidadeAtual) return;
+    
+    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
+    
+    // Usar a API do QRServer como fallback
+    const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(unidadeAtual.id)}`;
+    window.open(url, '_blank');
 }
 
 // Ver QR Code completo
@@ -1794,4 +1836,5 @@ document.getElementById('busca-rebimento-produto')?.addEventListener('focus', ()
         filtrarProdutosRecebimento();
     }
 });
+
 
