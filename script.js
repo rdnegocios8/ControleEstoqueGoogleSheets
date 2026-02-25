@@ -461,15 +461,15 @@ async function carregarEstoqueGeral() {
                 codigo: row[0] || '',
                 unidade: row[1] || '',
                 descricao: row[2] || '',
-                qtdSistema: parseFloat(row[3]) || 0,        // Coluna D - QTD ESTOQUE SISTEMA
-                quantidadeAnterior: parseFloat(row[4]) || 0, // Coluna E - QTD ESTOQUE ANTERIOR
-                lancamentos: parseFloat(row[5]) || 0,        // Coluna F - QTD ESTOQUE LANÇADO
-                quantidadeTotal: parseFloat(row[6]) || 0,    // Coluna G - QTD ESTOQUE TOTAL
-                abastecimentos: parseFloat(row[7]) || 0,     // Coluna H - QTD ESTOQUE ABASTECIDO
-                fisicoAtual: parseFloat(row[8]) || 0,        // Coluna I - QTD ESTOQUE FÍSICO ATUAL
-                estSistemaReal: parseFloat(row[9]) || 0,     // Coluna J - EST. SISTEMA / EST. REAL
-                status: row[10] || 'NORMAL'                   // Coluna K - STATUS
-            })).filter(item => item.codigo); // Remove linhas vazias
+                qtdSistema: parseFloat(row[3]) || 0,
+                quantidadeAnterior: parseFloat(row[4]) || 0,
+                lancamentos: parseFloat(row[5]) || 0,
+                quantidadeTotal: parseFloat(row[6]) || 0,
+                abastecimentos: parseFloat(row[7]) || 0,
+                fisicoAtual: parseFloat(row[8]) || 0,
+                estSistemaReal: parseFloat(row[9]) || 0,
+                status: row[10] || 'NORMAL'
+            })).filter(item => item.codigo);
             
             console.log(`✅ ${estoqueGeral.length} itens carregados do estoque geral`);
         } else {
@@ -477,7 +477,6 @@ async function carregarEstoqueGeral() {
             console.log('⚠️ Nenhum dado encontrado na aba Estoque Geral');
         }
         
-        // Atualizar a tabela
         atualizarTabelaEstoqueGeral();
         
     } catch (error) {
@@ -503,24 +502,24 @@ function atualizarTabelaEstoqueGeral(dadosFiltrados = null) {
     dados.forEach(item => {
         const tr = document.createElement('tr');
         
-        // Definir classe de status para a linha
         let statusClass = '';
         if (item.status === 'ESTOQUE ZERADO' || item.fisicoAtual <= 0) statusClass = 'table-danger';
         else if (item.status === 'ESTOQUE BAIXO' || (item.fisicoAtual > 0 && item.fisicoAtual < 10)) statusClass = 'table-warning';
         
         tr.className = statusClass;
         
+        // CORREÇÃO: Formatar com 2 casas decimais
         tr.innerHTML = `
             <td><strong>${item.codigo}</strong></td>
             <td>${item.unidade}</td>
             <td>${item.descricao}</td>
-            <td class="text-end">${item.qtdSistema.toFixed(2)}</td>
-            <td class="text-end">${item.quantidadeAnterior.toFixed(2)}</td>
-            <td class="text-end">${item.lancamentos.toFixed(2)}</td>
-            <td class="text-end"><strong>${item.quantidadeTotal.toFixed(2)}</strong></td>
-            <td class="text-end text-danger">${item.abastecimentos.toFixed(2)}</td>
-            <td class="text-end"><strong class="${item.fisicoAtual <= 0 ? 'text-danger' : item.fisicoAtual < 10 ? 'text-warning' : 'text-success'}">${item.fisicoAtual.toFixed(2)}</strong></td>
-            <td class="text-end">${item.estSistemaReal.toFixed(2)}</td>
+            <td class="text-end">${item.qtdSistema.toFixed(2).replace('.', ',')}</td>
+            <td class="text-end">${item.quantidadeAnterior.toFixed(2).replace('.', ',')}</td>
+            <td class="text-end">${item.lancamentos.toFixed(2).replace('.', ',')}</td>
+            <td class="text-end"><strong>${item.quantidadeTotal.toFixed(2).replace('.', ',')}</strong></td>
+            <td class="text-end text-danger">${item.abastecimentos.toFixed(2).replace('.', ',')}</td>
+            <td class="text-end"><strong class="${item.fisicoAtual <= 0 ? 'text-danger' : item.fisicoAtual < 10 ? 'text-warning' : 'text-success'}">${item.fisicoAtual.toFixed(2).replace('.', ',')}</strong></td>
+            <td class="text-end">${item.estSistemaReal.toFixed(2).replace('.', ',')}</td>
             <td>
                 <span class="badge ${item.status === 'NORMAL' ? 'bg-success' : item.status === 'ESTOQUE BAIXO' ? 'bg-warning' : 'bg-danger'}">
                     ${item.status}
@@ -668,7 +667,7 @@ async function carregarDados() {
                     descricao: row[2] || '',
                     categoria: row[3] || 'Insumos',
                     tipoEmbalagem: row[4] || 'UN',
-                    qtdPorEmbalagem: parseInt(row[5]) || 1,
+                    qtdPorEmbalagem: parseInt(row[5]) || 1,  // Aqui parseInt está correto (é quantidade inteira)
                     unidadeBase: row[6] || 'UN',
                     imagem: row[7] || ''
                 };
@@ -693,14 +692,14 @@ async function carregarDados() {
                     sku: sku,
                     lote: row[2] || '',
                     validade: row[3] || '',
-                    volume: parseInt(row[4]) || 1,
-                    quantidade: parseFloat(row[5]) || 0,
+                    volume: parseInt(row[4]) || 1,        // Volume geralmente é inteiro
+                    quantidade: parseFloat(row[5]) || 0,  // Quantidade pode ter decimais
                     unidadeEmbalagem: row[6] || 'UN',
                     status: row[7] || 'Disponível',
                     localizacao: row[8] || '-',
                     destino: row[9] || '',
                     foraPadrao: row[10] === 'Sim',
-                    qtdRealPorEmbalagem: row[11] ? parseInt(row[11]) : null
+                    qtdRealPorEmbalagem: row[11] ? parseFloat(row[11]) : null  // Pode ter decimais
                 };
             }).filter(u => u.id);
             
@@ -723,8 +722,8 @@ async function carregarDados() {
                     tipo: row[1] || '',
                     idUnidade: row[2] || '',
                     sku: sku,
-                    volume: parseInt(row[4]) || 0,
-                    quantidade: parseFloat(row[5]) || 0,
+                    volume: parseInt(row[4]) || 0,        // Volume geralmente é inteiro
+                    quantidade: parseFloat(row[5]) || 0,  // Quantidade pode ter decimais
                     unidadeEmbalagem: row[6] || '',
                     destino: row[7] || '',
                     responsavel: row[8] || '',
@@ -879,7 +878,7 @@ function filtrarProdutos() {
     atualizarCardsProdutos();
 }
 
-// Ver produto
+// Ver produto (modal)
 function verProduto(sku) {
     const produto = produtos.find(p => p.sku === sku);
     const unidadesProduto = unidades.filter(u => u.sku === sku && u.quantidade > 0);
@@ -894,13 +893,14 @@ function verProduto(sku) {
     } else {
         unidadesProduto.forEach(u => {
             const tr = document.createElement('tr');
+            // CORREÇÃO: Formatar com 2 casas decimais
             tr.innerHTML = `
                 <td><small>${u.id}</small></td>
                 <td>${u.lote}</td>
                 <td>${formatarData(u.validade)}</td>
                 <td>${u.unidadeEmbalagem}</td>
                 <td>${u.volume}</td>
-                <td>${u.quantidade.toFixed(2)} ${produto?.unidadeBase || 'UN'}</td>
+                <td>${u.quantidade.toFixed(2).replace('.', ',')} ${produto?.unidadeBase || 'UN'}</td>
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.localizacao}</td>
                 <td>
@@ -1229,8 +1229,8 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
         const validadeDate = new Date(u.validade);
         const vencido = validadeDate < hoje;
         
-        // Formatar quantidade com 2 casas decimais
-        const quantidadeFormatada = u.quantidade.toFixed(2);
+        // CORREÇÃO: Formatar com 2 casas decimais
+        const quantidadeFormatada = u.quantidade.toFixed(2).replace('.', ',');
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1555,6 +1555,7 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
 
 
