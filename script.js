@@ -856,7 +856,7 @@ function atualizarCardsProdutos() {
                             <small>Volume: ${totalVolume} ${produto.tipoEmbalagem}</small>
                         </div>
                         <div class="col-6">
-                            <small>Total: ${totalQuantidade} ${produto.unidadeBase || 'UN'}</small>
+                            <small>Total: ${totalQuantidade.toFixed(2)} ${produto.unidadeBase || 'UN'}</small>
                         </div>
                     </div>
                     <div class="mt-3">
@@ -900,7 +900,7 @@ function verProduto(sku) {
                 <td>${formatarData(u.validade)}</td>
                 <td>${u.unidadeEmbalagem}</td>
                 <td>${u.volume}</td>
-                <td>${u.quantidade} ${produto?.unidadeBase || 'UN'}</td>
+                <td>${u.quantidade.toFixed(2)} ${produto?.unidadeBase || 'UN'}</td>
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.localizacao}</td>
                 <td>
@@ -1229,6 +1229,9 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
         const validadeDate = new Date(u.validade);
         const vencido = validadeDate < hoje;
         
+        // Formatar quantidade com 2 casas decimais
+        const quantidadeFormatada = u.quantidade.toFixed(2);
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><small>${u.id}</small></td>
@@ -1238,7 +1241,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
             <td>${u.lote}</td>
             <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
             <td>${u.volume}</td>
-            <td>${u.quantidade} ${produto?.unidadeBase || 'UN'}</td>
+            <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
             <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
             <td>${u.destino || '-'}</td>
             <td>
@@ -1552,6 +1555,7 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
 
 
