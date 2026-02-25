@@ -9,151 +9,142 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
+            background: #f0f0f0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             margin: 0;
         }
         
-        .qr-container {
-            max-width: 600px;
+        .container {
+            max-width: 800px;
             width: 100%;
         }
         
-        .qr-card {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 2px solid #fbbf24;
-            border-radius: 24px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
+        .card {
+            background: white;
+            border: 2px solid #000;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
-        .qr-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
-        }
-        
-        .qr-header {
-            margin-bottom: 30px;
-        }
-        
-        .qr-header h2 {
-            color: #fbbf24;
-            font-weight: 700;
-            font-size: 2rem;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: none;
-        }
-        
-        .ordem-badge {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #0f172a;
-            font-size: 3.5rem;
-            font-weight: 800;
+        /* Estilo da etiqueta igual à imagem */
+        .etiqueta {
+            font-family: 'Courier New', monospace;
+            border: 2px solid #000;
             padding: 20px;
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            border: 4px solid white;
-            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
+            margin: 20px 0;
+            background: white;
+            max-width: 500px;
+            margin: 0 auto;
         }
         
-        .ordem-texto {
-            font-size: 1.1rem;
-            color: #cbd5e1;
-            margin-bottom: 20px;
+        .etiqueta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .etiqueta-codigo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .etiqueta-ordem {
+            font-size: 48px;
+            font-weight: bold;
+            color: #000;
+        }
+        
+        .etiqueta-descricao {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
             text-transform: uppercase;
-            letter-spacing: 2px;
+        }
+        
+        .etiqueta-linha {
+            display: flex;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        
+        .etiqueta-label {
+            font-weight: bold;
+            width: 80px;
+        }
+        
+        .etiqueta-valor {
+            flex: 1;
+        }
+        
+        .etiqueta-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 2px solid #000;
+            font-weight: bold;
+            font-size: 20px;
         }
         
         .qr-code-box {
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            padding: 25px;
-            border-radius: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 20px 0;
-            border: 3px solid #fbbf24;
-            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.2);
-            min-height: 300px;
+            border: 2px solid #000;
+            min-height: 200px;
         }
         
         #qrcode canvas, #qrcode img {
             max-width: 100%;
             height: auto;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
-        .qr-info {
-            background: #1e293b;
-            border-radius: 16px;
-            padding: 25px;
+        .info-paletes {
+            background: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
             margin: 20px 0;
-            border: 1px solid #fbbf24;
+        }
+        
+        .info-paletes h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .tabela-validades {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .tabela-validades th {
+            background: #333;
+            color: white;
+            padding: 8px;
             text-align: left;
         }
         
-        .qr-info p {
-            margin: 12px 0;
-            color: #cbd5e1;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 8px;
-            font-size: 1rem;
-        }
-        
-        .qr-info strong {
-            color: #fbbf24;
-            width: 120px;
-            display: inline-block;
-            font-weight: 600;
-        }
-        
-        .validades-list {
-            background: #0f172a;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-        
-        .validade-item {
-            display: flex;
-            justify-content: space-between;
+        .tabela-validades td {
             padding: 8px;
-            border-bottom: 1px solid #334155;
-            color: #cbd5e1;
+            border-bottom: 1px solid #ccc;
         }
         
-        .validade-item:last-child {
-            border-bottom: none;
-        }
-        
-        .validade-ordem {
-            background: #fbbf24;
-            color: #0f172a;
-            padding: 2px 8px;
-            border-radius: 12px;
+        .tabela-validades tr.atual {
+            background: #ffffcc;
             font-weight: bold;
-            font-size: 0.8rem;
         }
         
         .qr-actions {
@@ -167,7 +158,7 @@
         .qr-actions button {
             padding: 12px 25px;
             border: none;
-            border-radius: 12px;
+            border-radius: 5px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -180,126 +171,103 @@
         }
         
         .btn-download {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: #007bff;
             color: white;
         }
         
         .btn-print {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #0f172a;
-        }
-        
-        .btn-close {
-            background: linear-gradient(135deg, #64748b, #475569);
+            background: #28a745;
             color: white;
         }
         
-        .qr-actions button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3);
+        .btn-close {
+            background: #dc3545;
+            color: white;
         }
         
-        .badge-unidade {
-            display: inline-block;
-            padding: 8px 20px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #0f172a;
-            border-radius: 30px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
+        .btn-view {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .qr-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
         .info-id {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            color: #fbbf24;
-            word-break: break-all;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
             margin: 15px 0;
-            border: 2px solid #fbbf24;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-        
-        .volume-info {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            padding: 20px;
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #334155;
-        }
-        
-        .volume-item {
-            text-align: center;
-        }
-        
-        .volume-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #fbbf24;
-            line-height: 1.2;
-        }
-        
-        .volume-label {
-            font-size: 0.9rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-family: monospace;
+            word-break: break-all;
         }
         
         @media print {
-            .qr-actions, .badge-unidade {
-                display: none;
+            body {
+                background: white;
+                padding: 0;
             }
             
-            .qr-card {
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+            
+            .card {
                 box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            
+            .qr-actions, .badge, .info-paletes, .btn-view, h2 {
+                display: none !important;
+            }
+            
+            .etiqueta {
+                border: 2px solid #000;
+                page-break-inside: avoid;
+                margin: 0;
+                max-width: 100%;
+            }
+            
+            .qr-code-box {
                 border: 1px solid #000;
             }
         }
     </style>
 </head>
 <body>
-    <div class="qr-container">
-        <div class="qr-card">
-            <div class="badge-unidade">
-                <i class="bi bi-palette-fill"></i> ETIQUETA DE PALETE
-            </div>
+    <div class="container">
+        <div class="card">
+            <h2 style="text-align: center; margin-top: 0;">Etiqueta de Palete</h2>
             
-            <!-- Badge de ordem rotativa -->
-            <div class="ordem-badge" id="ordemBadge">4º</div>
-            <div class="ordem-texto" id="ordemTexto">ORDEM DE VALIDADE</div>
+            <!-- Visualização da etiqueta no formato da imagem -->
+            <div class="etiqueta" id="etiquetaVisualizacao">
+                <!-- Será preenchido via JavaScript -->
+            </div>
             
             <div class="qr-code-box" id="qr-code-container">
                 <div id="qrcode"></div>
             </div>
             
-            <div class="qr-info" id="qr-info">
-                <!-- Informações serão preenchidas via JavaScript -->
-            </div>
-            
-            <div class="volume-info" id="volume-info">
-                <!-- Informações de volume serão preenchidas -->
-            </div>
-            
-            <!-- Lista de validades -->
-            <div class="validades-list" id="validadesList">
-                <!-- Lista será preenchida via JavaScript -->
+            <!-- Informações dos paletes -->
+            <div class="info-paletes" id="infoPaletes">
+                <!-- Será preenchido via JavaScript -->
             </div>
             
             <div class="info-id" id="info-id"></div>
             
             <div class="qr-actions">
-                <button class="btn-download" onclick="baixarQR()">
+                <button class="btn-download" onclick="baixarEtiqueta()">
                     <i class="bi bi-download"></i> Baixar
                 </button>
-                <button class="btn-print" onclick="window.print()">
+                <button class="btn-print" onclick="imprimirEtiqueta()">
                     <i class="bi bi-printer"></i> Imprimir
+                </button>
+                <button class="btn-view" onclick="window.location.href='qr-view.html'">
+                    <i class="bi bi-arrow-left"></i> Voltar
                 </button>
                 <button class="btn-close" onclick="window.close()">
                     <i class="bi bi-x-lg"></i> Fechar
@@ -309,7 +277,7 @@
     </div>
 
     <script>
-        // Função para parsear data no formato DD/MM/YYYY
+        // Função para converter data no formato DD/MM/YYYY para Date
         function parseData(dataStr) {
             if (!dataStr) return null;
             const partes = dataStr.split('/');
@@ -321,198 +289,391 @@
 
         // Função para formatar data
         function formatarData(data) {
-            if (!data) return 'N/A';
-            return data.toLocaleDateString('pt-BR');
+            if (!data) return '';
+            if (data instanceof Date) {
+                return data.toLocaleDateString('pt-BR');
+            }
+            return data;
         }
 
-        // Função para calcular ordem baseada nas validades
-        function calcularOrdemValidade(dataAtual, todasValidades) {
-            if (!dataAtual || !todasValidades || todasValidades.length === 0) return '1º';
+        // Função principal para calcular a ordem baseada em TODAS as validades
+        function calcularOrdemValidade(dataAtualStr, todasUnidades) {
+            if (!dataAtualStr || !todasUnidades || todasUnidades.length === 0) {
+                return { ordem: '1º', posicao: 1 };
+            }
             
-            // Converter todas as validades para objetos Date
-            const datas = todasValidades.map(v => parseData(v)).filter(d => d !== null);
+            // Mapear todas as unidades com suas validades
+            const unidadesComData = todasUnidades.map(u => ({
+                ...u,
+                dataObj: parseData(u.validade)
+            })).filter(u => u.dataObj !== null);
             
-            // Ordenar datas (mais antiga primeiro)
-            datas.sort((a, b) => a - b);
+            if (unidadesComData.length === 0) {
+                return { ordem: '1º', posicao: 1 };
+            }
+            
+            // Agrupar por data de validade
+            const grupos = {};
+            unidadesComData.forEach(u => {
+                const dataStr = u.validade;
+                if (!grupos[dataStr]) {
+                    grupos[dataStr] = [];
+                }
+                grupos[dataStr].push(u);
+            });
+            
+            // Ordenar as datas (mais antiga primeiro)
+            const datasOrdenadas = Object.keys(grupos).sort((a, b) => {
+                const dataA = parseData(a);
+                const dataB = parseData(b);
+                return dataA - dataB;
+            });
+            
+            // Mapear cada data para sua posição
+            const posicaoPorData = {};
+            datasOrdenadas.forEach((data, index) => {
+                posicaoPorData[data] = index + 1; // 1º, 2º, 3º...
+            });
             
             // Encontrar a posição da data atual
-            const dataAtualObj = parseData(dataAtual);
-            if (!dataAtualObj) return '1º';
-            
-            let posicao = 1;
-            let dataAnterior = null;
-            
-            for (let i = 0; i < datas.length; i++) {
-                if (datas[i].getTime() === dataAtualObj.getTime()) {
-                    // Se é a mesma data, usa a mesma posição da anterior
-                    if (dataAnterior && datas[i].getTime() === dataAnterior.getTime()) {
-                        posicao = i; // Mesma posição da anterior
-                    } else {
-                        posicao = i + 1;
-                    }
-                    break;
-                }
-                dataAnterior = datas[i];
-            }
+            const posicao = posicaoPorData[dataAtualStr] || 1;
             
             // Converter para ordinal
             const ordinais = ['1º', '2º', '3º', '4º', '5º', '6º', '7º', '8º', '9º', '10º'];
-            return ordinais[Math.min(posicao - 1, ordinais.length - 1)] || posicao + 'º';
+            const ordem = ordinais[Math.min(posicao - 1, ordinais.length - 1)] || posicao + 'º';
+            
+            return { ordem, posicao, grupos, datasOrdenadas };
         }
 
         // Carregar dados da URL
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id');
-        const sku = urlParams.get('sku');
-        const lote = urlParams.get('lote');
-        const validade = urlParams.get('validade');
-        const produtoNome = decodeURIComponent(urlParams.get('produto') || '');
-        const volume = urlParams.get('volume') || '0';
-        const quantidade = urlParams.get('quantidade') || '0';
-        const unidade = urlParams.get('unidade') || 'UN';
+        const sku = urlParams.get('sku') || '000304394';
+        const lote = urlParams.get('lote') || '144142';
+        const validade = urlParams.get('validade') || '23/01/2027';
+        const produtoNome = decodeURIComponent(urlParams.get('produto') || 'FILME BISC. ROSQUINHA LEITE EMEGE 300GR');
+        const volume = urlParams.get('volume') || '500,0';
+        const quantidade = urlParams.get('quantidade') || '20';
+        const unidade = urlParams.get('unidade') || 'Cx';
         
-        // Receber lista de validades (separadas por vírgula)
-        const validadesStr = urlParams.get('validades') || '';
-        const todasValidades = validadesStr ? validadesStr.split(',').map(v => v.trim()) : [validade];
+        // Receber lista de todas as unidades (simulando dados da imagem)
+        // Formato esperado: ID, LOTE, VALIDADE, embalagem, volume, qtd
+        const unidadesStr = urlParams.get('unidades') || '';
+        let todasUnidades = [];
+        
+        if (unidadesStr) {
+            // Se veio parâmetro com todas unidades
+            todasUnidades = JSON.parse(decodeURIComponent(unidadesStr));
+        } else {
+            // Dados simulados baseado na imagem fornecida
+            todasUnidades = [
+                { id: 'UN-KØNLQSNX-AMZK', lote: 'AAACXB0101', validade: '07/04/2026', volume: '583,50', quantidade: '1' },
+                { id: 'UN-2EP1M8IO-9Y8R', lote: 'AAACS60101', validade: '25/06/2026', volume: '535,87', quantidade: '1' },
+                { id: 'UN-CUT9HP6G-46K4', lote: 'AAACS60101', validade: '25/06/2026', volume: '555,88', quantidade: '1' }
+            ];
+        }
 
-        // Calcular ordem
-        const ordem = calcularOrdemValidade(validade, todasValidades);
+        // Calcular ordem baseada em TODAS as validades
+        const resultado = calcularOrdemValidade(validade, todasUnidades);
+        const ordem = resultado.ordem;
 
         // Construir link completo
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
 
+        // Função para atualizar a visualização da etiqueta
+        function atualizarEtiqueta() {
+            const etiquetaDiv = document.getElementById('etiquetaVisualizacao');
+            etiquetaDiv.innerHTML = `
+                <div class="etiqueta-header">
+                    <div class="etiqueta-codigo">CODIGO:${sku}</div>
+                    <div class="etiqueta-ordem">${ordem}</div>
+                </div>
+                <div class="etiqueta-descricao">${produtoNome}</div>
+                <div class="etiqueta-linha">
+                    <span class="etiqueta-label">LOTE:</span>
+                    <span class="etiqueta-valor">${lote}</span>
+                </div>
+                <div class="etiqueta-linha">
+                    <span class="etiqueta-label">VALIDADE:</span>
+                    <span class="etiqueta-valor">${validade}</span>
+                </div>
+                <div class="etiqueta-footer">
+                    <span>${volume} Kg</span>
+                    <span>${quantidade} ${unidade}</span>
+                </div>
+            `;
+        }
+
         // Função para gerar QR Code
         function gerarQRCode() {
             const qrcodeDiv = document.getElementById('qrcode');
-            qrcodeDiv.innerHTML = ''; // Limpar
+            qrcodeDiv.innerHTML = '';
             
-            if (!unidadeId) {
-                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID da unidade não encontrado</p>';
-                return;
-            }
-
-            // Atualizar badge de ordem
-            document.getElementById('ordemBadge').textContent = ordem;
-            
-            // Destacar a ordem
-            if (ordem === '1º') {
-                document.getElementById('ordemBadge').style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-                document.getElementById('ordemTexto').textContent = 'PRIMEIRO A VENCER';
-            } else if (ordem === '2º') {
-                document.getElementById('ordemBadge').style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-                document.getElementById('ordemTexto').textContent = 'SEGUNDO A VENCER';
-            } else if (ordem === '3º') {
-                document.getElementById('ordemBadge').style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                document.getElementById('ordemTexto').textContent = 'TERCEIRO A VENCER';
-            } else {
-                document.getElementById('ordemBadge').style.background = 'linear-gradient(135deg, #fbbf24, #f59e0b)';
-            }
-
-            // Usar a biblioteca QRCode.js
             if (typeof QRCode !== 'undefined') {
                 try {
-                    // Gerar QR Code
                     QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
-                        width: 250,
-                        margin: 2,
-                        color: {
-                            dark: '#000000',
-                            light: '#ffffff'
-                        }
+                        width: 200,
+                        margin: 2
                     }, function(err, canvas) {
                         if (err) {
-                            console.error('Erro ao gerar QR Code:', err);
-                            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
+                            console.error('Erro:', err);
                             return;
                         }
-                        
-                        // Limpar e adicionar o canvas
                         qrcodeDiv.innerHTML = '';
                         canvas.style.width = '100%';
                         canvas.style.height = 'auto';
-                        canvas.style.borderRadius = '8px';
                         qrcodeDiv.appendChild(canvas);
                     });
 
-                    // Preencher informações
-                    document.getElementById('qr-info').innerHTML = `
-                        <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
-                        <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
-                        <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
-                        <p><strong>Validade:</strong> ${validade || 'N/A'}</p>
-                        <p><strong>Ordem:</strong> <span style="color: #fbbf24; font-weight: bold;">${ordem}</span></p>
-                    `;
-
-                    document.getElementById('volume-info').innerHTML = `
-                        <div class="volume-item">
-                            <div class="volume-value">${volume}</div>
-                            <div class="volume-label">${unidade}</div>
-                        </div>
-                        <div class="volume-item">
-                            <div class="volume-value">${quantidade}</div>
-                            <div class="volume-label">UNIDADES</div>
-                        </div>
-                    `;
-
-                    // Criar lista de validades
-                    const validadesOrdenadas = [...todasValidades].sort((a, b) => {
-                        const dataA = parseData(a);
-                        const dataB = parseData(b);
-                        if (!dataA || !dataB) return 0;
-                        return dataA - dataB;
+                    // Atualizar informações dos paletes
+                    let infoHtml = '<h4>📦 Todos os Paletes do Produto:</h4>';
+                    infoHtml += '<table class="tabela-validades">';
+                    infoHtml += '<tr><th>ID</th><th>LOTE</th><th>VALIDADE</th><th>ORDEM</th></tr>';
+                    
+                    // Recalcular ordens para cada unidade
+                    const resultadoGeral = calcularOrdemValidade('', todasUnidades);
+                    const posicaoPorData = {};
+                    resultadoGeral.datasOrdenadas.forEach((data, index) => {
+                        posicaoPorData[data] = index + 1;
                     });
-
-                    let validadesHtml = '<h4 style="color: #fbbf24; margin-bottom: 10px;">Todas as Validades:</h4>';
-                    validadesOrdenadas.forEach((v, index) => {
-                        const isAtual = v === validade;
-                        validadesHtml += `
-                            <div class="validade-item" style="${isAtual ? 'background: #334155; border-radius: 8px;' : ''}">
-                                <span>${v}</span>
-                                <span class="validade-ordem">${index + 1}º</span>
-                            </div>
-                        `;
+                    
+                    todasUnidades.forEach(u => {
+                        const posicao = posicaoPorData[u.validade] || 1;
+                        const ordinais = ['1º', '2º', '3º', '4º', '5º'];
+                        const ordemUnidade = ordinais[Math.min(posicao - 1, ordinais.length - 1)] || posicao + 'º';
+                        
+                        infoHtml += `<tr ${u.id === unidadeId ? 'class="atual"' : ''}>`;
+                        infoHtml += `<td>${u.id}</td>`;
+                        infoHtml += `<td>${u.lote}</td>`;
+                        infoHtml += `<td>${u.validade}</td>`;
+                        infoHtml += `<td><strong>${ordemUnidade}</strong></td>`;
+                        infoHtml += `</tr>`;
                     });
-
-                    document.getElementById('validadesList').innerHTML = validadesHtml;
+                    
+                    infoHtml += '</table>';
+                    document.getElementById('infoPaletes').innerHTML = infoHtml;
 
                     document.getElementById('info-id').innerHTML = `
-                        <i class="bi bi-upc-scan"></i> ID: ${unidadeId}
+                        <i class="bi bi-upc-scan"></i> ID: ${unidadeId} | Ordem: ${ordem}
                     `;
 
                 } catch (e) {
                     console.error('Erro:', e);
-                    qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
                 }
-            } else {
-                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Biblioteca QR Code não carregada</p>';
-                console.error('QRCode library not loaded');
             }
         }
 
-        // Função para baixar QR Code
-        function baixarQR() {
-            const canvas = document.querySelector('#qrcode canvas');
-            if (!canvas) {
-                alert('QR Code ainda não foi gerado!');
+        // Função para imprimir apenas a etiqueta
+        function imprimirEtiqueta() {
+            // Criar uma nova janela para impressão
+            const janelaImpressao = window.open('', '_blank');
+            
+            // Conteúdo HTML para impressão
+            const conteudoImpressao = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Etiqueta de Palete - ${ordem}</title>
+                    <style>
+                        body {
+                            font-family: 'Courier New', monospace;
+                            margin: 0;
+                            padding: 20px;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                        }
+                        .etiqueta {
+                            border: 2px solid #000;
+                            padding: 20px;
+                            width: 400px;
+                            margin: 0 auto;
+                            page-break-inside: avoid;
+                        }
+                        .etiqueta-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            border-bottom: 2px solid #000;
+                            padding-bottom: 10px;
+                            margin-bottom: 15px;
+                        }
+                        .etiqueta-codigo {
+                            font-size: 24px;
+                            font-weight: bold;
+                        }
+                        .etiqueta-ordem {
+                            font-size: 48px;
+                            font-weight: bold;
+                        }
+                        .etiqueta-descricao {
+                            font-size: 18px;
+                            font-weight: bold;
+                            margin: 15px 0;
+                            text-transform: uppercase;
+                        }
+                        .etiqueta-linha {
+                            display: flex;
+                            margin: 10px 0;
+                            font-size: 18px;
+                        }
+                        .etiqueta-label {
+                            font-weight: bold;
+                            width: 80px;
+                        }
+                        .etiqueta-valor {
+                            flex: 1;
+                        }
+                        .etiqueta-footer {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-top: 20px;
+                            padding-top: 10px;
+                            border-top: 2px solid #000;
+                            font-weight: bold;
+                            font-size: 20px;
+                        }
+                        .qr-code {
+                            text-align: center;
+                            margin: 20px 0;
+                        }
+                        @media print {
+                            body { padding: 0; }
+                            .etiqueta { box-shadow: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div>
+                        <div class="etiqueta">
+                            <div class="etiqueta-header">
+                                <div class="etiqueta-codigo">CODIGO:${sku}</div>
+                                <div class="etiqueta-ordem">${ordem}</div>
+                            </div>
+                            <div class="etiqueta-descricao">${produtoNome}</div>
+                            <div class="etiqueta-linha">
+                                <span class="etiqueta-label">LOTE:</span>
+                                <span class="etiqueta-valor">${lote}</span>
+                            </div>
+                            <div class="etiqueta-linha">
+                                <span class="etiqueta-label">VALIDADE:</span>
+                                <span class="etiqueta-valor">${validade}</span>
+                            </div>
+                            <div class="etiqueta-footer">
+                                <span>${volume} Kg</span>
+                                <span>${quantidade} ${unidade}</span>
+                            </div>
+                            <div class="qr-code">
+                                <img src="${document.querySelector('#qrcode canvas').toDataURL()}" style="width: 150px; height: 150px;">
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); window.close(); }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            janelaImpressao.document.write(conteudoImpressao);
+            janelaImpressao.document.close();
+        }
+
+        // Função para baixar a etiqueta como imagem
+        function baixarEtiqueta() {
+            // Criar um canvas para capturar a etiqueta
+            const etiquetaDiv = document.getElementById('etiquetaVisualizacao');
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            
+            if (!qrCanvas) {
+                alert('Aguarde o QR Code ser gerado!');
                 return;
             }
             
+            // Criar um canvas temporário
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Configurar tamanho do canvas
+            canvas.width = 500;
+            canvas.height = 400;
+            
+            // Fundo branco
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Desenhar a etiqueta
+            ctx.font = 'bold 20px "Courier New"';
+            ctx.fillStyle = 'black';
+            
+            // Cabeçalho
+            ctx.font = 'bold 24px "Courier New"';
+            ctx.fillText(`CODIGO:${sku}`, 20, 40);
+            ctx.font = 'bold 48px "Courier New"';
+            ctx.fillText(ordem, 380, 60);
+            
+            // Linha divisória
+            ctx.beginPath();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.moveTo(20, 80);
+            ctx.lineTo(480, 80);
+            ctx.stroke();
+            
+            // Descrição
+            ctx.font = 'bold 18px "Courier New"';
+            ctx.fillText(produtoNome.substring(0, 35), 20, 120);
+            
+            // Lote
+            ctx.font = '18px "Courier New"';
+            ctx.fillText('LOTE:', 20, 160);
+            ctx.font = 'bold 18px "Courier New"';
+            ctx.fillText(lote, 120, 160);
+            
+            // Validade
+            ctx.font = '18px "Courier New"';
+            ctx.fillText('VALIDADE:', 20, 200);
+            ctx.font = 'bold 18px "Courier New"';
+            ctx.fillText(validade, 140, 200);
+            
+            // Rodapé
+            ctx.beginPath();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.moveTo(20, 250);
+            ctx.lineTo(480, 250);
+            ctx.stroke();
+            
+            ctx.font = 'bold 20px "Courier New"';
+            ctx.fillText(`${volume} Kg`, 20, 290);
+            ctx.fillText(`${quantidade} ${unidade}`, 350, 290);
+            
+            // Desenhar QR Code
+            ctx.drawImage(qrCanvas, 150, 310, 150, 150);
+            
+            // Baixar imagem
             const link = document.createElement('a');
-            link.download = `etiqueta-palete-${ordem}-${unidadeId || 'unidade'}.png`;
+            link.download = `etiqueta-${ordem}-${unidadeId || 'palete'}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         }
 
-        // Gerar QR Code quando a página carregar
+        // Inicializar
         window.onload = function() {
+            atualizarEtiqueta();
             setTimeout(gerarQRCode, 100);
         };
 
         if (document.readyState === 'complete') {
+            atualizarEtiqueta();
             gerarQRCode();
         } else {
-            window.addEventListener('load', gerarQRCode);
+            window.addEventListener('load', function() {
+                atualizarEtiqueta();
+                gerarQRCode();
+            });
         }
     </script>
 </body>
