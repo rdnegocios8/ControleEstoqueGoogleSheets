@@ -485,39 +485,49 @@
         return { numero: 1, totalUnidades: 1 };
     }
 
+    // FUNÇÃO DE NORMALIZAÇÃO IGUALZINHA À DA TABELA
     const normalizarData = (dataStr) => {
         if (!dataStr) return '';
+        // Se já vier YYYY-MM-DD (da URL), mantém
+        if (dataStr.includes('-')) {
+            return dataStr;
+        }
+        // Se vier DD/MM/YYYY, converte para YYYY-MM-DD
         if (dataStr.includes('/')) {
             const partes = dataStr.split('/');
             return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
         }
-        return dataStr; // Já está YYYY-MM-DD
+        return dataStr;
     };
 
-    // IMPORTANTE: A data que vem da URL pode ser YYYY-MM-DD
-    // Precisamos normalizar a data atual também
-    const dataAtualNorm = normalizarData(validadeAtual);
+    // Normalizar TODAS as datas das unidades (que estão em DD/MM/YYYY)
+    const unidadesNormalizadas = unidadesDoSKU.map(u => ({
+        ...u,
+        dataNorm: normalizarData(u.validade)
+    }));
     
-    // Normalizar todas as datas das unidades
-    const datasUnicas = [...new Set(unidadesDoSKU.map(u => normalizarData(u.validade)))]
+    // Extrair datas únicas e ordenar (IGUAL À TABELA)
+    const datasUnicas = [...new Set(unidadesNormalizadas.map(u => u.dataNorm))]
         .filter(d => d)
         .sort();
 
+    // Normalizar a data atual (que vem da URL em YYYY-MM-DD)
+    const dataAtualNorm = normalizarData(validadeAtual);
+    
     console.log('Datas únicas:', datasUnicas);
     console.log('Data atual:', dataAtualNorm);
     
     // Encontrar posição (1-based)
     const index = datasUnicas.indexOf(dataAtualNorm);
-    const posicao = index >= 0 ? index + 1 : 1; // Se não achar, assume 1º
+    const posicao = index >= 0 ? index + 1 : 1;
     
-    console.log('Posição encontrada:', posicao);
+    console.log('Posição final:', posicao);
 
     return {
         numero: posicao,
         totalUnidades: unidadesDoSKU.length
     };
 }
-
         // Carregar dados da URL
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id') || 'UN-2EP1M8IO-9Y8R';
@@ -723,4 +733,5 @@
     </script>
 </body>
 </html>
+
 
