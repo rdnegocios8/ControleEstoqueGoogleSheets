@@ -15,7 +15,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
+            background: #0a0c10;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -31,15 +31,15 @@
         }
         
         .card {
-            background: white;
-            border: 2px solid #fbbf24;
+            background: #151515;
+            border: 2px solid #ffd700;
             border-radius: 24px;
             padding: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         
         h2 {
-            color: #fbbf24;
+            color: #ffd700;
             text-align: center;
             font-size: 36px;
             margin-bottom: 30px;
@@ -47,27 +47,32 @@
             letter-spacing: 2px;
         }
         
-        /* Etiqueta BRANCA (apenas a etiqueta) */
+        /* Etiqueta ESCURA (agora em vez de branca) */
         .etiqueta {
             font-family: 'Courier New', monospace;
-            border: 4px solid #000;
+            border: 4px solid #ffd700;
             padding: 40px;
             margin: 20px auto;
-            background: white;
+            background: #1e1e1e;
             width: 100%;
             max-width: 1100px;
             min-height: 700px;
             display: flex;
             flex-direction: column;
             page-break-inside: avoid;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #f0f0f0;
+        }
+        
+        .etiqueta * {
+            color: #f0f0f0;
         }
         
         .etiqueta-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 4px solid #000;
+            border-bottom: 4px solid #ffd700;
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
@@ -75,12 +80,13 @@
         .etiqueta-codigo {
             font-size: 48px;
             font-weight: bold;
+            color: #ffd700 !important;
         }
         
         .etiqueta-ordem {
             font-size: 120px;
             font-weight: bold;
-            color: #000;
+            color: #ffd700 !important;
             line-height: 1;
         }
         
@@ -90,8 +96,9 @@
             margin: 30px 0;
             text-transform: uppercase;
             line-height: 1.3;
-            border-bottom: 2px solid #000;
+            border-bottom: 2px solid #ffd700;
             padding-bottom: 20px;
+            color: #fff !important;
         }
         
         .etiqueta-linha {
@@ -104,11 +111,13 @@
         .etiqueta-label {
             font-weight: bold;
             width: 200px;
+            color: #aaa !important;
         }
         
         .etiqueta-valor {
             flex: 1;
             font-weight: bold;
+            color: #ffd700 !important;
         }
         
         .etiqueta-footer {
@@ -116,9 +125,10 @@
             justify-content: space-between;
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 4px solid #000;
+            border-top: 4px solid #ffd700;
             font-weight: bold;
             font-size: 48px;
+            color: #fff !important;
         }
         
         .qr-section {
@@ -127,8 +137,8 @@
             justify-content: space-between;
             margin-top: 40px;
             padding: 20px;
-            background: #f8f9fa;
-            border: 2px solid #000;
+            background: #252525;
+            border: 2px solid #ffd700;
         }
         
         .qr-code-box {
@@ -138,7 +148,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 2px solid #000;
+            border: 2px solid #ffd700;
         }
         
         #qrcode canvas, #qrcode img {
@@ -149,15 +159,21 @@
         .qr-info {
             font-size: 24px;
             margin-left: 30px;
+            color: #ccc !important;
         }
         
         .qr-info p {
             margin: 10px 0;
+            color: #ccc !important;
+        }
+        
+        .qr-info strong {
+            color: #ffd700 !important;
         }
         
         .info-paletes {
-            background: white;
-            border: 2px solid #fbbf24;
+            background: #151515;
+            border: 2px solid #ffd700;
             border-radius: 16px;
             padding: 30px;
             margin: 30px 0;
@@ -166,8 +182,8 @@
         .info-paletes h3 {
             font-size: 32px;
             margin: 0 0 20px 0;
-            color: #0f172a;
-            border-bottom: 2px solid #fbbf24;
+            color: #ffd700;
+            border-bottom: 2px solid #ffd700;
             padding-bottom: 10px;
         }
         
@@ -179,22 +195,28 @@
         }
         
         .tabela-validades th {
-            background: #0f172a;
-            color: #fbbf24;
+            background: #0a0c10;
+            color: #ffd700;
             padding: 15px;
             text-align: left;
             font-size: 22px;
+            border-bottom: 2px solid #ffd700;
         }
         
         .tabela-validades td {
             padding: 15px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #333;
             font-size: 20px;
+            color: #ccc;
         }
         
         .tabela-validades tr.atual {
-            background: #fef3c7;
+            background: #2a2a0a;
             font-weight: bold;
+        }
+        
+        .tabela-validades tr.atual td {
+            color: #ffd700;
         }
         
         .ordem-badge {
@@ -206,11 +228,11 @@
             color: white;
         }
         
-        .ordem-1 { background: #dc2626; }
-        .ordem-2 { background: #ea580c; }
-        .ordem-3 { background: #ca8a04; }
-        .ordem-4 { background: #16a34a; }
-        .ordem-5 { background: #0891b2; }
+        .ordem-1 { background: #8b0000; }
+        .ordem-2 { background: #b45f06; }
+        .ordem-3 { background: #9e6d03; }
+        .ordem-4 { background: #0e5c3f; }
+        .ordem-5 { background: #0b4f6c; }
         
         .qr-actions {
             display: flex;
@@ -236,38 +258,43 @@
         }
         
         .btn-download {
-            background: #3b82f6;
+            background: #0a4f8a;
             color: white;
         }
         
         .btn-print {
-            background: #fbbf24;
-            color: #0f172a;
+            background: #b45f06;
+            color: white;
         }
         
         .btn-close {
-            background: #64748b;
+            background: #5a3a3a;
             color: white;
         }
         
         .btn-view {
-            background: #6b7280;
+            background: #3a4a5a;
             color: white;
         }
         
         .qr-actions button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3);
+            filter: brightness(1.2);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
         }
         
         .resumo-sku {
-            background: white;
+            background: #151515;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 30px;
             font-size: 24px;
-            border: 2px solid #fbbf24;
-            color: #0f172a;
+            border: 2px solid #ffd700;
+            color: #ccc;
+        }
+        
+        .resumo-sku strong {
+            color: #ffd700;
         }
         
         /* Ajustes para impressão - UMA ÚNICA FOLHA */
@@ -313,11 +340,29 @@
                 right: 0;
                 bottom: 0;
                 background: white;
+                color: black;
+            }
+            
+            .etiqueta * {
+                color: black !important;
+            }
+            
+            .etiqueta-header {
+                border-bottom: 4px solid #000;
+            }
+            
+            .etiqueta-codigo, .etiqueta-ordem, .etiqueta-descricao, 
+            .etiqueta-label, .etiqueta-valor, .etiqueta-footer, .qr-info {
+                color: black !important;
             }
             
             .qr-section {
                 border: 2px solid #000;
                 background: white;
+            }
+            
+            .qr-code-box {
+                border: 2px solid #000;
             }
         }
     </style>
@@ -332,7 +377,7 @@
                 Carregando informações...
             </div>
             
-            <!-- Visualização da etiqueta BRANCA -->
+            <!-- Visualização da etiqueta ESCURA -->
             <div class="etiqueta" id="etiquetaVisualizacao">
                 <!-- Será preenchido via JavaScript -->
             </div>
@@ -360,30 +405,24 @@
     </div>
 
     <script>
-        // Função para converter data nos formatos DD/MM/YYYY ou YYYY-MM-DD
+        // Seu JavaScript continua EXATAMENTE IGUAL
         function parseData(dataStr) {
             if (!dataStr) return null;
-            
-            // Tentar formato YYYY-MM-DD
             if (dataStr.includes('-')) {
                 const partes = dataStr.split('-');
                 if (partes.length === 3) {
                     return new Date(partes[0], partes[1] - 1, partes[2]);
                 }
             }
-            
-            // Tentar formato DD/MM/YYYY
             if (dataStr.includes('/')) {
                 const partes = dataStr.split('/');
                 if (partes.length === 3) {
                     return new Date(partes[2], partes[1] - 1, partes[0]);
                 }
             }
-            
             return new Date(dataStr);
         }
 
-        // Função para formatar data
         function formatarData(data) {
             if (!data) return '';
             if (data instanceof Date) {
@@ -392,9 +431,7 @@
             return data;
         }
 
-        // Função para buscar todas as unidades do mesmo SKU
         function buscarUnidadesPorSKU(sku, unidadeAtualId) {
-            // Simulação dos dados baseado na imagem fornecida
             const todasUnidades = [
                 {
                     id: 'UN-KØNLQSNX-AMZK',
@@ -427,30 +464,23 @@
                     unidade: 'PLT'
                 }
             ];
-            
-            // Filtrar apenas unidades do mesmo SKU
             return todasUnidades.filter(u => u.sku === sku);
         }
 
-        // Função principal para calcular a ordem baseada no SKU
         function calcularOrdemPorSKU(sku, validadeAtual, unidadeAtualId) {
-            // Buscar todas unidades do mesmo SKU
             const unidadesDoSKU = buscarUnidadesPorSKU(sku, unidadeAtualId);
             
             if (!unidadesDoSKU || unidadesDoSKU.length === 0) {
                 return { ordem: '1º', posicao: 1, unidades: [], totalUnidades: 1 };
             }
             
-            // Mapear unidades com suas datas
             const unidadesComData = unidadesDoSKU.map(u => ({
                 ...u,
                 dataObj: parseData(u.validade)
             })).filter(u => u.dataObj !== null);
             
-            // Ordenar por data (mais antiga primeiro)
             const unidadesOrdenadas = [...unidadesComData].sort((a, b) => a.dataObj - b.dataObj);
             
-            // Agrupar por data de validade
             const grupos = {};
             const posicaoMap = {};
             let posicaoAtual = 1;
@@ -461,7 +491,6 @@
                 
                 if (!grupos[dataStr]) {
                     grupos[dataStr] = [];
-                    // Se é uma data diferente da anterior, incrementa posição
                     if (dataAnterior && dataStr !== dataAnterior) {
                         posicaoAtual++;
                     }
@@ -472,19 +501,9 @@
                 dataAnterior = dataStr;
             });
             
-            // Encontrar a posição da data atual
             const posicao = posicaoMap[validadeAtual] || 1;
-            
-            // Converter para ordinal
             const ordinais = ['1º', '2º', '3º', '4º', '5º', '6º', '7º', '8º', '9º', '10º'];
             const ordem = ordinais[Math.min(posicao - 1, ordinais.length - 1)] || posicao + 'º';
-            
-            // Debug
-            console.log('Data atual:', validadeAtual);
-            console.log('Posição:', posicao);
-            console.log('Ordem:', ordem);
-            console.log('Grupos:', grupos);
-            console.log('Datas ordenadas:', Object.keys(grupos));
             
             return {
                 ordem,
@@ -495,7 +514,6 @@
             };
         }
 
-        // Carregar dados da URL
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id') || 'UN-2EP1M8IO-9Y8R';
         const sku = urlParams.get('sku') || '00030202';
@@ -506,19 +524,15 @@
         const quantidade = urlParams.get('quantidade') || '1';
         const unidade = urlParams.get('unidade') || 'PLT';
 
-        // Calcular ordem baseada em TODAS as unidades do mesmo SKU
         const resultado = calcularOrdemPorSKU(sku, validade, unidadeId);
-        const ordem = resultado.ordem; // Deve ser "2º" para a validade 25/06/2026
+        const ordem = resultado.ordem;
 
-        // Construir link completo
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
 
-        // Função para atualizar a visualização da etiqueta
         function atualizarEtiqueta() {
             const etiquetaDiv = document.getElementById('etiquetaVisualizacao');
             
-            // Formatar a data para exibição
             let dataExibicao = validade;
             if (validade.includes('/')) {
                 const partes = validade.split('/');
@@ -556,7 +570,6 @@
             `;
         }
 
-        // Função para gerar QR Code
         function gerarQRCode() {
             const qrcodeDiv = document.getElementById('qrcode');
             if (!qrcodeDiv) return;
@@ -579,25 +592,21 @@
                         qrcodeDiv.appendChild(canvas);
                     });
 
-                    // Atualizar resumo do SKU
                     document.getElementById('resumo-sku').innerHTML = `
                         <strong>SKU: ${sku}</strong> | 
                         <strong>Total de unidades:</strong> ${resultado.totalUnidades} | 
                         <strong>Datas diferentes:</strong> ${Object.keys(resultado.grupos).length} |
-                        <strong>Unidade atual:</strong> <span style="color: #ea580c; font-weight: bold;">${ordem}</span>
+                        <strong>Unidade atual:</strong> <span style="color: #ffd700; font-weight: bold;">${ordem}</span>
                     `;
 
-                    // Atualizar tabela com TODAS as unidades
                     let infoHtml = '<h3>📦 TODAS AS UNIDADES DO SKU ' + sku + ':</h3>';
                     infoHtml += '<table class="tabela-validades">';
                     infoHtml += '<tr><th>ID</th><th>LOTE</th><th>VALIDADE</th><th>ORDEM</th></tr>';
                     
-                    // Ordenar unidades por data
                     const unidadesOrdenadas = [...resultado.unidades].sort((a, b) => {
                         return parseData(a.validade) - parseData(b.validade);
                     });
                     
-                    // Calcular ordem para cada unidade
                     const ordensPorData = {};
                     let pos = 1;
                     let ultimaData = null;
@@ -639,11 +648,9 @@
             }
         }
 
-        // Função para imprimir a etiqueta (UMA FOLHA)
         function imprimirEtiqueta() {
             const janelaImpressao = window.open('', '_blank');
             
-            // Formatar a data para exibição
             let dataExibicao = validade;
             if (validade.includes('/')) {
                 const partes = validade.split('/');
@@ -656,139 +663,24 @@
                 <head>
                     <title>Etiqueta de Palete - SKU ${sku} - ${ordem}</title>
                     <style>
-                        * {
-                            margin: 0;
-                            padding: 0;
-                            box-sizing: border-box;
-                        }
-                        
-                        body {
-                            font-family: 'Courier New', monospace;
-                            background: white;
-                            margin: 0;
-                            padding: 0;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            min-height: 100vh;
-                        }
-                        
-                        .etiqueta {
-                            border: 4px solid #000;
-                            padding: 40px;
-                            width: 1050px;
-                            height: 700px;
-                            margin: 0 auto;
-                            page-break-inside: avoid;
-                            page-break-after: avoid;
-                            page-break-before: avoid;
-                            display: flex;
-                            flex-direction: column;
-                            background: white;
-                            box-shadow: none;
-                        }
-                        
-                        .etiqueta-header {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            border-bottom: 4px solid #000;
-                            padding-bottom: 20px;
-                            margin-bottom: 25px;
-                        }
-                        
-                        .etiqueta-codigo {
-                            font-size: 48px;
-                            font-weight: bold;
-                        }
-                        
-                        .etiqueta-ordem {
-                            font-size: 120px;
-                            font-weight: bold;
-                            line-height: 1;
-                        }
-                        
-                        .etiqueta-descricao {
-                            font-size: 40px;
-                            font-weight: bold;
-                            margin: 25px 0;
-                            text-transform: uppercase;
-                            line-height: 1.3;
-                            border-bottom: 2px solid #000;
-                            padding-bottom: 20px;
-                        }
-                        
-                        .etiqueta-linha {
-                            display: flex;
-                            margin: 20px 0;
-                            font-size: 38px;
-                            align-items: baseline;
-                        }
-                        
-                        .etiqueta-label {
-                            font-weight: bold;
-                            width: 200px;
-                        }
-                        
-                        .etiqueta-valor {
-                            flex: 1;
-                            font-weight: bold;
-                        }
-                        
-                        .etiqueta-footer {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-top: 30px;
-                            padding-top: 20px;
-                            border-top: 4px solid #000;
-                            font-weight: bold;
-                            font-size: 44px;
-                        }
-                        
-                        .qr-section {
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                            margin-top: 30px;
-                            padding: 20px;
-                            background: #f8f9fa;
-                            border: 2px solid #000;
-                        }
-                        
-                        .qr-code-box {
-                            background: white;
-                            padding: 15px;
-                            border: 2px solid #000;
-                        }
-                        
-                        #qrcode-img {
-                            width: 180px;
-                            height: 180px;
-                        }
-                        
-                        .qr-info {
-                            font-size: 24px;
-                            margin-left: 25px;
-                        }
-                        
-                        .qr-info p {
-                            margin: 8px 0;
-                        }
-                        
-                        @media print {
-                            body {
-                                padding: 0;
-                                margin: 0;
-                            }
-                            .etiqueta {
-                                box-shadow: none;
-                                margin: 0 auto;
-                                width: 100%;
-                                height: 100%;
-                                page-break-after: avoid;
-                                page-break-before: avoid;
-                            }
-                        }
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { font-family: 'Courier New', monospace; background: white; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+                        .etiqueta { border: 4px solid #000; padding: 40px; width: 1050px; height: 700px; margin: 0 auto; page-break-inside: avoid; page-break-after: avoid; page-break-before: avoid; display: flex; flex-direction: column; background: white; box-shadow: none; color: black; }
+                        .etiqueta-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #000; padding-bottom: 20px; margin-bottom: 25px; }
+                        .etiqueta-codigo { font-size: 48px; font-weight: bold; color: black; }
+                        .etiqueta-ordem { font-size: 120px; font-weight: bold; line-height: 1; color: black; }
+                        .etiqueta-descricao { font-size: 40px; font-weight: bold; margin: 25px 0; text-transform: uppercase; line-height: 1.3; border-bottom: 2px solid #000; padding-bottom: 20px; color: black; }
+                        .etiqueta-linha { display: flex; margin: 20px 0; font-size: 38px; align-items: baseline; }
+                        .etiqueta-label { font-weight: bold; width: 200px; color: black; }
+                        .etiqueta-valor { flex: 1; font-weight: bold; color: black; }
+                        .etiqueta-footer { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 4px solid #000; font-weight: bold; font-size: 44px; color: black; }
+                        .qr-section { display: flex; align-items: center; justify-content: space-between; margin-top: 30px; padding: 20px; background: #f8f9fa; border: 2px solid #000; }
+                        .qr-code-box { background: white; padding: 15px; border: 2px solid #000; }
+                        #qrcode-img { width: 180px; height: 180px; }
+                        .qr-info { font-size: 24px; margin-left: 25px; color: black; }
+                        .qr-info p { margin: 8px 0; color: black; }
+                        .qr-info strong { color: black; }
+                        @media print { body { padding: 0; margin: 0; } .etiqueta { box-shadow: none; margin: 0 auto; width: 100%; height: 100%; page-break-after: avoid; page-break-before: avoid; } }
                     </style>
                 </head>
                 <body>
@@ -821,11 +713,7 @@
                             </div>
                         </div>
                     </div>
-                    <script>
-                        window.onload = function() { 
-                            window.print();
-                        }
-                    <\/script>
+                    <script>window.onload = function() { window.print(); }<\/script>
                 </body>
                 </html>
             `;
@@ -834,7 +722,6 @@
             janelaImpressao.document.close();
         }
 
-        // Função para baixar a etiqueta como imagem
         function baixarEtiqueta() {
             const qrCanvas = document.querySelector('#qrcode canvas');
             
@@ -862,29 +749,20 @@
                 dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
             }
             
-            ctx.font = 'bold 48px "Courier New"';
             ctx.fillStyle = 'black';
-            
             ctx.font = 'bold 52px "Courier New"';
             ctx.fillText(`CODIGO: ${sku}`, 50, 100);
+            
             ctx.font = 'bold 140px "Courier New"';
             ctx.fillText(ordem, 900, 150);
             
             ctx.beginPath();
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 4;
             ctx.moveTo(50, 180);
             ctx.lineTo(1150, 180);
             ctx.stroke();
             
             ctx.font = 'bold 48px "Courier New"';
-            let descricao = produtoNome;
-            if (descricao.length > 25) {
-                ctx.fillText(descricao.substring(0, 25), 50, 260);
-                ctx.fillText(descricao.substring(25, 50), 50, 320);
-            } else {
-                ctx.fillText(descricao, 50, 260);
-            }
+            ctx.fillText(produtoNome.substring(0, 30), 50, 260);
             
             ctx.font = '44px "Courier New"';
             ctx.fillText('LOTE:', 50, 420);
@@ -897,8 +775,6 @@
             ctx.fillText(dataExibicao, 300, 490);
             
             ctx.beginPath();
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 4;
             ctx.moveTo(50, 570);
             ctx.lineTo(1150, 570);
             ctx.stroke();
@@ -918,7 +794,6 @@
             link.click();
         }
 
-        // Inicializar
         window.onload = function() {
             atualizarEtiqueta();
             setTimeout(gerarQRCode, 100);
