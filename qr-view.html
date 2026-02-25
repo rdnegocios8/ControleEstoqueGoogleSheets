@@ -90,7 +90,6 @@
             line-height: 1;
         }
         
-        /* ESTILO CORRIGIDO PARA O ORDINAL */
         .etiqueta-ordem sup {
             font-size: 0.55em;
             vertical-align: super;
@@ -311,7 +310,6 @@
             color: #ffd700;
         }
         
-        /* Ajustes para impressão */
         @media print {
             body {
                 background: white;
@@ -391,19 +389,16 @@
         <div class="card">
             <h2>🏷️ Etiqueta de Palete - Ordem Rotativa</h2>
             
-            <!-- Resumo do SKU -->
             <div class="resumo-sku" id="resumo-sku">
                 Carregando informações...
             </div>
             
-            <!-- Visualização da etiqueta ESCURA -->
             <div class="etiqueta" id="etiquetaVisualizacao">
-                <!-- Será preenchido via JavaScript -->
+                <!-- Preenchido via JavaScript -->
             </div>
             
-            <!-- Informações de todos os paletes do mesmo SKU -->
             <div class="info-paletes" id="infoPaletes">
-                <!-- Será preenchido via JavaScript -->
+                <!-- Preenchido via JavaScript -->
             </div>
             
             <div class="qr-actions">
@@ -424,21 +419,7 @@
     </div>
 
     <script>
-        // Função para converter data
-        function parseData(dataStr) {
-            if (!dataStr) return null;
-            if (dataStr.includes('-')) {
-                const partes = dataStr.split('-');
-                return new Date(partes[0], partes[1] - 1, partes[2]);
-            }
-            if (dataStr.includes('/')) {
-                const partes = dataStr.split('/');
-                return new Date(partes[2], partes[1] - 1, partes[0]);
-            }
-            return new Date(dataStr);
-        }
-
-        // Função para buscar unidades do mesmo SKU
+        // Função para buscar todas as unidades do mesmo SKU
         function buscarUnidadesPorSKU(sku, unidadeAtualId) {
             const todasUnidades = [
                 {
@@ -475,92 +456,84 @@
             return todasUnidades.filter(u => u.sku === sku);
         }
 
-        // ============================================
-        // FUNÇÃO CORRIGIDA - USA LÓGICA DE DATAS ÚNICAS
-        // ============================================
-        function calcularOrdemPorSKU(sku, validadeAtual, unidadeAtualId) {
-    const unidadesDoSKU = buscarUnidadesPorSKU(sku, unidadeAtualId);
-    
-    if (!unidadesDoSKU || unidadesDoSKU.length === 0) {
-        return { numero: 1, totalUnidades: 1 };
-    }
-
-    // FUNÇÃO DE NORMALIZAÇÃO IGUALZINHA À DA TABELA
-    const normalizarData = (dataStr) => {
-        if (!dataStr) return '';
-        // Se já vier YYYY-MM-DD (da URL), mantém
-        if (dataStr.includes('-')) {
-            return dataStr;
-        }
-        // Se vier DD/MM/YYYY, converte para YYYY-MM-DD
-        if (dataStr.includes('/')) {
-            const partes = dataStr.split('/');
-            return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
-        }
-        return dataStr;
-    };
-
-    // Normalizar TODAS as datas das unidades (que estão em DD/MM/YYYY)
-    const unidadesNormalizadas = unidadesDoSKU.map(u => ({
-        ...u,
-        dataNorm: normalizarData(u.validade)
-    }));
-    
-    // Extrair datas únicas e ordenar (IGUAL À TABELA)
-    const datasUnicas = [...new Set(unidadesNormalizadas.map(u => u.dataNorm))]
-        .filter(d => d)
-        .sort();
-
-    // Normalizar a data atual (que vem da URL em YYYY-MM-DD)
-    const dataAtualNorm = normalizarData(validadeAtual);
-    
-    console.log('Datas únicas:', datasUnicas);
-    console.log('Data atual:', dataAtualNorm);
-    
-    // Encontrar posição (1-based)
-    const index = datasUnicas.indexOf(dataAtualNorm);
-    const posicao = index >= 0 ? index + 1 : 1;
-    
-    console.log('Posição final:', posicao);
-
-    return {
-        numero: posicao,
-        totalUnidades: unidadesDoSKU.length
-    };
-}
         // Carregar dados da URL
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id') || 'UN-2EP1M8IO-9Y8R';
         const sku = urlParams.get('sku') || '00030202';
         const lote = urlParams.get('lote') || 'AAACS60101';
-        const validade = urlParams.get('validade') || '25/06/2026';
+        const validade = urlParams.get('validade') || '2026-06-26';
         const produtoNome = decodeURIComponent(urlParams.get('produto') || 'FILME BISC. ROSQUINHA COCO EMEGE 600GR');
         const volume = urlParams.get('volume') || '535.87';
         const quantidade = urlParams.get('quantidade') || '1';
         const unidade = urlParams.get('unidade') || 'PLT';
 
-        // Calcular ordem
-        const resultado = calcularOrdemPorSKU(sku, validade, unidadeId);
-        const numeroOrdem = resultado.numero; // Agora é 2 (não "2º")
+        // ============================================
+        // SOLUÇÃO DEFINITIVA - USA A LISTA COMO REFERÊNCIA
+        // ============================================
+        
+        // Buscar todas unidades do SKU
+        const todasUnidades = buscarUnidadesPorSKU(sku, unidadeId);
+
+        // Função de normalização (igual da lista)
+        const normalizarData = (dataStr) => {
+            if (!dataStr) return '';
+            // Se já vier YYYY-MM-DD (da URL), mantém
+            if (dataStr.includes('-')) {
+                return dataStr;
+            }
+            // Se vier DD/MM/YYYY (dos dados), converte
+            if (dataStr.includes('/')) {
+                const partes = dataStr.split('/');
+                return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+            }
+            return dataStr;
+        };
+
+        // Ordenar unidades por data (igual da lista)
+        const unidadesOrdenadas = [...todasUnidades].sort((a, b) => {
+            const dataA = normalizarData(a.validade);
+            const dataB = normalizarData(b.validade);
+            return dataA.localeCompare(dataB);
+        });
+
+        // Extrair datas únicas (igual da lista)
+        const datasUnicas = [...new Set(unidadesOrdenadas.map(u => normalizarData(u.validade)))].sort();
+
+        // Encontrar a posição da unidade atual
+        const dataAtualNorm = normalizarData(validade);
+        const posicaoNaLista = datasUnicas.indexOf(dataAtualNorm) + 1;
+
+        // VARIÁVEL QUE PUXA DA LISTA - esta é a ordem correta!
+        const numeroOrdem = posicaoNaLista; // 2 para a unidade 25/06/2026
+
+        console.log('📊 DATAS ÚNICAS:', datasUnicas);
+        console.log('📍 DATA ATUAL:', dataAtualNorm);
+        console.log('🎯 ORDEM DA UNIDADE:', numeroOrdem); // DEVE SER 2!
+
+        // Mapa de ordens para usar na tabela
+        const mapaOrdem = {};
+        unidadesOrdenadas.forEach(u => {
+            const dataNorm = normalizarData(u.validade);
+            const pos = datasUnicas.indexOf(dataNorm) + 1;
+            mapaOrdem[u.id] = pos;
+        });
 
         // Construir link QR Code
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
 
-        // ============================================
-        // FUNÇÃO ATUALIZADA - USA HTML PARA O ORDINAL
-        // ============================================
+        // Função para atualizar a etiqueta
         function atualizarEtiqueta() {
             const etiquetaDiv = document.getElementById('etiquetaVisualizacao');
             
-            // Formatar data
+            // Formatar data para exibição
             let dataExibicao = validade;
-            if (validade.includes('/')) {
-                const partes = validade.split('/');
-                dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
+            if (validade.includes('-')) {
+                const partes = validade.split('-');
+                dataExibicao = `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
             
-            // Criar HTML do ordinal: número + <sup>º</sup>
+            // Criar HTML do ordinal
             const ordemHTML = `${numeroOrdem}<sup>º</sup>`;
             
             etiquetaDiv.innerHTML = `
@@ -587,7 +560,7 @@
                     </div>
                     <div class="qr-info">
                         <p><strong>SKU:</strong> ${sku}</p>
-                        <p><strong>Total:</strong> ${resultado.totalUnidades} unidades</p>
+                        <p><strong>Total:</strong> ${todasUnidades.length} unidades</p>
                         <p><strong>ID:</strong> ${unidadeId.substring(0, 15)}...</p>
                     </div>
                 </div>
@@ -612,30 +585,17 @@
             // Atualizar resumo
             document.getElementById('resumo-sku').innerHTML = `
                 <strong>SKU: ${sku}</strong> | 
-                <strong>Total de unidades:</strong> ${resultado.totalUnidades} | 
+                <strong>Total de unidades:</strong> ${todasUnidades.length} | 
                 <strong>Unidade atual:</strong> <span style="color: #ffd700; font-weight: bold;">${numeroOrdem}º</span>
             `;
 
-            // Gerar tabela
-            const unidades = buscarUnidadesPorSKU(sku);
-            const normalizarData = (d) => {
-                if (!d) return '';
-                const partes = d.split('/');
-                return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
-            };
-            
-            const ordenadas = [...unidades].sort((a, b) => 
-                normalizarData(a.validade).localeCompare(normalizarData(b.validade))
-            );
-            
-            const datasUnicas = [...new Set(ordenadas.map(u => normalizarData(u.validade)))].sort();
-            
+            // Gerar tabela (usando o mapa de ordens já calculado)
             let infoHtml = '<h3>📦 TODAS AS UNIDADES DO SKU ' + sku + ':</h3>';
-            infoHtml += '<table class="tabela-validades"><tr><th>ID</th><th>LOTE</th><th>VALIDADE</th><th>ORDEM</th></tr>';
+            infoHtml += '<table class="tabela-validades">';
+            infoHtml += '<tr><th>ID</th><th>LOTE</th><th>VALIDADE</th><th>ORDEM</th></tr>';
             
-            ordenadas.forEach(u => {
-                const dataNorm = normalizarData(u.validade);
-                const pos = datasUnicas.indexOf(dataNorm) + 1;
+            unidadesOrdenadas.forEach(u => {
+                const pos = mapaOrdem[u.id];
                 const ordemBadge = `${pos}<sup>º</sup>`;
                 
                 infoHtml += `<tr ${u.id === unidadeId ? 'class="atual"' : ''}>`;
@@ -675,9 +635,9 @@
             ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
             
             let dataExibicao = validade;
-            if (validade.includes('/')) {
-                const partes = validade.split('/');
-                dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
+            if (validade.includes('-')) {
+                const partes = validade.split('-');
+                dataExibicao = `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
             
             ctx.fillStyle = 'black';
@@ -717,7 +677,7 @@
             ctx.drawImage(qrCanvas, 150, 680, 150, 150);
             
             ctx.font = '24px "Courier New"';
-            ctx.fillText(`SKU: ${sku} | Total: ${resultado.totalUnidades} unidades`, 350, 780);
+            ctx.fillText(`SKU: ${sku} | Total: ${todasUnidades.length} unidades`, 350, 780);
             
             const link = document.createElement('a');
             link.download = `etiqueta-${sku}-${numeroOrdem}.png`;
@@ -733,5 +693,3 @@
     </script>
 </body>
 </html>
-
-
