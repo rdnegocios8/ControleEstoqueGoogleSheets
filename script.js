@@ -1577,6 +1577,109 @@ function formatarData(data) {
     return d.toLocaleDateString('pt-BR');
 }
 
+// ============================================
+// FUNÇÕES DE BUSCA DE PRODUTOS NO MODAL
+// ============================================
+
+// Preencher a lista de produtos
+function preencherListaProdutos() {
+    const container = document.getElementById('lista-produtos');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
+        const item = document.createElement('a');
+        item.href = '#';
+        item.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary';
+        item.setAttribute('data-sku', p.sku);
+        item.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span>${p.nome}</span>
+                <small class="text-muted">${p.sku} - ${p.tipoEmbalagem}</small>
+            </div>
+            <small class="text-info">${p.categoria}</small>
+        `;
+        
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            selecionarProduto(p.sku, p.nome, p.tipoEmbalagem, p.qtdPorEmbalagem, p.unidadeBase);
+        });
+        
+        container.appendChild(item);
+    });
+}
+
+// Selecionar um produto
+function selecionarProduto(sku, nome, tipoEmbalagem, qtdPorEmbalagem, unidadeBase) {
+    document.getElementById('unidade-sku').value = sku;
+    document.getElementById('busca-produto').value = nome;
+    document.getElementById('lista-produtos-container').style.display = 'none';
+    
+    // Atualizar informações da embalagem
+    document.getElementById('volume-label').textContent = `Volume (${tipoEmbalagem})`;
+    document.getElementById('volume-descricao').textContent = `Número de ${tipoEmbalagem}`;
+    document.getElementById('quantidade-unidade').textContent = `(${unidadeBase})`;
+    document.getElementById('quantidade-descricao').textContent = `Total em ${unidadeBase}`;
+    
+    // Recalcular quantidade
+    calcularQuantidadeAutomatica();
+}
+
+// Filtrar produtos conforme digitação
+function filtrarProdutosLista() {
+    const termo = document.getElementById('busca-produto').value.toLowerCase();
+    const container = document.getElementById('lista-produtos');
+    const items = container.getElementsByClassName('list-group-item');
+    let hasVisible = false;
+    
+    Array.from(items).forEach(item => {
+        const texto = item.textContent.toLowerCase();
+        if (texto.includes(termo)) {
+            item.style.display = 'block';
+            hasVisible = true;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('lista-produtos-container').style.display = hasVisible ? 'block' : 'none';
+}
+
+// Abrir modal unidade (modificada)
+function abrirModalUnidade(sku) {
+    preencherListaProdutos();
+    document.getElementById('form-unidade').reset();
+    document.getElementById('unidade-id').value = '';
+    document.getElementById('unidade-sku').value = sku || '';
+    document.getElementById('unidade-volume').value = '1';
+    document.getElementById('unidade-status').value = 'Disponível';
+    document.getElementById('campo-quantidade-real').style.display = 'none';
+    document.getElementById('lista-produtos-container').style.display = 'none';
+    
+    if (sku) {
+        const produto = produtos.find(p => p.sku === sku);
+        if (produto) {
+            document.getElementById('busca-produto').value = produto.nome;
+            selecionarProduto(produto.sku, produto.nome, produto.tipoEmbalagem, produto.qtdPorEmbalagem, produto.unidadeBase);
+        }
+    } else {
+        document.getElementById('busca-produto').value = '';
+        document.getElementById('quantidade-unidade').textContent = '(UN)';
+        document.getElementById('quantidade-descricao').textContent = 'Total em UN';
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalUnidade'));
+    modal.show();
+}
+
+// Event listener para o campo de busca
+document.getElementById('busca-produto')?.addEventListener('keyup', filtrarProdutosLista);
+document.getElementById('busca-produto')?.addEventListener('focus', () => {
+    if (document.getElementById('busca-produto').value) {
+        filtrarProdutosLista();
+    }
+});
 
 
 
