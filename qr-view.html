@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code da Unidade</title>
+    <title>Etiqueta de Palete - Validade Rotativa</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <!-- Usando biblioteca mais estável -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
         body {
@@ -60,6 +59,31 @@
             border-bottom: none;
         }
         
+        .ordem-badge {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0f172a;
+            font-size: 3.5rem;
+            font-weight: 800;
+            padding: 20px;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 4px solid white;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
+        }
+        
+        .ordem-texto {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
         .qr-code-box {
             background: linear-gradient(135deg, #ffffff, #f8fafc);
             padding: 25px;
@@ -102,6 +126,34 @@
             width: 120px;
             display: inline-block;
             font-weight: 600;
+        }
+        
+        .validades-list {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .validade-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #334155;
+            color: #cbd5e1;
+        }
+        
+        .validade-item:last-child {
+            border-bottom: none;
+        }
+        
+        .validade-ordem {
+            background: #fbbf24;
+            color: #0f172a;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
         }
         
         .qr-actions {
@@ -216,8 +268,12 @@
     <div class="qr-container">
         <div class="qr-card">
             <div class="badge-unidade">
-                <i class="bi bi-qr-code-scan"></i> QR CODE DA UNIDADE
+                <i class="bi bi-palette-fill"></i> ETIQUETA DE PALETE
             </div>
+            
+            <!-- Badge de ordem rotativa -->
+            <div class="ordem-badge" id="ordemBadge">4º</div>
+            <div class="ordem-texto" id="ordemTexto">ORDEM DE VALIDADE</div>
             
             <div class="qr-code-box" id="qr-code-container">
                 <div id="qrcode"></div>
@@ -229,6 +285,11 @@
             
             <div class="volume-info" id="volume-info">
                 <!-- Informações de volume serão preenchidas -->
+            </div>
+            
+            <!-- Lista de validades -->
+            <div class="validades-list" id="validadesList">
+                <!-- Lista será preenchida via JavaScript -->
             </div>
             
             <div class="info-id" id="info-id"></div>
@@ -248,6 +309,57 @@
     </div>
 
     <script>
+        // Função para parsear data no formato DD/MM/YYYY
+        function parseData(dataStr) {
+            if (!dataStr) return null;
+            const partes = dataStr.split('/');
+            if (partes.length === 3) {
+                return new Date(partes[2], partes[1] - 1, partes[0]);
+            }
+            return new Date(dataStr);
+        }
+
+        // Função para formatar data
+        function formatarData(data) {
+            if (!data) return 'N/A';
+            return data.toLocaleDateString('pt-BR');
+        }
+
+        // Função para calcular ordem baseada nas validades
+        function calcularOrdemValidade(dataAtual, todasValidades) {
+            if (!dataAtual || !todasValidades || todasValidades.length === 0) return '1º';
+            
+            // Converter todas as validades para objetos Date
+            const datas = todasValidades.map(v => parseData(v)).filter(d => d !== null);
+            
+            // Ordenar datas (mais antiga primeiro)
+            datas.sort((a, b) => a - b);
+            
+            // Encontrar a posição da data atual
+            const dataAtualObj = parseData(dataAtual);
+            if (!dataAtualObj) return '1º';
+            
+            let posicao = 1;
+            let dataAnterior = null;
+            
+            for (let i = 0; i < datas.length; i++) {
+                if (datas[i].getTime() === dataAtualObj.getTime()) {
+                    // Se é a mesma data, usa a mesma posição da anterior
+                    if (dataAnterior && datas[i].getTime() === dataAnterior.getTime()) {
+                        posicao = i; // Mesma posição da anterior
+                    } else {
+                        posicao = i + 1;
+                    }
+                    break;
+                }
+                dataAnterior = datas[i];
+            }
+            
+            // Converter para ordinal
+            const ordinais = ['1º', '2º', '3º', '4º', '5º', '6º', '7º', '8º', '9º', '10º'];
+            return ordinais[Math.min(posicao - 1, ordinais.length - 1)] || posicao + 'º';
+        }
+
         // Carregar dados da URL
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id');
@@ -258,6 +370,13 @@
         const volume = urlParams.get('volume') || '0';
         const quantidade = urlParams.get('quantidade') || '0';
         const unidade = urlParams.get('unidade') || 'UN';
+        
+        // Receber lista de validades (separadas por vírgula)
+        const validadesStr = urlParams.get('validades') || '';
+        const todasValidades = validadesStr ? validadesStr.split(',').map(v => v.trim()) : [validade];
+
+        // Calcular ordem
+        const ordem = calcularOrdemValidade(validade, todasValidades);
 
         // Construir link completo
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
@@ -271,6 +390,23 @@
             if (!unidadeId) {
                 qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID da unidade não encontrado</p>';
                 return;
+            }
+
+            // Atualizar badge de ordem
+            document.getElementById('ordemBadge').textContent = ordem;
+            
+            // Destacar a ordem
+            if (ordem === '1º') {
+                document.getElementById('ordemBadge').style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                document.getElementById('ordemTexto').textContent = 'PRIMEIRO A VENCER';
+            } else if (ordem === '2º') {
+                document.getElementById('ordemBadge').style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                document.getElementById('ordemTexto').textContent = 'SEGUNDO A VENCER';
+            } else if (ordem === '3º') {
+                document.getElementById('ordemBadge').style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                document.getElementById('ordemTexto').textContent = 'TERCEIRO A VENCER';
+            } else {
+                document.getElementById('ordemBadge').style.background = 'linear-gradient(135deg, #fbbf24, #f59e0b)';
             }
 
             // Usar a biblioteca QRCode.js
@@ -304,7 +440,8 @@
                         <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
                         <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
                         <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
-                        <p><strong>Validade:</strong> ${validade ? new Date(validade).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                        <p><strong>Validade:</strong> ${validade || 'N/A'}</p>
+                        <p><strong>Ordem:</strong> <span style="color: #fbbf24; font-weight: bold;">${ordem}</span></p>
                     `;
 
                     document.getElementById('volume-info').innerHTML = `
@@ -317,6 +454,27 @@
                             <div class="volume-label">UNIDADES</div>
                         </div>
                     `;
+
+                    // Criar lista de validades
+                    const validadesOrdenadas = [...todasValidades].sort((a, b) => {
+                        const dataA = parseData(a);
+                        const dataB = parseData(b);
+                        if (!dataA || !dataB) return 0;
+                        return dataA - dataB;
+                    });
+
+                    let validadesHtml = '<h4 style="color: #fbbf24; margin-bottom: 10px;">Todas as Validades:</h4>';
+                    validadesOrdenadas.forEach((v, index) => {
+                        const isAtual = v === validade;
+                        validadesHtml += `
+                            <div class="validade-item" style="${isAtual ? 'background: #334155; border-radius: 8px;' : ''}">
+                                <span>${v}</span>
+                                <span class="validade-ordem">${index + 1}º</span>
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('validadesList').innerHTML = validadesHtml;
 
                     document.getElementById('info-id').innerHTML = `
                         <i class="bi bi-upc-scan"></i> ID: ${unidadeId}
@@ -341,17 +499,16 @@
             }
             
             const link = document.createElement('a');
-            link.download = `qrcode-${unidadeId || 'unidade'}.png`;
+            link.download = `etiqueta-palete-${ordem}-${unidadeId || 'unidade'}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         }
 
         // Gerar QR Code quando a página carregar
         window.onload = function() {
-            setTimeout(gerarQRCode, 100); // Pequeno delay para garantir que tudo carregou
+            setTimeout(gerarQRCode, 100);
         };
 
-        // Fallback se a biblioteca demorar a carregar
         if (document.readyState === 'complete') {
             gerarQRCode();
         } else {
