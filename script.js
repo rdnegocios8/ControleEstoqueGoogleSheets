@@ -654,72 +654,105 @@ async function carregarDados() {
         const produtosRes = await fetch(PRODUTOS_URL);
         const produtosData = await produtosRes.json();
         if (produtosData.values && produtosData.values.length > 1) {
-            produtos = produtosData.values.slice(1).map(row => ({
-                sku: row[0] || '',
-                nome: row[1] || '',
-                descricao: row[2] || '',
-                categoria: row[3] || 'Insumos',
-                tipoEmbalagem: row[4] || 'UN',
-                qtdPorEmbalagem: parseInt(row[5]) || 1,
-                unidadeBase: row[6] || 'UN',
-                imagem: row[7] || ''
-            })).filter(p => p.sku);
+            produtos = produtosData.values.slice(1).map(row => {
+                let sku = row[0] || '';
+                
+                // CORREÇÃO: Adicionar zeros à esquerda se necessário (para 8 dígitos)
+                if (sku && !isNaN(sku) && sku.length < 8) {
+                    sku = sku.padStart(8, '0');
+                }
+                
+                return {
+                    sku: sku,
+                    nome: row[1] || '',
+                    descricao: row[2] || '',
+                    categoria: row[3] || 'Insumos',
+                    tipoEmbalagem: row[4] || 'UN',
+                    qtdPorEmbalagem: parseInt(row[5]) || 1,
+                    unidadeBase: row[6] || 'UN',
+                    imagem: row[7] || ''
+                };
+            }).filter(p => p.sku);
+            
+            console.log(`✅ ${produtos.length} produtos carregados`);
         }
 
         const unidadesRes = await fetch(UNIDADES_URL);
         const unidadesData = await unidadesRes.json();
         if (unidadesData.values && unidadesData.values.length > 1) {
-            unidades = unidadesData.values.slice(1).map(row => ({
-                id: row[0] || '',
-                sku: row[1] || '',
-                lote: row[2] || '',
-                validade: row[3] || '',
-                volume: parseInt(row[4]) || 1,
-                quantidade: parseFloat(row[5]) || 0,
-                unidadeEmbalagem: row[6] || 'UN',
-                status: row[7] || 'Disponível',
-                localizacao: row[8] || '-',
-                destino: row[9] || '',
-                foraPadrao: row[10] === 'Sim',
-                qtdRealPorEmbalagem: row[11] ? parseInt(row[11]) : null
-            })).filter(u => u.id);
+            unidades = unidadesData.values.slice(1).map(row => {
+                let sku = row[1] || '';
+                
+                // CORREÇÃO: Adicionar zeros à esquerda no SKU das unidades também
+                if (sku && !isNaN(sku) && sku.length < 8) {
+                    sku = sku.padStart(8, '0');
+                }
+                
+                return {
+                    id: row[0] || '',
+                    sku: sku,
+                    lote: row[2] || '',
+                    validade: row[3] || '',
+                    volume: parseInt(row[4]) || 1,
+                    quantidade: parseFloat(row[5]) || 0,
+                    unidadeEmbalagem: row[6] || 'UN',
+                    status: row[7] || 'Disponível',
+                    localizacao: row[8] || '-',
+                    destino: row[9] || '',
+                    foraPadrao: row[10] === 'Sim',
+                    qtdRealPorEmbalagem: row[11] ? parseInt(row[11]) : null
+                };
+            }).filter(u => u.id);
+            
+            console.log(`✅ ${unidades.length} unidades carregadas`);
         }
 
         const movRes = await fetch(MOVIMENTACOES_URL);
         const movData = await movRes.json();
         if (movData.values && movData.values.length > 1) {
-            movimentacoes = movData.values.slice(1).map(row => ({
-                data: row[0] || '',
-                tipo: row[1] || '',
-                idUnidade: row[2] || '',
-                sku: row[3] || '',
-                volume: parseInt(row[4]) || 0,
-                quantidade: parseFloat(row[5]) || 0,
-                unidadeEmbalagem: row[6] || '',
-                destino: row[7] || '',
-                responsavel: row[8] || '',
-                observacao: row[9] || ''
-            })).filter(m => m.data);
+            movimentacoes = movData.values.slice(1).map(row => {
+                let sku = row[3] || '';
+                
+                // CORREÇÃO: Adicionar zeros à esquerda no SKU das movimentações
+                if (sku && !isNaN(sku) && sku.length < 8) {
+                    sku = sku.padStart(8, '0');
+                }
+                
+                return {
+                    data: row[0] || '',
+                    tipo: row[1] || '',
+                    idUnidade: row[2] || '',
+                    sku: sku,
+                    volume: parseInt(row[4]) || 0,
+                    quantidade: parseFloat(row[5]) || 0,
+                    unidadeEmbalagem: row[6] || '',
+                    destino: row[7] || '',
+                    responsavel: row[8] || '',
+                    observacao: row[9] || ''
+                };
+            }).filter(m => m.data);
+            
+            console.log(`✅ ${movimentacoes.length} movimentações carregadas`);
         }
 
         await carregarRecebimentos();
         atualizarInterface();
     } catch (error) {
-        console.error('Erro ao carregar dados:', error);
+        console.error('❌ Erro ao carregar dados:', error);
         carregarDadosExemplo();
     }
 }
 
-// Dados de exemplo
+// Dados de exemplo (corrigido com SKUs de 8 dígitos)
 function carregarDadosExemplo() {
     produtos = [
-        { sku: '300214', nome: 'Una especial 50Kg', descricao: 'Farinha de trigo', categoria: 'Insumos', tipoEmbalagem: 'MALA', qtdPorEmbalagem: 50, unidadeBase: 'KG', imagem: '' },
-        { sku: '303050', nome: 'saco vitella', descricao: 'Embalagem para farinha', categoria: 'Embalagem Sacaria', tipoEmbalagem: 'PCT', qtdPorEmbalagem: 100, unidadeBase: 'UN', imagem: '' }
+        { sku: 'ERRO', nome: 'ERRO', descricao: 'ERRO', categoria: 'ERRO', tipoEmbalagem: 'ERRO', qtdPorEmbalagem: 50, unidadeBase: 'ERRO', imagem: '' },
+        { sku: 'ERRO', nome: 'ERRO', descricao: 'ERRO', categoria: 'ERRO', tipoEmbalagem: 'ERRO', qtdPorEmbalagem: 100, unidadeBase: 'ERRO', imagem: '' }
     ];
     
     unidades = [
-        { id: 'UN-E53UOSQY-Z1D0', sku: '300214', lote: '5050', validade: '2026-05-05', volume: 10, quantidade: 500, unidadeEmbalagem: 'MALA', status: 'Disponível', localizacao: 'Prateleira A1', destino: '', foraPadrao: false, qtdRealPorEmbalagem: null },
-        { id: 'UN-5NZBIQR7-KQMG', sku: '303050', lote: 'vite01', validade: '2026-04-05', volume: 20, quantidade: 2000, unidadeEmbalagem: 'PCT', status: 'Disponível', localizacao: 'Prateleira B2', destino: '', foraPadrao: false, qtdRealPorEmbalagem: null }
+        { id: 'ERRO', sku: 'ERRO', lote: 'ERRO', validade: 'ERRO', volume: 10, quantidade: 500, unidadeEmbalagem: 'ERRO', status: 'ERRO', localizacao: 'ERRO', destino: '', foraPadrao: false, qtdRealPorEmbalagem: null },
+        { id: 'ERRO', sku: 'ERRO', lote: 'ERRO', validade: 'ERRO', volume: 20, quantidade: 2000, unidadeEmbalagem: 'ERRO', status: 'ERRO', localizacao: 'ERRO', destino: '', foraPadrao: false, qtdRealPorEmbalagem: null }
     ];
     
     movimentacoes = [];
@@ -908,13 +941,20 @@ function abrirModalUnidade(sku) {
 
 // Salvar produto
 async function salvarProduto() {
+    let sku = document.getElementById('produto-sku').value;
+    
+    // CORREÇÃO: Garantir que o SKU tenha 8 dígitos
+    if (sku && sku.length < 8 && !isNaN(sku)) {
+        sku = sku.padStart(8, '0');
+    }
+    
     const tipoEmbalagem = document.getElementById('produto-tipo-embalagem').value;
     const qtdPorEmbalagem = tipoEmbalagem !== 'UN' ? 
         parseInt(document.getElementById('produto-qtd-por-embalagem').value) : 1;
     
     const produto = {
         tipo: 'produto',
-        sku: document.getElementById('produto-sku').value,
+        sku: sku,  // Usar o SKU corrigido
         nome: document.getElementById('produto-nome').value,
         descricao: document.getElementById('produto-descricao').value,
         categoria: document.getElementById('produto-categoria').value,
@@ -949,7 +989,6 @@ async function salvarProduto() {
         alert('Erro ao salvar produto.');
     }
 }
-
 // Salvar unidade
 async function salvarUnidade() {
     const id = document.getElementById('unidade-id').value || gerarIdUnico();
@@ -1508,4 +1547,5 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
