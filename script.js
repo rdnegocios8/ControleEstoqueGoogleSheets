@@ -1570,11 +1570,38 @@ function getCategoriaBadgeClass(categoria) {
     return classes[categoria] || 'bg-secondary';
 }
 
+// Formatar data sem problemas de fuso horário
 function formatarData(data) {
     if (!data) return '';
-    const d = new Date(data);
-    if (isNaN(d.getTime())) return data;
-    return d.toLocaleDateString('pt-BR');
+    
+    // Se for string no formato YYYY-MM-DD (padrão do Google Sheets)
+    if (typeof data === 'string' && data.includes('-')) {
+        const partes = data.split('-');
+        if (partes.length === 3) {
+            // Criar data considerando o fuso local
+            const ano = parseInt(partes[0]);
+            const mes = parseInt(partes[1]);
+            const dia = parseInt(partes[2]);
+            
+            // Formatar manualmente para evitar problemas de fuso
+            return `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano}`;
+        }
+    }
+    
+    // Fallback para outros formatos
+    try {
+        const d = new Date(data);
+        if (isNaN(d.getTime())) return data;
+        
+        // Extrair partes manualmente para evitar fuso
+        const dia = d.getDate().toString().padStart(2, '0');
+        const mes = (d.getMonth() + 1).toString().padStart(2, '0');
+        const ano = d.getFullYear();
+        
+        return `${dia}/${mes}/${ano}`;
+    } catch (e) {
+        return data;
+    }
 }
 
 // ============================================
@@ -1767,3 +1794,4 @@ document.getElementById('busca-rebimento-produto')?.addEventListener('focus', ()
         filtrarProdutosRecebimento();
     }
 });
+
