@@ -1680,9 +1680,3 @@ document.getElementById('busca-produto')?.addEventListener('focus', () => {
         filtrarProdutosLista();
     }
 });
-
-
-
-
-
-
