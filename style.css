@@ -1593,3 +1593,86 @@ h2 {
     margin-right: 8px;
 }
 
+/* ============================================ */
+/* FORÇAR FUNDO ESCURO NO MODAL VER PRODUTO - ULTRA FORTE */
+/* ============================================ */
+
+/* Forçar em todos os elementos do modal */
+#modalVerProduto,
+#modalVerProduto .modal-dialog,
+#modalVerProduto .modal-content,
+#modalVerProduto .modal-header,
+#modalVerProduto .modal-body,
+#modalVerProduto .modal-footer,
+#modalVerProduto .container-fluid,
+#modalVerProduto .row,
+#modalVerProduto .col-md-12,
+#modalVerProduto .table,
+#modalVerProduto .table-responsive,
+#modalVerProduto thead,
+#modalVerProduto tbody,
+#modalVerProduto tr,
+#modalVerProduto th,
+#modalVerProduto td {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+/* Cabeçalho do modal */
+#modalVerProduto .modal-header {
+    background: #1a2634 !important;
+    border-bottom: 2px solid #fbbf24 !important;
+}
+
+#modalVerProduto .modal-title {
+    color: #fbbf24 !important;
+}
+
+/* Cabeçalho da tabela */
+#modalVerProduto thead tr,
+#modalVerProduto thead th {
+    background: #1a2634 !important;
+    color: #fbbf24 !important;
+    border-bottom: 2px solid #fbbf24 !important;
+}
+
+/* Linhas da tabela */
+#modalVerProduto tbody tr {
+    background-color: #0f172a !important;
+    border-bottom: 1px solid #2d3748 !important;
+}
+
+#modalVerProduto tbody tr:hover {
+    background-color: #1e293b !important;
+}
+
+#modalVerProduto tbody tr:nth-child(even) {
+    background-color: #1a1f2e !important;
+}
+
+/* Células */
+#modalVerProduto td {
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+}
+
+#modalVerProduto td:first-child {
+    color: #fbbf24 !important;
+    font-weight: 600;
+}
+
+/* Botão de fechar */
+#modalVerProduto .btn-close {
+    background-color: #94a3b8 !important;
+    opacity: 0.8;
+}
+
+/* Texto de nenhum registro */
+#modalVerProduto td[colspan] {
+    color: #94a3b8 !important;
+    font-style: italic;
+    text-align: center;
+    padding: 40px !important;
+    background-color: #1a2634 !important;
+}
