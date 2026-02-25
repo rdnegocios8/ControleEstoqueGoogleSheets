@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Etiqueta de Palete - Validade Rotativa</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
@@ -13,7 +12,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             background: #0a0c10;
             min-height: 100vh;
@@ -24,12 +22,12 @@
             font-family: 'Inter', 'Segoe UI', sans-serif;
             margin: 0;
         }
-        
+       
         .container {
             max-width: 1200px;
             width: 100%;
         }
-        
+       
         .card {
             background: #151515;
             border: 2px solid #ffd700;
@@ -37,7 +35,7 @@
             padding: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        
+       
         h2 {
             color: #ffd700;
             text-align: center;
@@ -46,8 +44,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-        
-        /* Etiqueta ESCURA (agora em vez de branca) */
+       
         .etiqueta {
             font-family: 'Courier New', monospace;
             border: 4px solid #ffd700;
@@ -63,11 +60,11 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             color: #f0f0f0;
         }
-        
+       
         .etiqueta * {
             color: #f0f0f0;
         }
-        
+       
         .etiqueta-header {
             display: flex;
             justify-content: space-between;
@@ -76,20 +73,28 @@
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
-        
+       
         .etiqueta-codigo {
             font-size: 48px;
             font-weight: bold;
             color: #ffd700 !important;
         }
-        
+       
         .etiqueta-ordem {
             font-size: 120px;
             font-weight: bold;
             color: #ffd700 !important;
             line-height: 1;
         }
-        
+       
+        .etiqueta-ordem sup {
+            font-size: 0.55em;
+            vertical-align: super;
+            margin-left: -0.1em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+       
         .etiqueta-descricao {
             font-size: 42px;
             font-weight: bold;
@@ -100,26 +105,26 @@
             padding-bottom: 20px;
             color: #fff !important;
         }
-        
+       
         .etiqueta-linha {
             display: flex;
             margin: 25px 0;
             font-size: 40px;
             align-items: baseline;
         }
-        
+       
         .etiqueta-label {
             font-weight: bold;
             width: 200px;
             color: #aaa !important;
         }
-        
+       
         .etiqueta-valor {
             flex: 1;
             font-weight: bold;
             color: #ffd700 !important;
         }
-        
+       
         .etiqueta-footer {
             display: flex;
             justify-content: space-between;
@@ -130,7 +135,7 @@
             font-size: 48px;
             color: #fff !important;
         }
-        
+       
         .qr-section {
             display: flex;
             align-items: center;
@@ -140,7 +145,7 @@
             background: #252525;
             border: 2px solid #ffd700;
         }
-        
+       
         .qr-code-box {
             background: white;
             padding: 20px;
@@ -150,27 +155,27 @@
             align-items: center;
             border: 2px solid #ffd700;
         }
-        
+       
         #qrcode canvas, #qrcode img {
             width: 200px;
             height: 200px;
         }
-        
+       
         .qr-info {
             font-size: 24px;
             margin-left: 30px;
             color: #ccc !important;
         }
-        
+       
         .qr-info p {
             margin: 10px 0;
             color: #ccc !important;
         }
-        
+       
         .qr-info strong {
             color: #ffd700 !important;
         }
-        
+       
         .info-paletes {
             background: #151515;
             border: 2px solid #ffd700;
@@ -178,7 +183,7 @@
             padding: 30px;
             margin: 30px 0;
         }
-        
+       
         .info-paletes h3 {
             font-size: 32px;
             margin: 0 0 20px 0;
@@ -186,14 +191,14 @@
             border-bottom: 2px solid #ffd700;
             padding-bottom: 10px;
         }
-        
+       
         .tabela-validades {
             width: 100%;
             border-collapse: collapse;
             font-family: 'Courier New', monospace;
             font-size: 20px;
         }
-        
+       
         .tabela-validades th {
             background: #0a0c10;
             color: #ffd700;
@@ -202,23 +207,23 @@
             font-size: 22px;
             border-bottom: 2px solid #ffd700;
         }
-        
+       
         .tabela-validades td {
             padding: 15px;
             border-bottom: 1px solid #333;
             font-size: 20px;
             color: #ccc;
         }
-        
+       
         .tabela-validades tr.atual {
             background: #2a2a0a;
             font-weight: bold;
         }
-        
+       
         .tabela-validades tr.atual td {
             color: #ffd700;
         }
-        
+       
         .ordem-badge {
             display: inline-block;
             padding: 5px 15px;
@@ -227,13 +232,13 @@
             font-size: 20px;
             color: white;
         }
-        
+       
         .ordem-1 { background: #8b0000; }
         .ordem-2 { background: #b45f06; }
         .ordem-3 { background: #9e6d03; }
         .ordem-4 { background: #0e5c3f; }
         .ordem-5 { background: #0b4f6c; }
-        
+       
         .qr-actions {
             display: flex;
             gap: 20px;
@@ -241,7 +246,7 @@
             margin-top: 30px;
             flex-wrap: wrap;
         }
-        
+       
         .qr-actions button {
             padding: 15px 30px;
             border: none;
@@ -256,33 +261,18 @@
             min-width: 180px;
             justify-content: center;
         }
-        
-        .btn-download {
-            background: #0a4f8a;
-            color: white;
-        }
-        
-        .btn-print {
-            background: #b45f06;
-            color: white;
-        }
-        
-        .btn-close {
-            background: #5a3a3a;
-            color: white;
-        }
-        
-        .btn-view {
-            background: #3a4a5a;
-            color: white;
-        }
-        
+       
+        .btn-download { background: #0a4f8a; color: white; }
+        .btn-print    { background: #b45f06; color: white; }
+        .btn-close    { background: #5a3a3a; color: white; }
+        .btn-view     { background: #3a4a5a; color: white; }
+       
         .qr-actions button:hover {
             transform: translateY(-3px);
             filter: brightness(1.2);
             box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
         }
-        
+       
         .resumo-sku {
             background: #151515;
             padding: 20px;
@@ -292,37 +282,23 @@
             border: 2px solid #ffd700;
             color: #ccc;
         }
-        
+       
         .resumo-sku strong {
             color: #ffd700;
         }
-        
-        /* Ajustes para impressão - UMA ÚNICA FOLHA */
+       
+        /* Impressão */
         @media print {
             body {
                 background: white;
                 padding: 0;
                 margin: 0;
             }
-            
-            .container {
-                max-width: 100%;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .card {
-                box-shadow: none;
-                border: none;
-                padding: 0;
-                margin: 0;
-                background: white;
-            }
-            
-            h2, .qr-actions, .info-paletes, .btn-view, .resumo-sku {
+           
+            .container, .card, h2, .qr-actions, .info-paletes, .btn-view, .resumo-sku {
                 display: none !important;
             }
-            
+           
             .etiqueta {
                 border: 3px solid #000;
                 page-break-inside: avoid;
@@ -334,36 +310,16 @@
                 height: auto;
                 box-shadow: none;
                 padding: 30px;
-                position: relative;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
                 background: white;
-                color: black;
+                color: black !important;
             }
-            
+           
             .etiqueta * {
                 color: black !important;
             }
-            
-            .etiqueta-header {
-                border-bottom: 4px solid #000;
-            }
-            
-            .etiqueta-codigo, .etiqueta-ordem, .etiqueta-descricao, 
-            .etiqueta-label, .etiqueta-valor, .etiqueta-footer, .qr-info {
-                color: black !important;
-            }
-            
-            .qr-section {
-                border: 2px solid #000;
-                background: white;
-            }
-            
-            .qr-code-box {
-                border: 2px solid #000;
-            }
+           
+            .etiqueta-header { border-bottom: 4px solid #000; }
+            .etiqueta-ordem sup { font-size: 0.5em; }
         }
     </style>
 </head>
@@ -371,22 +327,13 @@
     <div class="container">
         <div class="card">
             <h2>🏷️ Etiqueta de Palete - Ordem Rotativa</h2>
-            
-            <!-- Resumo do SKU -->
-            <div class="resumo-sku" id="resumo-sku">
-                Carregando informações...
-            </div>
-            
-            <!-- Visualização da etiqueta ESCURA -->
-            <div class="etiqueta" id="etiquetaVisualizacao">
-                <!-- Será preenchido via JavaScript -->
-            </div>
-            
-            <!-- Informações de todos os paletes do mesmo SKU -->
-            <div class="info-paletes" id="infoPaletes">
-                <!-- Será preenchido via JavaScript -->
-            </div>
-            
+           
+            <div class="resumo-sku" id="resumo-sku">Carregando informações...</div>
+           
+            <div class="etiqueta" id="etiquetaVisualizacao"></div>
+           
+            <div class="info-paletes" id="infoPaletes"></div>
+           
             <div class="qr-actions">
                 <button class="btn-download" onclick="baixarEtiqueta()">
                     <i class="bi bi-download"></i> Baixar PNG
@@ -405,33 +352,29 @@
     </div>
 
     <script>
-        // Seu JavaScript continua EXATAMENTE IGUAL
         function parseData(dataStr) {
             if (!dataStr) return null;
             if (dataStr.includes('-')) {
                 const partes = dataStr.split('-');
-                if (partes.length === 3) {
-                    return new Date(partes[0], partes[1] - 1, partes[2]);
-                }
+                if (partes.length === 3) return new Date(partes[0], partes[1] - 1, partes[2]);
             }
             if (dataStr.includes('/')) {
                 const partes = dataStr.split('/');
-                if (partes.length === 3) {
-                    return new Date(partes[2], partes[1] - 1, partes[0]);
-                }
+                if (partes.length === 3) return new Date(partes[2], partes[1] - 1, partes[0]);
             }
             return new Date(dataStr);
         }
 
         function formatarData(data) {
             if (!data) return '';
-            if (data instanceof Date) {
+            if (data instanceof Date && !isNaN(data)) {
                 return data.toLocaleDateString('pt-BR');
             }
             return data;
         }
 
         function buscarUnidadesPorSKU(sku, unidadeAtualId) {
+            // ← Substitua isso pela sua fonte real (Google Sheets, JSON, etc.) no futuro
             const todasUnidades = [
                 {
                     id: 'UN-KØNLQSNX-AMZK',
@@ -471,61 +414,57 @@
             const unidadesDoSKU = buscarUnidadesPorSKU(sku, unidadeAtualId);
             
             if (!unidadesDoSKU || unidadesDoSKU.length === 0) {
-                return { ordem: '1º', posicao: 1, unidades: [], totalUnidades: 1 };
+                return { ordemHTML: '—', posicao: 0, totalUnidades: 0, unidades: [] };
             }
             
-            const unidadesComData = unidadesDoSKU.map(u => ({
-                ...u,
-                dataObj: parseData(u.validade)
-            })).filter(u => u.dataObj !== null);
+            const unidadesComData = unidadesDoSKU
+                .map(u => ({ ...u, dataObj: parseData(u.validade) }))
+                .filter(u => u.dataObj instanceof Date && !isNaN(u.dataObj.getTime()));
+            
+            if (unidadesComData.length === 0) {
+                return { ordemHTML: '—', posicao: 0, totalUnidades: 0, unidades: [] };
+            }
             
             const unidadesOrdenadas = [...unidadesComData].sort((a, b) => a.dataObj - b.dataObj);
             
-            const grupos = {};
-            const posicaoMap = {};
-            let posicaoAtual = 1;
+            let rank = 1;
+            const posicoesPorId = {};
             let dataAnterior = null;
             
-            unidadesOrdenadas.forEach((u, index) => {
-                const dataStr = u.validade;
-                
-                if (!grupos[dataStr]) {
-                    grupos[dataStr] = [];
-                    if (dataAnterior && dataStr !== dataAnterior) {
-                        posicaoAtual++;
-                    }
-                    posicaoMap[dataStr] = posicaoAtual;
+            unidadesOrdenadas.forEach(u => {
+                const dataAtual = u.validade;
+                if (dataAnterior !== null && dataAtual !== dataAnterior) {
+                    rank++;
                 }
-                
-                grupos[dataStr].push(u);
-                dataAnterior = dataStr;
+                posicoesPorId[u.id] = rank;
+                dataAnterior = dataAtual;
             });
             
-            const posicao = posicaoMap[validadeAtual] || 1;
+            const minhaPosicao = posicoesPorId[unidadeAtualId] || 1;
             const ordinais = ['1º', '2º', '3º', '4º', '5º', '6º', '7º', '8º', '9º', '10º'];
-            const ordem = ordinais[Math.min(posicao - 1, ordinais.length - 1)] || posicao + 'º';
+            const ordemTexto = ordinais[Math.min(minhaPosicao - 1, ordinais.length - 1)] || `${minhaPosicao}º`;
+            const ordemHTML = ordemTexto.replace('º', '<sup>º</sup>');
             
             return {
-                ordem,
-                posicao,
-                grupos,
-                unidades: unidadesComData,
-                totalUnidades: unidadesComData.length
+                ordemHTML,
+                posicao: minhaPosicao,
+                totalUnidades: unidadesOrdenadas.length,
+                unidades: unidadesOrdenadas
             };
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        const unidadeId = urlParams.get('id') || 'UN-2EP1M8IO-9Y8R';
-        const sku = urlParams.get('sku') || '00030202';
-        const lote = urlParams.get('lote') || 'AAACS60101';
-        const validade = urlParams.get('validade') || '25/06/2026';
-        const produtoNome = decodeURIComponent(urlParams.get('produto') || 'FILME BISC. ROSQUINHA COCO EMEGE 600GR');
-        const volume = urlParams.get('volume') || '535.87';
-        const quantidade = urlParams.get('quantidade') || '1';
-        const unidade = urlParams.get('unidade') || 'PLT';
+        const unidadeId    = urlParams.get('id')        || 'UN-2EP1M8IO-9Y8R';
+        const sku          = urlParams.get('sku')       || '00030202';
+        const lote         = urlParams.get('lote')      || 'AAACS60101';
+        const validade     = urlParams.get('validade')  || '25/06/2026';
+        const produtoNome  = decodeURIComponent(urlParams.get('produto') || 'FILME BISC. ROSQUINHA COCO EMEGE 600GR');
+        const volume       = urlParams.get('volume')    || '535.87';
+        const quantidade   = urlParams.get('quantidade')|| '1';
+        const unidade      = urlParams.get('unidade')   || 'PLT';
 
         const resultado = calcularOrdemPorSKU(sku, validade, unidadeId);
-        const ordem = resultado.ordem;
+        const { ordemHTML } = resultado;
 
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
@@ -542,7 +481,7 @@
             etiquetaDiv.innerHTML = `
                 <div class="etiqueta-header">
                     <div class="etiqueta-codigo">CODIGO: ${sku}</div>
-                    <div class="etiqueta-ordem">${ordem}</div>
+                    <div class="etiqueta-ordem">${ordemHTML}</div>
                 </div>
                 <div class="etiqueta-descricao">${produtoNome}</div>
                 <div class="etiqueta-linha">
@@ -576,135 +515,111 @@
             
             qrcodeDiv.innerHTML = '';
             
-            if (typeof QRCode !== 'undefined') {
-                try {
-                    QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
-                        width: 200,
-                        margin: 2
-                    }, function(err, canvas) {
-                        if (err) {
-                            console.error('Erro:', err);
-                            return;
-                        }
-                        qrcodeDiv.innerHTML = '';
-                        canvas.style.width = '100%';
-                        canvas.style.height = 'auto';
-                        qrcodeDiv.appendChild(canvas);
-                    });
+            QRCode.toCanvas(qrcodeDiv, linkCompleto, {
+                width: 200,
+                margin: 2,
+                color: { dark: '#000000', light: '#ffffff' }
+            }, function (err) {
+                if (err) console.error(err);
+            });
 
-                    document.getElementById('resumo-sku').innerHTML = `
-                        <strong>SKU: ${sku}</strong> | 
-                        <strong>Total de unidades:</strong> ${resultado.totalUnidades} | 
-                        <strong>Datas diferentes:</strong> ${Object.keys(resultado.grupos).length} |
-                        <strong>Unidade atual:</strong> <span style="color: #ffd700; font-weight: bold;">${ordem}</span>
-                    `;
+            document.getElementById('resumo-sku').innerHTML = `
+                <strong>SKU: ${sku}</strong> |
+                <strong>Total de unidades:</strong> ${resultado.totalUnidades} |
+                <strong>Unidade atual:</strong> <span style="color: #ffd700; font-weight: bold;">${resultado.posicao}ª na rotação</span>
+            `;
 
-                    let infoHtml = '<h3>📦 TODAS AS UNIDADES DO SKU ' + sku + ':</h3>';
-                    infoHtml += '<table class="tabela-validades">';
-                    infoHtml += '<tr><th>ID</th><th>LOTE</th><th>VALIDADE</th><th>ORDEM</th></tr>';
-                    
-                    const unidadesOrdenadas = [...resultado.unidades].sort((a, b) => {
-                        return parseData(a.validade) - parseData(b.validade);
-                    });
-                    
-                    const ordensPorData = {};
-                    let pos = 1;
-                    let ultimaData = null;
-                    
-                    unidadesOrdenadas.forEach(u => {
-                        if (!ultimaData || u.validade !== ultimaData) {
-                            if (ultimaData) pos++;
-                        }
-                        ordensPorData[u.id] = pos;
-                        ultimaData = u.validade;
-                    });
-                    
-                    unidadesOrdenadas.forEach(u => {
-                        const posUnidade = ordensPorData[u.id];
-                        const ordinais = ['1º', '2º', '3º', '4º', '5º'];
-                        const ordemUnidade = ordinais[Math.min(posUnidade - 1, ordinais.length - 1)] || posUnidade + 'º';
-                        
-                        let classeOrdem = 'ordem-1';
-                        if (posUnidade === 1) classeOrdem = 'ordem-1';
-                        else if (posUnidade === 2) classeOrdem = 'ordem-2';
-                        else if (posUnidade === 3) classeOrdem = 'ordem-3';
-                        else if (posUnidade === 4) classeOrdem = 'ordem-4';
-                        else classeOrdem = 'ordem-5';
-                        
-                        infoHtml += `<tr ${u.id === unidadeId ? 'class="atual"' : ''}>`;
-                        infoHtml += `<td>${u.id.substring(0, 12)}...</td>`;
-                        infoHtml += `<td>${u.lote}</td>`;
-                        infoHtml += `<td>${u.validade}</td>`;
-                        infoHtml += `<td><span class="ordem-badge ${classeOrdem}">${ordemUnidade}</span></td>`;
-                        infoHtml += `</tr>`;
-                    });
-                    
-                    infoHtml += '</table>';
-                    document.getElementById('infoPaletes').innerHTML = infoHtml;
-
-                } catch (e) {
-                    console.error('Erro:', e);
+            let infoHtml = '<h3>📦 TODAS AS UNIDADES DO SKU ' + sku + ':</h3>';
+            infoHtml += '<table class="tabela-validades">';
+            infoHtml += '<tr><th>ID</th><th>LOTE</th><th>VALIDADE</th><th>ORDEM</th></tr>';
+            
+            const unidadesOrdenadas = resultado.unidades;
+            const ordensPorData = {};
+            let pos = 1;
+            let ultimaData = null;
+            
+            unidadesOrdenadas.forEach(u => {
+                if (!ultimaData || u.validade !== ultimaData) {
+                    if (ultimaData) pos++;
                 }
-            }
+                ordensPorData[u.id] = pos;
+                ultimaData = u.validade;
+            });
+            
+            unidadesOrdenadas.forEach(u => {
+                const posUnidade = ordensPorData[u.id];
+                const ordinais = ['1º', '2º', '3º', '4º', '5º'];
+                const ordemUnidade = ordinais[Math.min(posUnidade - 1, ordinais.length - 1)] || posUnidade + 'º';
+                
+                let classeOrdem = `ordem-${Math.min(posUnidade, 5)}`;
+                
+                infoHtml += `<tr ${u.id === unidadeId ? 'class="atual"' : ''}>`;
+                infoHtml += `<td>${u.id.substring(0, 12)}...</td>`;
+                infoHtml += `<td>${u.lote}</td>`;
+                infoHtml += `<td>${u.validade}</td>`;
+                infoHtml += `<td><span class="ordem-badge ${classeOrdem}">${ordemUnidade}</span></td>`;
+                infoHtml += `</tr>`;
+            });
+            
+            infoHtml += '</table>';
+            document.getElementById('infoPaletes').innerHTML = infoHtml;
         }
 
         function imprimirEtiqueta() {
-            const janelaImpressao = window.open('', '_blank');
-            
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (!qrCanvas) {
+                alert('Aguarde o QR Code ser gerado!');
+                return;
+            }
+
+            const qrDataUrl = qrCanvas.toDataURL('image/png');
+
             let dataExibicao = validade;
             if (validade.includes('/')) {
                 const partes = validade.split('/');
                 dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
             }
-            
-            const conteudoImpressao = `
+
+            const janela = window.open('', '_blank');
+            janela.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Etiqueta de Palete - SKU ${sku} - ${ordem}</title>
+                    <title>Etiqueta - ${sku} - ${resultado.posicao}º</title>
                     <style>
-                        * { margin: 0; padding: 0; box-sizing: border-box; }
-                        body { font-family: 'Courier New', monospace; background: white; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-                        .etiqueta { border: 4px solid #000; padding: 40px; width: 1050px; height: 700px; margin: 0 auto; page-break-inside: avoid; page-break-after: avoid; page-break-before: avoid; display: flex; flex-direction: column; background: white; box-shadow: none; color: black; }
-                        .etiqueta-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #000; padding-bottom: 20px; margin-bottom: 25px; }
-                        .etiqueta-codigo { font-size: 48px; font-weight: bold; color: black; }
-                        .etiqueta-ordem { font-size: 120px; font-weight: bold; line-height: 1; color: black; }
-                        .etiqueta-descricao { font-size: 40px; font-weight: bold; margin: 25px 0; text-transform: uppercase; line-height: 1.3; border-bottom: 2px solid #000; padding-bottom: 20px; color: black; }
-                        .etiqueta-linha { display: flex; margin: 20px 0; font-size: 38px; align-items: baseline; }
-                        .etiqueta-label { font-weight: bold; width: 200px; color: black; }
-                        .etiqueta-valor { flex: 1; font-weight: bold; color: black; }
-                        .etiqueta-footer { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 4px solid #000; font-weight: bold; font-size: 44px; color: black; }
-                        .qr-section { display: flex; align-items: center; justify-content: space-between; margin-top: 30px; padding: 20px; background: #f8f9fa; border: 2px solid #000; }
-                        .qr-code-box { background: white; padding: 15px; border: 2px solid #000; }
-                        #qrcode-img { width: 180px; height: 180px; }
-                        .qr-info { font-size: 24px; margin-left: 25px; color: black; }
-                        .qr-info p { margin: 8px 0; color: black; }
-                        .qr-info strong { color: black; }
-                        @media print { body { padding: 0; margin: 0; } .etiqueta { box-shadow: none; margin: 0 auto; width: 100%; height: 100%; page-break-after: avoid; page-break-before: avoid; } }
+                        body { margin:0; padding:0; font-family:'Courier New',monospace; background:white; color:black; }
+                        .etiqueta { border:4px solid #000; padding:40px; width:1050px; height:700px; margin:20px auto; box-sizing:border-box; page-break-inside:avoid; }
+                        .header { display:flex; justify-content:space-between; align-items:center; border-bottom:4px solid #000; padding-bottom:20px; margin-bottom:30px; }
+                        .codigo { font-size:48px; font-weight:bold; }
+                        .ordem { font-size:120px; font-weight:bold; line-height:1; }
+                        .ordem sup { font-size:0.55em; vertical-align:super; }
+                        .descricao { font-size:42px; font-weight:bold; margin:30px 0; text-transform:uppercase; border-bottom:2px solid #000; padding-bottom:20px; }
+                        .linha { display:flex; margin:25px 0; font-size:40px; align-items:baseline; }
+                        .label { font-weight:bold; width:200px; }
+                        .valor { flex:1; font-weight:bold; }
+                        .footer { display:flex; justify-content:space-between; margin-top:40px; padding-top:20px; border-top:4px solid #000; font-size:48px; font-weight:bold; }
+                        .qr-section { display:flex; align-items:center; justify-content:space-between; margin-top:40px; padding:20px; border:2px solid #000; }
+                        .qr-box { background:white; padding:15px; border:2px solid #000; }
+                        #qrcode-img { width:180px; height:180px; }
+                        .qr-info { font-size:24px; margin-left:30px; }
                     </style>
                 </head>
                 <body>
                     <div class="etiqueta">
-                        <div class="etiqueta-header">
-                            <div class="etiqueta-codigo">CODIGO: ${sku}</div>
-                            <div class="etiqueta-ordem">${ordem}</div>
+                        <div class="header">
+                            <div class="codigo">CODIGO: ${sku}</div>
+                            <div class="ordem">${ordemHTML}</div>
                         </div>
-                        <div class="etiqueta-descricao">${produtoNome}</div>
-                        <div class="etiqueta-linha">
-                            <span class="etiqueta-label">LOTE:</span>
-                            <span class="etiqueta-valor">${lote}</span>
-                        </div>
-                        <div class="etiqueta-linha">
-                            <span class="etiqueta-label">VALIDADE:</span>
-                            <span class="etiqueta-valor">${dataExibicao}</span>
-                        </div>
-                        <div class="etiqueta-footer">
+                        <div class="descricao">${produtoNome}</div>
+                        <div class="linha"><span class="label">LOTE:</span><span class="valor">${lote}</span></div>
+                        <div class="linha"><span class="label">VALIDADE:</span><span class="valor">${dataExibicao}</span></div>
+                        <div class="footer">
                             <span>${volume} Kg</span>
                             <span>${quantidade} ${unidade}</span>
                         </div>
                         <div class="qr-section">
-                            <div class="qr-code-box">
-                                <img src="${document.querySelector('#qrcode canvas').toDataURL()}" id="qrcode-img">
+                            <div class="qr-box">
+                                <img id="qrcode-img" src="${qrDataUrl}">
                             </div>
                             <div class="qr-info">
                                 <p><strong>SKU:</strong> ${sku}</p>
@@ -713,90 +628,82 @@
                             </div>
                         </div>
                     </div>
-                    <script>window.onload = function() { window.print(); }<\/script>
+                    <script>window.onload = () => window.print();</script>
                 </body>
                 </html>
-            `;
-            
-            janelaImpressao.document.write(conteudoImpressao);
-            janelaImpressao.document.close();
+            `);
+            janela.document.close();
         }
 
         function baixarEtiqueta() {
             const qrCanvas = document.querySelector('#qrcode canvas');
-            
             if (!qrCanvas) {
                 alert('Aguarde o QR Code ser gerado!');
                 return;
             }
-            
+
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
             canvas.width = 1200;
             canvas.height = 800;
-            
+
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 6;
             ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-            
-            let dataExibicao = validade;
-            if (validade.includes('/')) {
-                const partes = validade.split('/');
-                dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
-            }
-            
+
             ctx.fillStyle = 'black';
             ctx.font = 'bold 52px "Courier New"';
             ctx.fillText(`CODIGO: ${sku}`, 50, 100);
-            
+
             ctx.font = 'bold 140px "Courier New"';
-            ctx.fillText(ordem, 900, 150);
-            
+            ctx.fillText(resultado.posicao, 900, 150);
+            ctx.font = 'bold 80px "Courier New"';
+            ctx.fillText('º', 1050, 120);  // Ajuste manual se necessário
+
             ctx.beginPath();
             ctx.moveTo(50, 180);
             ctx.lineTo(1150, 180);
             ctx.stroke();
-            
+
             ctx.font = 'bold 48px "Courier New"';
-            ctx.fillText(produtoNome.substring(0, 30), 50, 260);
-            
+            ctx.fillText(produtoNome.substring(0, 30) + (produtoNome.length > 30 ? '...' : ''), 50, 260);
+
             ctx.font = '44px "Courier New"';
             ctx.fillText('LOTE:', 50, 420);
             ctx.font = 'bold 44px "Courier New"';
             ctx.fillText(lote, 250, 420);
-            
+
             ctx.font = '44px "Courier New"';
             ctx.fillText('VALIDADE:', 50, 490);
             ctx.font = 'bold 44px "Courier New"';
-            ctx.fillText(dataExibicao, 300, 490);
-            
+            ctx.fillText(validade, 300, 490);
+
             ctx.beginPath();
             ctx.moveTo(50, 570);
             ctx.lineTo(1150, 570);
             ctx.stroke();
-            
+
             ctx.font = 'bold 52px "Courier New"';
             ctx.fillText(`${volume} Kg`, 50, 650);
             ctx.fillText(`${quantidade} ${unidade}`, 800, 650);
-            
+
             ctx.drawImage(qrCanvas, 150, 680, 150, 150);
-            
+
             ctx.font = '24px "Courier New"';
-            ctx.fillText(`SKU: ${sku} | Total: ${resultado.totalUnidades} unidades`, 350, 780);
-            
+            ctx.fillText(`SKU: ${sku} | Total: ${resultado.totalUnidades} unid.`, 350, 780);
+
             const link = document.createElement('a');
-            link.download = `etiqueta-${sku}-${ordem}.png`;
+            link.download = `etiqueta-${sku}-${resultado.posicao}º.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         }
 
         window.onload = function() {
             atualizarEtiqueta();
-            setTimeout(gerarQRCode, 100);
+            setTimeout(gerarQRCode, 300);  // pequeno delay para garantir DOM pronto
         };
     </script>
 </body>
