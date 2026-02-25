@@ -774,100 +774,110 @@
     </div>
 </div>
 
-    <!-- MODAL RECEBIMENTO -->
-    <div class="modal fade" id="modalRecebimento" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-truck"></i> Recebimento de Mercadorias
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="form-recebimento">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Data do Recebimento</label>
-                                <input type="date" class="form-control" id="recebimento-data" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Número da NF</label>
-                                <input type="text" class="form-control" id="recebimento-nf">
-                            </div>
+    <!-- Modal Recebimento -->
+<div class="modal fade" id="modalRecebimento" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-truck"></i> Recebimento de Mercadorias
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-recebimento">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Data do Recebimento</label>
+                            <input type="date" class="form-control" id="recebimento-data" required>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Número da NF</label>
+                            <input type="text" class="form-control" id="recebimento-nf">
+                        </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Fornecedor</label>
-                                <input type="text" class="form-control" id="recebimento-fornecedor">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Código SKU</label>
-                                <select class="form-control" id="recebimento-sku" required>
-                                    <option value="">Selecione um produto</option>
-                                </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fornecedor</label>
+                            <input type="text" class="form-control" id="recebimento-fornecedor">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Código SKU</label>
+                            
+                            <!-- CAMPO DE BUSCA DE PRODUTOS -->
+                            <input type="text" class="form-control" id="busca-recebimento-produto" placeholder="Digite para buscar...">
+                            
+                            <!-- SELECT OCULTO PARA ARMAZENAR O SKU SELECIONADO -->
+                            <input type="hidden" id="recebimento-sku" required>
+                            
+                            <!-- LISTA DE PRODUTOS -->
+                            <div id="lista-recebimento-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none; margin-top: 5px;">
+                                <div id="lista-recebimento-produtos" class="list-group list-group-flush">
+                                    <!-- Produtos serão inseridos aqui -->
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Produto</label>
-                                <input type="text" class="form-control" id="recebimento-produto" readonly>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Lote</label>
-                                <input type="text" class="form-control" id="recebimento-lote" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Validade</label>
-                                <input type="date" class="form-control" id="recebimento-validade" required>
-                            </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Produto</label>
+                            <input type="text" class="form-control" id="recebimento-produto" readonly>
                         </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Lote</label>
+                            <input type="text" class="form-control" id="recebimento-lote" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Validade</label>
+                            <input type="date" class="form-control" id="recebimento-validade" required>
+                        </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Volume</label>
-                                <input type="number" class="form-control" id="recebimento-volume" min="1" value="1" required>
-                                <small class="text-muted">Quantidade de embalagens</small>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Unidade de Medida</label>
-                                <input type="text" class="form-control" id="recebimento-unidade" readonly>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Qtd por Embalagem</label>
-                                <input type="number" class="form-control" id="recebimento-qtd-embalagem" readonly>
-                            </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Volume</label>
+                            <input type="number" class="form-control" id="recebimento-volume" min="1" value="1" step="any" required>
+                            <small class="text-muted">Quantidade de embalagens</small>
                         </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Unidade de Medida</label>
+                            <input type="text" class="form-control" id="recebimento-unidade" readonly>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Qtd por Embalagem</label>
+                            <input type="number" class="form-control" id="recebimento-qtd-embalagem" readonly>
+                        </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Quantidade Total Recebida</label>
-                                <input type="number" class="form-control" id="recebimento-quantidade" readonly>
-                                <small class="text-muted">Calculado automaticamente</small>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Localização</label>
-                                <input type="text" class="form-control" id="recebimento-localizacao">
-                            </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quantidade Total Recebida</label>
+                            <input type="number" class="form-control" id="recebimento-quantidade" readonly>
+                            <small class="text-muted">Calculado automaticamente</small>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Localização</label>
+                            <input type="text" class="form-control" id="recebimento-localizacao">
+                        </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Observações</label>
-                            <textarea class="form-control" id="recebimento-observacoes" rows="2"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" id="salvar-recebimento">
-                        <i class="bi bi-check-circle"></i> Confirmar Recebimento
-                    </button>
-                </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observações</label>
+                        <textarea class="form-control" id="recebimento-observacoes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="salvar-recebimento">
+                    <i class="bi bi-check-circle"></i> Confirmar Recebimento
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- MODAL CATEGORIA -->
     <div class="modal fade" id="modalCategoria" tabindex="-1">
@@ -981,6 +991,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
