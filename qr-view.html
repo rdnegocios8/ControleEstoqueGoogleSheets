@@ -420,42 +420,58 @@
 
     <script>
         // ============================================
-        // DADOS DAS UNIDADES (IGUAL À SUA IMAGEM)
-        // ============================================
-        function buscarUnidadesPorSKU(sku) {
-            return [
-                {
-                    id: 'UN-KØNLQSNX-AMZK',
-                    sku: '00030202',
-                    produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
-                    lote: 'AAACXB0101',
-                    validade: '07/04/2026',
-                    volume: '583.50',
-                    quantidade: '1',
-                    unidade: 'PLT'
-                },
-                {
-                    id: 'UN-2EP1M8IO-9Y8R',
-                    sku: '00030202',
-                    produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
-                    lote: 'AAACS60101',
-                    validade: '25/06/2026',
-                    volume: '535.87',
-                    quantidade: '1',
-                    unidade: 'PLT'
-                },
-                {
-                    id: 'UN-CUT9HP6G-46K4',
-                    sku: '00030202',
-                    produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
-                    lote: 'AAACS60101',
-                    validade: '25/06/2026',
-                    volume: '555.88',
-                    quantidade: '1',
-                    unidade: 'PLT'
-                }
-            ].filter(u => u.sku === sku);
+// FUNÇÃO CORRIGIDA - USA A VARIÁVEL REAL 'unidades'
+// ============================================
+function buscarUnidadesPorSKU(sku) {
+    // Tenta acessar a variável 'unidades' que já existe
+    if (typeof unidades !== 'undefined' && Array.isArray(unidades)) {
+        console.log('✅ Usando dados reais:', unidades.length, 'unidades');
+        
+        // Filtrar pelo SKU e quantidade > 0
+        const filtradas = unidades.filter(u => 
+            u.sku === sku && 
+            u.quantidade > 0
+        );
+        
+        console.log(`📦 Encontradas ${filtradas.length} unidades para o SKU ${sku}`);
+        return filtradas;
+    }
+    
+    // Fallback para dados simulados (caso a variável não exista)
+    console.warn('⚠️ Variável "unidades" não encontrada, usando fallback');
+    return [
+        {
+            id: 'UN-KØNLQSNX-AMZK',
+            sku: '00030202',
+            produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
+            lote: 'AAACXB0101',
+            validade: '07/04/2026',
+            volume: '583.50',
+            quantidade: '1',
+            unidade: 'PLT'
+        },
+        {
+            id: 'UN-2EP1M8IO-9Y8R',
+            sku: '00030202',
+            produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
+            lote: 'AAACS60101',
+            validade: '25/06/2026',
+            volume: '535.87',
+            quantidade: '1',
+            unidade: 'PLT'
+        },
+        {
+            id: 'UN-CUT9HP6G-46K4',
+            sku: '00030202',
+            produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
+            lote: 'AAACS60101',
+            validade: '25/06/2026',
+            volume: '555.88',
+            quantidade: '1',
+            unidade: 'PLT'
         }
+    ].filter(u => u.sku === sku);
+}
 
         // ============================================
         // PARÂMETROS DA URL
@@ -702,3 +718,4 @@
     </script>
 </body>
 </html>
+
