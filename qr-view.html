@@ -419,9 +419,11 @@
     </div>
 
     <script>
-        // Função para buscar todas as unidades do mesmo SKU
-        function buscarUnidadesPorSKU(sku, unidadeAtualId) {
-            const todasUnidades = [
+        // ============================================
+        // DADOS DAS UNIDADES (IGUAL À SUA IMAGEM)
+        // ============================================
+        function buscarUnidadesPorSKU(sku) {
+            return [
                 {
                     id: 'UN-KØNLQSNX-AMZK',
                     sku: '00030202',
@@ -452,11 +454,12 @@
                     quantidade: '1',
                     unidade: 'PLT'
                 }
-            ];
-            return todasUnidades.filter(u => u.sku === sku);
+            ].filter(u => u.sku === sku);
         }
 
-        // Carregar dados da URL
+        // ============================================
+        // PARÂMETROS DA URL
+        // ============================================
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id') || 'UN-2EP1M8IO-9Y8R';
         const sku = urlParams.get('sku') || '00030202';
@@ -468,20 +471,16 @@
         const unidade = urlParams.get('unidade') || 'PLT';
 
         // ============================================
-        // SOLUÇÃO DEFINITIVA - USA A LISTA COMO REFERÊNCIA
+        // SOLUÇÃO DEFINITIVA - ORDEM PELO ID (IGUAL À TABELA)
         // ============================================
         
         // Buscar todas unidades do SKU
-        const todasUnidades = buscarUnidadesPorSKU(sku, unidadeId);
+        const todasUnidades = buscarUnidadesPorSKU(sku);
 
-        // Função de normalização (igual da lista)
+        // Função de normalização
         const normalizarData = (dataStr) => {
             if (!dataStr) return '';
-            // Se já vier YYYY-MM-DD (da URL), mantém
-            if (dataStr.includes('-')) {
-                return dataStr;
-            }
-            // Se vier DD/MM/YYYY (dos dados), converte
+            if (dataStr.includes('-')) return dataStr;
             if (dataStr.includes('/')) {
                 const partes = dataStr.split('/');
                 return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
@@ -489,51 +488,53 @@
             return dataStr;
         };
 
-        // Ordenar unidades por data (igual da lista)
+        // ORDENAR UNIDADES POR DATA (igual à tabela)
         const unidadesOrdenadas = [...todasUnidades].sort((a, b) => {
             const dataA = normalizarData(a.validade);
             const dataB = normalizarData(b.validade);
             return dataA.localeCompare(dataB);
         });
 
-        // Extrair datas únicas (igual da lista)
-        const datasUnicas = [...new Set(unidadesOrdenadas.map(u => normalizarData(u.validade)))].sort();
-
-        // Encontrar a posição da unidade atual
-        const dataAtualNorm = normalizarData(validade);
-        const posicaoNaLista = datasUnicas.indexOf(dataAtualNorm) + 1;
-
-        // VARIÁVEL QUE PUXA DA LISTA - esta é a ordem correta!
-        const numeroOrdem = posicaoNaLista; // 2 para a unidade 25/06/2026
-
-        console.log('📊 DATAS ÚNICAS:', datasUnicas);
-        console.log('📍 DATA ATUAL:', dataAtualNorm);
-        console.log('🎯 ORDEM DA UNIDADE:', numeroOrdem); // DEVE SER 2!
-
-        // Mapa de ordens para usar na tabela
+        // CRIAR MAPA DE ORDENS (datas iguais = mesma ordem)
         const mapaOrdem = {};
-        unidadesOrdenadas.forEach(u => {
-            const dataNorm = normalizarData(u.validade);
-            const pos = datasUnicas.indexOf(dataNorm) + 1;
-            mapaOrdem[u.id] = pos;
+        let ordemAtual = 1;
+        let dataAnterior = null;
+
+        unidadesOrdenadas.forEach((unidade) => {
+            const dataAtual = normalizarData(unidade.validade);
+            if (dataAnterior && dataAtual !== dataAnterior) {
+                ordemAtual++;
+            }
+            mapaOrdem[unidade.id] = ordemAtual;
+            dataAnterior = dataAtual;
         });
 
-        // Construir link QR Code
+        // PEGAR A ORDEM DA UNIDADE ATUAL PELO ID
+        const numeroOrdem = mapaOrdem[unidadeId] || 1;
+
+        console.log('🎯 ORDEM DA UNIDADE ATUAL:', numeroOrdem); // DEVE SER 2!
+        console.log('📊 MAPA DE ORDENS:', mapaOrdem);
+
+        // ============================================
+        // QR CODE
+        // ============================================
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
 
-        // Função para atualizar a etiqueta
+        // ============================================
+        // ATUALIZAR ETIQUETA
+        // ============================================
         function atualizarEtiqueta() {
             const etiquetaDiv = document.getElementById('etiquetaVisualizacao');
             
-            // Formatar data para exibição
+            // Formatar data
             let dataExibicao = validade;
             if (validade.includes('-')) {
                 const partes = validade.split('-');
                 dataExibicao = `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
             
-            // Criar HTML do ordinal
+            // HTML do ordinal
             const ordemHTML = `${numeroOrdem}<sup>º</sup>`;
             
             etiquetaDiv.innerHTML = `
@@ -567,7 +568,9 @@
             `;
         }
 
-        // Gerar QR Code
+        // ============================================
+        // GERAR QR CODE E TABELA
+        // ============================================
         function gerarQRCode() {
             const qrcodeDiv = document.getElementById('qrcode');
             if (!qrcodeDiv) return;
@@ -582,14 +585,14 @@
                 qrcodeDiv.appendChild(canvas);
             });
 
-            // Atualizar resumo
+            // Resumo
             document.getElementById('resumo-sku').innerHTML = `
                 <strong>SKU: ${sku}</strong> | 
                 <strong>Total de unidades:</strong> ${todasUnidades.length} | 
                 <strong>Unidade atual:</strong> <span style="color: #ffd700; font-weight: bold;">${numeroOrdem}º</span>
             `;
 
-            // Gerar tabela (usando o mapa de ordens já calculado)
+            // Tabela
             let infoHtml = '<h3>📦 TODAS AS UNIDADES DO SKU ' + sku + ':</h3>';
             infoHtml += '<table class="tabela-validades">';
             infoHtml += '<tr><th>ID</th><th>LOTE</th><th>VALIDADE</th><th>ORDEM</th></tr>';
@@ -610,12 +613,16 @@
             document.getElementById('infoPaletes').innerHTML = infoHtml;
         }
 
-        // Função para imprimir
+        // ============================================
+        // IMPRIMIR
+        // ============================================
         function imprimirEtiqueta() {
             window.print();
         }
 
-        // Função para baixar
+        // ============================================
+        // BAIXAR PNG
+        // ============================================
         function baixarEtiqueta() {
             const qrCanvas = document.querySelector('#qrcode canvas');
             if (!qrCanvas) {
@@ -685,7 +692,9 @@
             link.click();
         }
 
-        // Inicializar
+        // ============================================
+        // INICIAR
+        // ============================================
         window.onload = function() {
             atualizarEtiqueta();
             setTimeout(gerarQRCode, 100);
