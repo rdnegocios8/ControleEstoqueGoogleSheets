@@ -479,33 +479,44 @@
         // FUNÇÃO CORRIGIDA - USA LÓGICA DE DATAS ÚNICAS
         // ============================================
         function calcularOrdemPorSKU(sku, validadeAtual, unidadeAtualId) {
-            const unidadesDoSKU = buscarUnidadesPorSKU(sku, unidadeAtualId);
-            
-            if (!unidadesDoSKU || unidadesDoSKU.length === 0) {
-                return { numero: 1, totalUnidades: 1 };
-            }
+    const unidadesDoSKU = buscarUnidadesPorSKU(sku, unidadeAtualId);
+    
+    if (!unidadesDoSKU || unidadesDoSKU.length === 0) {
+        return { numero: 1, totalUnidades: 1 };
+    }
 
-            // Função para normalizar data (DD/MM/YYYY -> YYYY-MM-DD)
-            const normalizarData = (dataStr) => {
-                if (!dataStr) return '';
-                const partes = dataStr.split('/');
-                return partes.length === 3 ? `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}` : dataStr;
-            };
-
-            // Extrai datas únicas e ordena
-            const datasUnicas = [...new Set(unidadesDoSKU.map(u => normalizarData(u.validade)))]
-                .filter(d => d)
-                .sort();
-
-            // Encontra a posição da data atual
-            const dataAtualNorm = normalizarData(validadeAtual);
-            const posicao = datasUnicas.indexOf(dataAtualNorm) + 1;
-
-            return {
-                numero: posicao,  // Retorna só o número (1, 2, 3...)
-                totalUnidades: unidadesDoSKU.length
-            };
+    const normalizarData = (dataStr) => {
+        if (!dataStr) return '';
+        if (dataStr.includes('/')) {
+            const partes = dataStr.split('/');
+            return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
         }
+        return dataStr; // Já está YYYY-MM-DD
+    };
+
+    // IMPORTANTE: A data que vem da URL pode ser YYYY-MM-DD
+    // Precisamos normalizar a data atual também
+    const dataAtualNorm = normalizarData(validadeAtual);
+    
+    // Normalizar todas as datas das unidades
+    const datasUnicas = [...new Set(unidadesDoSKU.map(u => normalizarData(u.validade)))]
+        .filter(d => d)
+        .sort();
+
+    console.log('Datas únicas:', datasUnicas);
+    console.log('Data atual:', dataAtualNorm);
+    
+    // Encontrar posição (1-based)
+    const index = datasUnicas.indexOf(dataAtualNorm);
+    const posicao = index >= 0 ? index + 1 : 1; // Se não achar, assume 1º
+    
+    console.log('Posição encontrada:', posicao);
+
+    return {
+        numero: posicao,
+        totalUnidades: unidadesDoSKU.length
+    };
+}
 
         // Carregar dados da URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -712,3 +723,4 @@
     </script>
 </body>
 </html>
+
