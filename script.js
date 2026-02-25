@@ -943,9 +943,14 @@ function abrirModalUnidade(sku) {
 async function salvarProduto() {
     let sku = document.getElementById('produto-sku').value;
     
-    // CORREÇÃO: Garantir que o SKU tenha 8 dígitos
-    if (sku && sku.length < 8 && !isNaN(sku)) {
-        sku = sku.padStart(8, '0');
+    // Garantir que o SKU tenha 8 dígitos e seja texto
+    if (sku) {
+        // Remover espaços e garantir que seja string
+        sku = String(sku).trim();
+        // Adicionar zeros à esquerda se necessário
+        if (sku.length < 8 && !isNaN(sku)) {
+            sku = sku.padStart(8, '0');
+        }
     }
     
     const tipoEmbalagem = document.getElementById('produto-tipo-embalagem').value;
@@ -954,7 +959,7 @@ async function salvarProduto() {
     
     const produto = {
         tipo: 'produto',
-        sku: sku,  // Usar o SKU corrigido
+        sku: sku,  // Agora é string com zeros
         nome: document.getElementById('produto-nome').value,
         descricao: document.getElementById('produto-descricao').value,
         categoria: document.getElementById('produto-categoria').value,
@@ -1547,5 +1552,6 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
 
