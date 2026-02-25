@@ -1837,4 +1837,337 @@ document.getElementById('busca-rebimento-produto')?.addEventListener('focus', ()
     }
 });
 
+// ============================================
+// FUNÇÕES DE RECEBIMENTO COM MÚLTIPLOS PRODUTOS
+// ============================================
+
+let contadorItens = 0;
+let produtosPorItem = {}; // Armazenar produtos por índice
+
+// Adicionar novo item ao recebimento
+function adicionarItemRecebimento() {
+    contadorItens++;
+    const container = document.getElementById('itens-recebimento-container');
+    const novoItem = document.createElement('div');
+    novoItem.className = 'item-recebimento mb-3 p-3 border rounded';
+    novoItem.id = `item-recebimento-${contadorItens}`;
+    
+    novoItem.innerHTML = `
+        <div class="d-flex justify-content-between mb-2">
+            <h6 class="text-info">Produto ${contadorItens + 1}</h6>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removerItemRecebimento(${contadorItens})">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-2">
+                <label class="form-label">Buscar Produto</label>
+                <input type="text" class="form-control busca-produto-recebimento" 
+                       placeholder="Digite para buscar..." data-index="${contadorItens}">
+                <input type="hidden" class="item-sku" id="item-sku-${contadorItens}" required>
+            </div>
+            <div class="col-md-2 mb-2">
+                <label class="form-label">Lote</label>
+                <input type="text" class="form-control item-lote" id="item-lote-${contadorItens}" required>
+            </div>
+            <div class="col-md-2 mb-2">
+                <label class="form-label">Validade</label>
+                <input type="date" class="form-control item-validade" id="item-validade-${contadorItens}" required>
+            </div>
+            <div class="col-md-2 mb-2">
+                <label class="form-label">Volume</label>
+                <input type="number" class="form-control item-volume" id="item-volume-${contadorItens}" min="1" value="1" step="any" required>
+                <small class="text-muted">Qtd de embalagens</small>
+            </div>
+            <div class="col-md-2 mb-2">
+                <label class="form-label">Quantidade</label>
+                <input type="number" class="form-control item-quantidade" id="item-quantidade-${contadorItens}" step="any" required>
+                <small class="text-muted item-unidade" id="item-unidade-${contadorItens}">UN</small>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-2">
+                <div class="lista-produtos-recebimento" id="lista-produtos-${contadorItens}" 
+                     style="max-height: 150px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
+                    <!-- Lista de produtos será inserida aqui -->
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label class="form-label">Unidade de Medida</label>
+                <input type="text" class="form-control item-unidade-medida" id="item-unidade-medida-${contadorItens}" readonly>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label class="form-label">Localização</label>
+                <input type="text" class="form-control item-localizacao" id="item-localizacao-${contadorItens}">
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(novoItem);
+    
+    // Adicionar event listeners para o novo item
+    configurarBuscaProduto(contadorItens);
+    configurarCalculoQuantidade(contadorItens);
+}
+
+// Remover item do recebimento
+function removerItemRecebimento(index) {
+    const item = document.getElementById(`item-recebimento-${index}`);
+    if (item) {
+        item.remove();
+        delete produtosPorItem[index];
+    }
+}
+
+// Configurar busca de produto para um item específico
+function configurarBuscaProduto(index) {
+    const inputBusca = document.querySelector(`.busca-produto-recebimento[data-index="${index}"]`);
+    const listaContainer = document.getElementById(`lista-produtos-${index}`);
+    
+    if (!inputBusca || !listaContainer) return;
+    
+    inputBusca.addEventListener('keyup', function() {
+        const termo = this.value.toLowerCase();
+        const lista = document.getElementById(`lista-produtos-${index}`);
+        
+        // Preencher lista se estiver vazia
+        if (lista.children.length === 0) {
+            produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary';
+                item.setAttribute('data-sku', p.sku);
+                item.setAttribute('data-tipo', p.tipoEmbalagem);
+                item.setAttribute('data-qtd', p.qtdPorEmbalagem);
+                item.setAttribute('data-unidade', p.unidadeBase);
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>${p.nome}</span>
+                        <small class="text-muted">${p.sku}</small>
+                    </div>
+                    <small class="text-info">${p.categoria} - ${p.tipoEmbalagem}</small>
+                `;
+                
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    selecionarProdutoItem(index, p.sku, p.nome, p.tipoEmbalagem, p.qtdPorEmbalagem, p.unidadeBase);
+                });
+                
+                lista.appendChild(item);
+            });
+        }
+        
+        // Filtrar
+        const items = lista.getElementsByClassName('list-group-item');
+        let hasVisible = false;
+        
+        Array.from(items).forEach(item => {
+            const texto = item.textContent.toLowerCase();
+            if (texto.includes(termo)) {
+                item.style.display = 'block';
+                hasVisible = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        listaContainer.style.display = hasVisible ? 'block' : 'none';
+    });
+    
+    inputBusca.addEventListener('focus', function() {
+        if (this.value) {
+            const lista = document.getElementById(`lista-produtos-${index}`);
+            if (lista.children.length === 0) {
+                // Forçar preenchimento
+                const event = new Event('keyup');
+                inputBusca.dispatchEvent(event);
+            } else {
+                listaContainer.style.display = 'block';
+            }
+        }
+    });
+}
+
+// Selecionar produto em um item específico
+function selecionarProdutoItem(index, sku, nome, tipoEmbalagem, qtdPorEmbalagem, unidadeBase) {
+    document.getElementById(`item-sku-${index}`).value = sku;
+    document.querySelector(`.busca-produto-recebimento[data-index="${index}"]`).value = nome;
+    document.getElementById(`lista-produtos-${index}`).style.display = 'none';
+    
+    document.getElementById(`item-unidade-medida-${index}`).value = tipoEmbalagem;
+    
+    // Armazenar dados do produto
+    produtosPorItem[index] = {
+        sku: sku,
+        nome: nome,
+        tipoEmbalagem: tipoEmbalagem,
+        qtdPorEmbalagem: qtdPorEmbalagem,
+        unidadeBase: unidadeBase
+    };
+    
+    // Atualizar unidade
+    document.getElementById(`item-unidade-${index}`).textContent = unidadeBase;
+    
+    // Calcular quantidade
+    calcularQuantidadeItem(index);
+}
+
+// Configurar cálculo de quantidade
+function configurarCalculoQuantidade(index) {
+    const volumeInput = document.getElementById(`item-volume-${index}`);
+    const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
+    
+    if (volumeInput) {
+        volumeInput.addEventListener('input', function() {
+            calcularQuantidadeItem(index);
+        });
+    }
+}
+
+// Calcular quantidade para um item
+function calcularQuantidadeItem(index) {
+    const produto = produtosPorItem[index];
+    if (!produto) return;
+    
+    const volume = parseFloat(document.getElementById(`item-volume-${index}`)?.value) || 1;
+    const quantidade = volume * (produto.qtdPorEmbalagem || 1);
+    
+    const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
+    if (quantidadeInput) {
+        quantidadeInput.value = quantidade.toFixed(2);
+    }
+}
+
+// Modificar a função salvarRecebimento para processar múltiplos itens
+async function salvarRecebimento() {
+    const dataRecebimento = document.getElementById('recebimento-data').value;
+    const numeroNF = document.getElementById('recebimento-nf').value;
+    const fornecedor = document.getElementById('recebimento-fornecedor').value;
+    const observacoes = document.getElementById('recebimento-observacoes').value;
+    
+    if (!dataRecebimento || !numeroNF || !fornecedor) {
+        alert('Data, NF e Fornecedor são obrigatórios!');
+        return;
+    }
+    
+    // Coletar todos os itens
+    const itens = [];
+    for (let i = 0; i <= contadorItens; i++) {
+        const item = document.getElementById(`item-recebimento-${i}`);
+        if (!item) continue;
+        
+        const sku = document.getElementById(`item-sku-${i}`)?.value;
+        const lote = document.getElementById(`item-lote-${i}`)?.value;
+        const validade = document.getElementById(`item-validade-${i}`)?.value;
+        const volume = parseFloat(document.getElementById(`item-volume-${i}`)?.value) || 1;
+        const quantidade = parseFloat(document.getElementById(`item-quantidade-${i}`)?.value) || 0;
+        const unidadeMedida = document.getElementById(`item-unidade-medida-${i}`)?.value;
+        const localizacao = document.getElementById(`item-localizacao-${i}`)?.value || '';
+        
+        if (!sku || !lote || !validade || !quantidade) {
+            alert(`Preencha todos os campos do item ${i + 1}`);
+            return;
+        }
+        
+        const produto = produtos.find(p => p.sku === sku);
+        
+        itens.push({
+            sku: sku,
+            nomeProduto: produto?.nome || '',
+            lote: lote,
+            validade: validade,
+            volume: volume,
+            quantidade: quantidade,
+            unidadeMedida: unidadeMedida,
+            localizacao: localizacao
+        });
+    }
+    
+    if (itens.length === 0) {
+        alert('Adicione pelo menos um produto!');
+        return;
+    }
+    
+    try {
+        // Salvar cada item como um recebimento separado
+        for (const item of itens) {
+            const recebimento = {
+                tipo: 'recebimento',
+                dataRecebimento: dataRecebimento,
+                numeroNF: numeroNF,
+                fornecedor: fornecedor,
+                codigoSKU: item.sku,
+                nomeProduto: item.nomeProduto,
+                lote: item.lote,
+                validade: item.validade,
+                quantidade: item.quantidade,
+                volume: item.volume,
+                unidadeMedida: item.unidadeMedida,
+                qtdPorEmbalagem: 1, // Pode ajustar se necessário
+                localizacao: item.localizacao,
+                responsavel: 'Sistema',
+                observacoes: observacoes
+            };
+            
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(recebimento)
+            });
+            
+            // Criar unidade automaticamente
+            const idUnidade = gerarIdUnico();
+            const unidade = {
+                tipo: 'unidade',
+                id: idUnidade,
+                sku: item.sku,
+                lote: item.lote,
+                validade: item.validade,
+                volume: item.volume,
+                quantidade: item.quantidade,
+                unidadeEmbalagem: item.unidadeMedida,
+                status: 'Disponível',
+                localizacao: item.localizacao || '-',
+                destino: '',
+                foraPadrao: false,
+                qtdRealPorEmbalagem: null
+            };
+            
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(unidade)
+            });
+        }
+        
+        // Limpar formulário
+        document.getElementById('form-recebimento').reset();
+        
+        // Remover itens extras (manter apenas o primeiro)
+        const container = document.getElementById('itens-recebimento-container');
+        while (container.children.length > 1) {
+            container.lastChild.remove();
+        }
+        
+        // Resetar contador
+        contadorItens = 0;
+        
+        bootstrap.Modal.getInstance(document.getElementById('modalRecebimento')).hide();
+        await carregarDados();
+        
+        alert(`${itens.length} produto(s) recebido(s) com sucesso!`);
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao registrar recebimento.');
+    }
+}
+
+// Inicializar o primeiro item
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar busca para o primeiro item
+    configurarBuscaProduto(0);
+    configurarCalculoQuantidade(0);
+});
 
