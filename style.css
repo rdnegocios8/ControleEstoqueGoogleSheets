@@ -1676,3 +1676,104 @@ h2 {
     padding: 40px !important;
     background-color: #1a2634 !important;
 }
+
+/* ============================================ */
+/* CORREÇÃO DO MODAL DE DETALHES DA UNIDADE */
+/* ============================================ */
+
+/* Garantir que o modal fique por cima de tudo */
+#modalDetalhesUnidade {
+    z-index: 9999 !important;
+}
+
+#modalDetalhesUnidade .modal-dialog {
+    z-index: 10000 !important;
+    margin-top: 50px;
+}
+
+/* Fundo escuro para o modal */
+#modalDetalhesUnidade .modal-content {
+    background-color: #0f172a !important;
+    border: 2px solid #fbbf24;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Cabeçalho do modal */
+#modalDetalhesUnidade .modal-header {
+    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+    border-bottom: 2px solid #fbbf24;
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem;
+}
+
+#modalDetalhesUnidade .modal-title {
+    color: #fbbf24 !important;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+/* Corpo do modal */
+#modalDetalhesUnidade .modal-body {
+    padding: 1.5rem;
+    color: #e2e8f0;
+    background-color: #0f172a !important;
+}
+
+#modalDetalhesUnidade .modal-body p {
+    margin: 0.8rem 0;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #2d3748;
+}
+
+#modalDetalhesUnidade .modal-body strong {
+    color: #fbbf24;
+    width: 120px;
+    display: inline-block;
+    font-weight: 600;
+}
+
+/* QR Code container */
+#unidade-qr-code {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 15px;
+    border: 2px solid #fbbf24;
+}
+
+/* Botão de fechar */
+#modalDetalhesUnidade .btn-close {
+    background-color: #94a3b8 !important;
+    opacity: 0.8;
+}
+
+#modalDetalhesUnidade .btn-close:hover {
+    opacity: 1;
+}
+
+/* Status badge */
+#detalhe-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Botão Ver QR Code */
+#modalDetalhesUnidade .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    border: none;
+    color: white !important;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#modalDetalhesUnidade .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
