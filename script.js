@@ -1680,3 +1680,90 @@ document.getElementById('busca-produto')?.addEventListener('focus', () => {
         filtrarProdutosLista();
     }
 });
+
+// ============================================
+// FUNÇÕES DE BUSCA DE PRODUTOS NO RECEBIMENTO
+// ============================================
+
+// Preencher a lista de produtos no recebimento
+function preencherListaProdutosRecebimento() {
+    const container = document.getElementById('lista-recebimento-produtos');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
+        const item = document.createElement('a');
+        item.href = '#';
+        item.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary';
+        item.setAttribute('data-sku', p.sku);
+        item.setAttribute('data-tipo', p.tipoEmbalagem);
+        item.setAttribute('data-qtd', p.qtdPorEmbalagem);
+        item.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span>${p.nome}</span>
+                <small class="text-muted">${p.sku}</small>
+            </div>
+            <small class="text-info">${p.categoria} - ${p.tipoEmbalagem}</small>
+        `;
+        
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            selecionarProdutoRecebimento(p.sku, p.nome, p.tipoEmbalagem, p.qtdPorEmbalagem);
+        });
+        
+        container.appendChild(item);
+    });
+}
+
+// Selecionar um produto no recebimento
+function selecionarProdutoRecebimento(sku, nome, tipoEmbalagem, qtdPorEmbalagem) {
+    document.getElementById('recebimento-sku').value = sku;
+    document.getElementById('busca-recebimento-produto').value = nome;
+    document.getElementById('lista-recebimento-container').style.display = 'none';
+    
+    document.getElementById('recebimento-produto').value = nome;
+    document.getElementById('recebimento-unidade').value = tipoEmbalagem;
+    document.getElementById('recebimento-qtd-embalagem').value = qtdPorEmbalagem;
+    
+    calcularQuantidadeRecebimento();
+}
+
+// Filtrar produtos no recebimento
+function filtrarProdutosRecebimento() {
+    const termo = document.getElementById('busca-recebimento-produto').value.toLowerCase();
+    const container = document.getElementById('lista-recebimento-produtos');
+    if (!container) return;
+    
+    const items = container.getElementsByClassName('list-group-item');
+    let hasVisible = false;
+    
+    Array.from(items).forEach(item => {
+        const texto = item.textContent.toLowerCase();
+        if (texto.includes(termo)) {
+            item.style.display = 'block';
+            hasVisible = true;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('lista-recebimento-container').style.display = hasVisible ? 'block' : 'none';
+}
+
+// Modificar a função preencherSelectProdutosRecebimento
+function preencherSelectProdutosRecebimento() {
+    preencherListaProdutosRecebimento();
+}
+
+// Modificar a função que abre o modal de recebimento (se houver)
+// Adicione esta linha no início da função que abre o modal:
+// preencherListaProdutosRecebimento();
+
+// Event listeners para o campo de busca
+document.getElementById('busca-recebimento-produto')?.addEventListener('keyup', filtrarProdutosRecebimento);
+document.getElementById('busca-rebimento-produto')?.addEventListener('focus', () => {
+    if (document.getElementById('busca-recebimento-produto').value) {
+        filtrarProdutosRecebimento();
+    }
+});
