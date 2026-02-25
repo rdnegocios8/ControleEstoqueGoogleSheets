@@ -470,53 +470,44 @@
             return todasUnidades.filter(u => u.sku === sku);
         }
 
-        // Calcula a ordem considerando grupos de mesma validade
-        function calcularOrdemPorSKU(sku, validadeAtual, unidadeAtualId) {
-            const unidadesDoSKU = buscarUnidadesPorSKU(sku, unidadeAtualId);
-           
-            if (!unidadesDoSKU || unidadesDoSKU.length === 0) {
-                return { ordem: '1º', posicao: 1, grupos: {}, unidades: [], totalUnidades: 1 };
-            }
-           
-            const unidadesComData = unidadesDoSKU.map(u => ({
-                ...u,
-                dataObj: parseData(u.validade)
-            })).filter(u => u.dataObj !== null);
-           
-            const unidadesOrdenadas = [...unidadesComData].sort((a, b) => a.dataObj - b.dataObj);
-           
-            const grupos = {};
-            const posicaoMap = {};
-            let posicaoAtual = 1;
-            let dataAnterior = null;
-           
-            unidadesOrdenadas.forEach(u => {
-                const dataStr = u.validade;
-               
-                if (!grupos[dataStr]) {
-                    grupos[dataStr] = [];
-                    if (dataAnterior && dataStr !== dataAnterior) {
-                        posicaoAtual++;
-                    }
-                    posicaoMap[dataStr] = posicaoAtual;
-                }
-               
-                grupos[dataStr].push(u);
-                dataAnterior = dataStr;
-            });
-           
-            const posicao = posicaoMap[validadeAtual] || 1;
-            const ordinais = ['1º', '2º', '3º', '4º', '5º', '6º', '7º', '8º', '9º', '10º'];
-            const ordem = ordinais[Math.min(posicao - 1, ordinais.length - 1)] || `${posicao}º`;
-           
-            return {
-                ordem,
-                posicao,
-                grupos,
-                unidades: unidadesOrdenadas,
-                totalUnidades: unidadesOrdenadas.length
-            };
-        }
+       // ============================================
+// FUNÇÃO CORRIGIDA - USA LÓGICA DE DATAS ÚNICAS
+// ============================================
+function calcularOrdemPorSKU(sku, validadeAtual, unidadeAtualId) {
+    // Busca as unidades do SKU (usa seus dados simulados)
+    const unidadesDoSKU = buscarUnidadesPorSKU(sku, unidadeAtualId);
+    if (!unidadesDoSKU || unidadesDoSKU.length === 0) {
+        return { ordem: '1º', posicao: 1, totalUnidades: 1 };
+    }
+
+    // Função para normalizar data (DD/MM/YYYY -> YYYY-MM-DD) para comparação
+    const normalizarData = (dataStr) => {
+        if (!dataStr) return '';
+        const partes = dataStr.split('/');
+        return partes.length === 3 ? `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}` : dataStr;
+    };
+
+    // Extrai datas únicas e ordena
+    const datasUnicas = [...new Set(unidadesDoSKU.map(u => normalizarData(u.validade)))]
+        .filter(d => d)
+        .sort();
+
+    // Encontra a posição da data atual
+    const dataAtualNorm = normalizarData(validadeAtual);
+    const posicao = datasUnicas.indexOf(dataAtualNorm) + 1; // +1 porque índice começa em 0
+
+    // Converte para ordinal
+    const ordinais = ['1º', '2º', '3º', '4º', '5º', '6º', '7º', '8º', '9º', '10º'];
+    const ordem = ordinais[posicao - 1] || posicao + 'º';
+
+    // Retorna exatamente o que a página precisa
+    return {
+        ordem: ordem,
+        posicao: posicao,
+        unidades: unidadesDoSKU,
+        totalUnidades: unidadesDoSKU.length
+    };
+}
 
         // Pegar parâmetros da URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -785,3 +776,4 @@
     </script>
 </body>
 </html>
+
