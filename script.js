@@ -385,22 +385,32 @@ async function carregarRecebimentos() {
         const data = await response.json();
         
         if (data.values && data.values.length > 1) {
-            recebimentos = data.values.slice(1).map(row => ({
-                data: row[0],
-                nf: row[1],
-                fornecedor: row[2],
-                sku: row[3],
-                produto: row[4],
-                lote: row[5],
-                validade: row[6],
-                quantidade: row[7],
-                volume: row[8],
-                unidade: row[9],
-                qtdPorEmbalagem: row[10],
-                localizacao: row[11],
-                responsavel: row[12],
-                observacoes: row[13]
-            }));
+            recebimentos = data.values.slice(1).map(row => {
+                const converter = (valor) => {
+                    if (!valor) return 0;
+                    if (typeof valor === 'string') {
+                        return parseFloat(valor.replace(',', '.')) || 0;
+                    }
+                    return parseFloat(valor) || 0;
+                };
+                
+                return {
+                    data: row[0],
+                    nf: row[1],
+                    fornecedor: row[2],
+                    sku: row[3],
+                    produto: row[4],
+                    lote: row[5],
+                    validade: row[6],
+                    quantidade: converter(row[7]),
+                    volume: converter(row[8]),
+                    unidade: row[9],
+                    qtdPorEmbalagem: converter(row[10]),
+                    localizacao: row[11],
+                    responsavel: row[12],
+                    observacoes: row[13]
+                };
+            });
             
             atualizarTabelaRecebimentos();
         }
@@ -449,36 +459,42 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 
 // Carregar estoque geral da planilha
 async function carregarEstoqueGeral() {
-    try {
+   try {
         console.log('📊 Carregando estoque geral da planilha...');
         
         const response = await fetch(ESTOQUE_GERAL_URL);
         const data = await response.json();
         
         if (data.values && data.values.length > 1) {
-            // Mapear os dados da planilha (pular cabeçalho)
-            estoqueGeral = data.values.slice(1).map(row => ({
-                codigo: row[0] || '',
-                unidade: row[1] || '',
-                descricao: row[2] || '',
-                qtdSistema: parseFloat(row[3]) || 0,
-                quantidadeAnterior: parseFloat(row[4]) || 0,
-                lancamentos: parseFloat(row[5]) || 0,
-                quantidadeTotal: parseFloat(row[6]) || 0,
-                abastecimentos: parseFloat(row[7]) || 0,
-                fisicoAtual: parseFloat(row[8]) || 0,
-                estSistemaReal: parseFloat(row[9]) || 0,
-                status: row[10] || 'NORMAL'
-            })).filter(item => item.codigo);
+            estoqueGeral = data.values.slice(1).map(row => {
+                // Função auxiliar para converter string com vírgula
+                const converter = (valor) => {
+                    if (!valor) return 0;
+                    if (typeof valor === 'string') {
+                        return parseFloat(valor.replace(',', '.')) || 0;
+                    }
+                    return parseFloat(valor) || 0;
+                };
+                
+                return {
+                    codigo: row[0] || '',
+                    unidade: row[1] || '',
+                    descricao: row[2] || '',
+                    qtdSistema: converter(row[3]),
+                    quantidadeAnterior: converter(row[4]),
+                    lancamentos: converter(row[5]),
+                    quantidadeTotal: converter(row[6]),
+                    abastecimentos: converter(row[7]),
+                    fisicoAtual: converter(row[8]),
+                    estSistemaReal: converter(row[9]),
+                    status: row[10] || 'NORMAL'
+                };
+            }).filter(item => item.codigo);
             
-            console.log(`✅ ${estoqueGeral.length} itens carregados do estoque geral`);
-        } else {
-            estoqueGeral = [];
-            console.log('⚠️ Nenhum dado encontrado na aba Estoque Geral');
+            console.log(`✅ ${estoqueGeral.length} itens carregados`);
         }
         
         atualizarTabelaEstoqueGeral();
-        
     } catch (error) {
         console.error('❌ Erro ao carregar estoque geral:', error);
         estoqueGeral = [];
@@ -682,24 +698,27 @@ async function carregarDados() {
             unidades = unidadesData.values.slice(1).map(row => {
                 let sku = row[1] || '';
                 
-                // CORREÇÃO: Adicionar zeros à esquerda no SKU das unidades também
                 if (sku && !isNaN(sku) && sku.length < 8) {
                     sku = sku.padStart(8, '0');
                 }
+                
+                // CORREÇÃO: Converter string com vírgula para número
+                const quantidadeStr = row[5] || '0';
+                const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
                 
                 return {
                     id: row[0] || '',
                     sku: sku,
                     lote: row[2] || '',
                     validade: row[3] || '',
-                    volume: parseInt(row[4]) || 1,        // Volume geralmente é inteiro
-                    quantidade: parseFloat(row[5]) || 0,  // Quantidade pode ter decimais
+                    volume: parseInt(row[4]) || 1,
+                    quantidade: quantidade,  // <-- VALOR CORRIGIDO
                     unidadeEmbalagem: row[6] || 'UN',
                     status: row[7] || 'Disponível',
                     localizacao: row[8] || '-',
                     destino: row[9] || '',
                     foraPadrao: row[10] === 'Sim',
-                    qtdRealPorEmbalagem: row[11] ? parseFloat(row[11]) : null  // Pode ter decimais
+                    qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null
                 };
             }).filter(u => u.id);
             
@@ -1555,6 +1574,7 @@ function formatarData(data) {
     if (isNaN(d.getTime())) return data;
     return d.toLocaleDateString('pt-BR');
 }
+
 
 
 
