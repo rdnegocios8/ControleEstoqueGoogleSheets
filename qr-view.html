@@ -360,560 +360,350 @@
     </div>
 
     <script>
-        // Função para converter data nos formatos DD/MM/YYYY ou YYYY-MM-DD
-        function parseData(dataStr) {
-            if (!dataStr) return null;
-            
-            // Tentar formato YYYY-MM-DD
-            if (dataStr.includes('-')) {
-                const partes = dataStr.split('-');
-                if (partes.length === 3) {
-                    return new Date(partes[0], partes[1] - 1, partes[2]);
-                }
-            }
-            
-            // Tentar formato DD/MM/YYYY
-            if (dataStr.includes('/')) {
-                const partes = dataStr.split('/');
-                if (partes.length === 3) {
-                    return new Date(partes[2], partes[1] - 1, partes[0]);
-                }
-            }
-            
-            return new Date(dataStr);
-        }
-
-        // Função para formatar data
-        function formatarData(data) {
-            if (!data) return '';
-            if (data instanceof Date) {
-                return data.toLocaleDateString('pt-BR');
-            }
-            return data;
-        }
-
-        // Função para buscar todas as unidades do mesmo SKU
-        function buscarUnidadesPorSKU(sku, unidadeAtualId) {
-            // Simulação dos dados baseado na imagem fornecida
-            const todasUnidades = [
-                {
-                    id: 'UN-KØNLQSNX-AMZK',
-                    sku: '00030202',
-                    produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
-                    lote: 'AAACXB0101',
-                    validade: '07/04/2026',
-                    volume: '583.50',
-                    quantidade: '1',
-                    unidade: 'PLT'
-                },
-                {
-                    id: 'UN-2EP1M8IO-9Y8R',
-                    sku: '00030202',
-                    produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
-                    lote: 'AAACS60101',
-                    validade: '25/06/2026',
-                    volume: '535.87',
-                    quantidade: '1',
-                    unidade: 'PLT'
-                },
-                {
-                    id: 'UN-CUT9HP6G-46K4',
-                    sku: '00030202',
-                    produto: 'FILME BISC. ROSQUINHA COCO EMEGE 600GR',
-                    lote: 'AAACS60101',
-                    validade: '25/06/2026',
-                    volume: '555.88',
-                    quantidade: '1',
-                    unidade: 'PLT'
-                }
+    // ============================================
+    // FUNÇÃO DE ORDENAÇÃO CORRIGIDA PARA ETIQUETAS
+    // ============================================
+    
+    /**
+     * Calcula a ordem (1º, 2º, 3º...) baseada na validade para um SKU específico
+     * @param {string} sku - O código SKU do produto
+     * @param {string} validadeAtual - A validade da unidade atual (formato DD/MM/YYYY)
+     * @returns {Object} - Objeto contendo a ordem formatada e metadados
+     */
+    function calcularOrdemPorValidade(sku, validadeAtual) {
+        // Buscar todas as unidades do sistema que possuem o mesmo SKU e quantidade > 0
+        // Nota: 'unidades' é a variável global do sistema
+        if (typeof unidades === 'undefined' || !Array.isArray(unidades)) {
+            console.warn('Variável global "unidades" não encontrada. Usando dados simulados.');
+            // Fallback para dados simulados caso a variável não exista
+            const unidadesSimuladas = [
+                { sku: '00030202', validade: '07/04/2026', lote: 'AAACXB0101', quantidade: 1, id: 'UN-KØNLQSNX-AMZK' },
+                { sku: '00030202', validade: '25/06/2026', lote: 'AAACS60101', quantidade: 1, id: 'UN-2EP1M8IO-9Y8R' },
+                { sku: '00030202', validade: '25/06/2026', lote: 'AAACS60101', quantidade: 1, id: 'UN-CUT9HP6G-46K4' }
             ];
-            
-            // Filtrar apenas unidades do mesmo SKU
-            return todasUnidades.filter(u => u.sku === sku);
+            var unidadesDoSKU = unidadesSimuladas.filter(u => u.sku === sku && u.quantidade > 0);
+        } else {
+            var unidadesDoSKU = unidades.filter(u => u.sku === sku && u.quantidade > 0);
+        }
+        
+        if (unidadesDoSKU.length === 0) {
+            return { ordem: '1º', posicao: 1, totalDatas: 1 };
         }
 
-        // Função principal para calcular a ordem baseada no SKU - CORRIGIDA
-        function calcularOrdemPorSKU(sku, validadeAtual, unidadeAtualId) {
-            // Buscar todas unidades do mesmo SKU
-            const unidadesDoSKU = buscarUnidadesPorSKU(sku, unidadeAtualId);
-            
-            if (!unidadesDoSKU || unidadesDoSKU.length === 0) {
-                return { ordem: '1º', posicao: 1, unidades: [], totalUnidades: 1 };
+        // Função auxiliar para padronizar datas para comparação
+        const normalizarData = (d) => {
+            if (!d) return null;
+            if (d.includes('/')) {
+                const [dia, mes, ano] = d.split('/');
+                return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
             }
-            
-            // Mapear unidades com suas datas
-            const unidadesComData = unidadesDoSKU.map(u => ({
-                ...u,
-                dataObj: parseData(u.validade)
-            })).filter(u => u.dataObj !== null);
-            
-            // Ordenar por data (mais antiga primeiro)
-            const unidadesOrdenadas = [...unidadesComData].sort((a, b) => a.dataObj - b.dataObj);
-            
-            // Obter datas únicas e ordenadas
-            const datasUnicas = [];
-            const datasSet = new Set();
-            
-            unidadesOrdenadas.forEach(u => {
-                if (!datasSet.has(u.validade)) {
-                    datasSet.add(u.validade);
-                    datasUnicas.push(u.validade);
-                }
-            });
-            
-            // Encontrar a posição da data atual entre as datas únicas
-            const posicao = datasUnicas.indexOf(validadeAtual) + 1;
-            
-            // Converter para ordinal
+            return d; // Assume YYYY-MM-DD
+        };
+
+        const dataAtualNorm = normalizarData(validadeAtual);
+
+        // Extrair datas únicas e ordená-las
+        const datasUnicas = [...new Set(unidadesDoSKU.map(u => normalizarData(u.validade)))]
+            .filter(d => d !== null)
+            .sort();
+
+        // Encontrar a posição da data atual
+        const index = datasUnicas.indexOf(dataAtualNorm);
+        const posicao = index === -1 ? 1 : index + 1;
+
+        // Formatar como ordinal
+        const ordinais = ['1º', '2º', '3º', '4º', '5º', '6º', '7º', '8º', '9º', '10º'];
+        const ordemFormatada = ordinais[posicao - 1] || `${posicao}º`;
+
+        return {
+            ordem: ordemFormatada,
+            posicao: posicao,
+            totalDatas: datasUnicas.length,
+            datasUnicas: datasUnicas
+        };
+    }
+
+    // ============================================
+    // FUNÇÃO PARA GERAR TABELA DE CONFERÊNCIA
+    // ============================================
+    function gerarTabelaConferencia(sku, unidadeId, validadeAtual) {
+        // Usar a variável global unidades ou fallback para dados simulados
+        let unidadesDoSKU;
+        if (typeof unidades !== 'undefined' && Array.isArray(unidades)) {
+            unidadesDoSKU = unidades.filter(u => u.sku === sku && u.quantidade > 0);
+        } else {
+            // Fallback para dados simulados
+            unidadesDoSKU = [
+                { sku: '00030202', validade: '07/04/2026', lote: 'AAACXB0101', quantidade: 1, id: 'UN-KØNLQSNX-AMZK' },
+                { sku: '00030202', validade: '25/06/2026', lote: 'AAACS60101', quantidade: 1, id: 'UN-2EP1M8IO-9Y8R' },
+                { sku: '00030202', validade: '25/06/2026', lote: 'AAACS60101', quantidade: 1, id: 'UN-CUT9HP6G-46K4' }
+            ];
+        }
+
+        // Função auxiliar para padronizar datas
+        const normalizarData = (d) => {
+            if (!d) return '';
+            if (d.includes('/')) {
+                const [dia, mes, ano] = d.split('/');
+                return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+            }
+            return d;
+        };
+
+        // Ordenar por data
+        const unidadesOrdenadas = [...unidadesDoSKU].sort((a, b) => {
+            const dataA = normalizarData(a.validade);
+            const dataB = normalizarData(b.validade);
+            return dataA.localeCompare(dataB);
+        });
+
+        // Encontrar datas únicas
+        const datasUnicas = [...new Set(unidadesOrdenadas.map(u => normalizarData(u.validade)))].sort();
+
+        let tabelaHtml = `<h3>📦 Unidades do SKU ${sku}</h3>
+            <table class="tabela-validades">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Lote</th>
+                        <th>Validade</th>
+                        <th>Ordem</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+        
+        unidadesOrdenadas.forEach(u => {
+            const dataNorm = normalizarData(u.validade);
+            const posicao = datasUnicas.indexOf(dataNorm) + 1;
+            const classeOrdem = `ordem-${Math.min(posicao, 5)}`;
             const ordinais = ['1º', '2º', '3º', '4º', '5º', '6º', '7º', '8º', '9º', '10º'];
-            const ordem = ordinais[Math.min(posicao - 1, ordinais.length - 1)] || posicao + 'º';
+            const ordemTexto = ordinais[posicao - 1] || `${posicao}º`;
             
-            // Debug
-            console.log('Data atual:', validadeAtual);
-            console.log('Datas únicas ordenadas:', datasUnicas);
-            console.log('Posição:', posicao);
-            console.log('Ordem:', ordem);
+            const isAtual = (u.id === unidadeId) || (u.validade === validadeAtual && u.lote === lote);
             
-            return {
-                ordem,
-                posicao,
-                unidades: unidadesComData,
-                totalUnidades: unidadesComData.length
-            };
+            tabelaHtml += `<tr class="${isAtual ? 'atual' : ''}">
+                <td>${u.id ? u.id.substring(0, 12) + '...' : '-'}</td>
+                <td>${u.lote}</td>
+                <td>${u.validade}</td>
+                <td><span class="ordem-badge ${classeOrdem}">${ordemTexto}</span></td>
+            </tr>`;
+        });
+        
+        tabelaHtml += '</tbody></table>';
+        document.getElementById('infoPaletes').innerHTML = tabelaHtml;
+    }
+
+    // ============================================
+    // PEGAR PARÂMETROS DA URL
+    // ============================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const unidadeId = urlParams.get('id') || 'UN-2EP1M8IO-9Y8R';
+    const sku = urlParams.get('sku') || '00030202';
+    const lote = urlParams.get('lote') || 'AAACS60101';
+    const validade = urlParams.get('validade') || '25/06/2026';
+    const produtoNome = decodeURIComponent(urlParams.get('produto') || 'FILME BISC. ROSQUINHA COCO EMEGE 600GR');
+    const volume = urlParams.get('volume') || '535.87';
+    const quantidade = urlParams.get('quantidade') || '1';
+    const unidade = urlParams.get('unidade') || 'PLT';
+
+    // ============================================
+    // CALCULAR ORDEM CORRETA
+    // ============================================
+    const infoOrdem = calcularOrdemPorValidade(sku, validade);
+    const ordem = infoOrdem.ordem;
+
+    // ============================================
+    // CONSTRUIR LINK DO QR CODE
+    // ============================================
+    const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
+    const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
+
+    // ============================================
+    // ATUALIZAR ETIQUETA
+    // ============================================
+    function atualizarEtiqueta() {
+        const etiquetaDiv = document.getElementById('etiquetaVisualizacao');
+        
+        // Formatar a data para exibição
+        let dataExibicao = validade;
+        if (validade.includes('/')) {
+            const partes = validade.split('/');
+            dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
         }
-
-        // Carregar dados da URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const unidadeId = urlParams.get('id') || 'UN-2EP1M8IO-9Y8R';
-        const sku = urlParams.get('sku') || '00030202';
-        const lote = urlParams.get('lote') || 'AAACS60101';
-        const validade = urlParams.get('validade') || '25/06/2026';
-        const produtoNome = decodeURIComponent(urlParams.get('produto') || 'FILME BISC. ROSQUINHA COCO EMEGE 600GR');
-        const volume = urlParams.get('volume') || '535.87';
-        const quantidade = urlParams.get('quantidade') || '1';
-        const unidade = urlParams.get('unidade') || 'PLT';
-
-        // Calcular ordem baseada em TODAS as unidades do mesmo SKU
-        const resultado = calcularOrdemPorSKU(sku, validade, unidadeId);
-        const ordem = resultado.ordem; // Agora deve ser "2º" para a validade 25/06/2026
-
-        // Construir link completo
-        const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
-        const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
-
-        // Função para atualizar a visualização da etiqueta
-        function atualizarEtiqueta() {
-            const etiquetaDiv = document.getElementById('etiquetaVisualizacao');
-            
-            // Formatar a data para exibição
-            let dataExibicao = validade;
-            if (validade.includes('/')) {
-                const partes = validade.split('/');
-                dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
-            }
-            
-            etiquetaDiv.innerHTML = `
-                <div class="etiqueta-header">
-                    <div class="etiqueta-codigo">CODIGO: ${sku}</div>
-                    <div class="etiqueta-ordem">${ordem}</div>
+        
+        etiquetaDiv.innerHTML = `
+            <div class="etiqueta-header">
+                <div class="etiqueta-codigo">CODIGO: ${sku}</div>
+                <div class="etiqueta-ordem">${ordem}</div>
+            </div>
+            <div class="etiqueta-descricao">${produtoNome}</div>
+            <div class="etiqueta-linha">
+                <span class="etiqueta-label">LOTE:</span>
+                <span class="etiqueta-valor">${lote}</span>
+            </div>
+            <div class="etiqueta-linha">
+                <span class="etiqueta-label">VALIDADE:</span>
+                <span class="etiqueta-valor">${dataExibicao}</span>
+            </div>
+            <div class="etiqueta-footer">
+                <span>${volume} Kg</span>
+                <span>${quantidade} ${unidade}</span>
+            </div>
+            <div class="qr-section">
+                <div class="qr-code-box" id="qr-code-container">
+                    <div id="qrcode"></div>
                 </div>
-                <div class="etiqueta-descricao">${produtoNome}</div>
-                <div class="etiqueta-linha">
-                    <span class="etiqueta-label">LOTE:</span>
-                    <span class="etiqueta-valor">${lote}</span>
+                <div class="qr-info">
+                    <p><strong>SKU:</strong> ${sku}</p>
+                    <p><strong>Total:</strong> ${infoOrdem.totalDatas} datas diferentes</p>
+                    <p><strong>ID:</strong> ${unidadeId.substring(0, 15)}...</p>
                 </div>
-                <div class="etiqueta-linha">
-                    <span class="etiqueta-label">VALIDADE:</span>
-                    <span class="etiqueta-valor">${dataExibicao}</span>
-                </div>
-                <div class="etiqueta-footer">
-                    <span>${volume} Kg</span>
-                    <span>${quantidade} ${unidade}</span>
-                </div>
-                <div class="qr-section">
-                    <div class="qr-code-box" id="qr-code-container">
-                        <div id="qrcode"></div>
-                    </div>
-                    <div class="qr-info">
-                        <p><strong>SKU:</strong> ${sku}</p>
-                        <p><strong>Total:</strong> ${resultado.totalUnidades} unidades</p>
-                        <p><strong>ID:</strong> ${unidadeId.substring(0, 15)}...</p>
-                    </div>
-                </div>
-            `;
-        }
+            </div>
+        `;
+    }
 
-        // Função para gerar QR Code
-        function gerarQRCode() {
-            const qrcodeDiv = document.getElementById('qrcode');
-            if (!qrcodeDiv) return;
-            
-            qrcodeDiv.innerHTML = '';
-            
-            if (typeof QRCode !== 'undefined') {
-                try {
-                    QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
-                        width: 200,
-                        margin: 2
-                    }, function(err, canvas) {
-                        if (err) {
-                            console.error('Erro:', err);
-                            return;
-                        }
-                        qrcodeDiv.innerHTML = '';
-                        canvas.style.width = '100%';
-                        canvas.style.height = 'auto';
-                        qrcodeDiv.appendChild(canvas);
-                    });
-
+    // ============================================
+    // GERAR QR CODE
+    // ============================================
+    function gerarQRCode() {
+        const qrcodeDiv = document.getElementById('qrcode');
+        if (!qrcodeDiv) return;
+        
+        qrcodeDiv.innerHTML = '';
+        
+        if (typeof QRCode !== 'undefined') {
+            try {
+                QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
+                    width: 180,
+                    margin: 1
+                }, function(err, canvas) {
+                    if (err) {
+                        console.error('Erro:', err);
+                        return;
+                    }
+                    qrcodeDiv.innerHTML = '';
+                    canvas.style.width = '100%';
+                    canvas.style.height = 'auto';
+                    qrcodeDiv.appendChild(canvas);
+                    
                     // Atualizar resumo do SKU
                     document.getElementById('resumo-sku').innerHTML = `
                         <strong>SKU: ${sku}</strong> | 
-                        <strong>Total de unidades:</strong> ${resultado.totalUnidades} | 
+                        <strong>Total de unidades:</strong> ${infoOrdem.totalDatas} datas diferentes |
                         <strong>Unidade atual:</strong> <span style="color: #ea580c; font-weight: bold;">${ordem}</span>
                     `;
+                    
+                    // Gerar tabela de conferência
+                    gerarTabelaConferencia(sku, unidadeId, validade);
+                });
 
-                    // Atualizar tabela com TODAS as unidades
-                    let infoHtml = '<h3>📦 TODAS AS UNIDADES DO SKU ' + sku + ':</h3>';
-                    infoHtml += '<table class="tabela-validades">';
-                    infoHtml += '<tr><th>ID</th><th>LOTE</th><th>VALIDADE</th><th>ORDEM</th></tr>';
-                    
-                    // Ordenar unidades por data
-                    const unidadesOrdenadas = [...resultado.unidades].sort((a, b) => {
-                        return parseData(a.validade) - parseData(b.validade);
-                    });
-                    
-                    // Obter datas únicas e ordenadas
-                    const datasUnicas = [];
-                    const datasSet = new Set();
-                    
-                    unidadesOrdenadas.forEach(u => {
-                        if (!datasSet.has(u.validade)) {
-                            datasSet.add(u.validade);
-                            datasUnicas.push(u.validade);
-                        }
-                    });
-                    
-                    // Calcular ordem para cada unidade
-                    const ordensPorData = {};
-                    datasUnicas.forEach((data, index) => {
-                        ordensPorData[data] = index + 1;
-                    });
-                    
-                    unidadesOrdenadas.forEach(u => {
-                        const posUnidade = ordensPorData[u.validade];
-                        const ordinais = ['1º', '2º', '3º', '4º', '5º'];
-                        const ordemUnidade = ordinais[Math.min(posUnidade - 1, ordinais.length - 1)] || posUnidade + 'º';
-                        
-                        let classeOrdem = 'ordem-1';
-                        if (posUnidade === 1) classeOrdem = 'ordem-1';
-                        else if (posUnidade === 2) classeOrdem = 'ordem-2';
-                        else if (posUnidade === 3) classeOrdem = 'ordem-3';
-                        else if (posUnidade === 4) classeOrdem = 'ordem-4';
-                        else classeOrdem = 'ordem-5';
-                        
-                        infoHtml += `<tr ${u.id === unidadeId ? 'class="atual"' : ''}>`;
-                        infoHtml += `<td>${u.id.substring(0, 12)}...</td>`;
-                        infoHtml += `<td>${u.lote}</td>`;
-                        infoHtml += `<td>${u.validade}</td>`;
-                        infoHtml += `<td><span class="ordem-badge ${classeOrdem}">${ordemUnidade}</span></td>`;
-                        infoHtml += `</tr>`;
-                    });
-                    
-                    infoHtml += '</table>';
-                    document.getElementById('infoPaletes').innerHTML = infoHtml;
-
-                } catch (e) {
-                    console.error('Erro:', e);
-                }
+            } catch (e) {
+                console.error('Erro:', e);
             }
         }
+    }
 
-        // Função para imprimir a etiqueta (UMA FOLHA)
-        function imprimirEtiqueta() {
-            const janelaImpressao = window.open('', '_blank');
-            
-            // Formatar a data para exibição
-            let dataExibicao = validade;
-            if (validade.includes('/')) {
-                const partes = validade.split('/');
-                dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
-            }
-            
-            const conteudoImpressao = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Etiqueta de Palete - SKU ${sku} - ${ordem}</title>
-                    <style>
-                        * {
-                            margin: 0;
-                            padding: 0;
-                            box-sizing: border-box;
-                        }
-                        
-                        body {
-                            font-family: 'Courier New', monospace;
-                            background: white;
-                            margin: 0;
-                            padding: 0;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            min-height: 100vh;
-                        }
-                        
-                        .etiqueta {
-                            border: 4px solid #000;
-                            padding: 25px;
-                            width: 100%;
-                            max-width: 1050px;
-                            margin: 0 auto;
-                            page-break-inside: avoid;
-                            page-break-after: avoid;
-                            page-break-before: avoid;
-                            display: flex;
-                            flex-direction: column;
-                            background: white;
-                            box-shadow: none;
-                        }
-                        
-                        .etiqueta-header {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            border-bottom: 4px solid #000;
-                            padding-bottom: 15px;
-                            margin-bottom: 20px;
-                        }
-                        
-                        .etiqueta-codigo {
-                            font-size: 48px;
-                            font-weight: bold;
-                        }
-                        
-                        .etiqueta-ordem {
-                            font-size: 120px;
-                            font-weight: bold;
-                            line-height: 1;
-                        }
-                        
-                        .etiqueta-descricao {
-                            font-size: 40px;
-                            font-weight: bold;
-                            margin: 20px 0;
-                            text-transform: uppercase;
-                            line-height: 1.3;
-                            border-bottom: 2px solid #000;
-                            padding-bottom: 15px;
-                        }
-                        
-                        .etiqueta-linha {
-                            display: flex;
-                            margin: 18px 0;
-                            font-size: 38px;
-                            align-items: baseline;
-                        }
-                        
-                        .etiqueta-label {
-                            font-weight: bold;
-                            width: 200px;
-                        }
-                        
-                        .etiqueta-valor {
-                            flex: 1;
-                            font-weight: bold;
-                        }
-                        
-                        .etiqueta-footer {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-top: 25px;
-                            padding-top: 15px;
-                            border-top: 4px solid #000;
-                            font-weight: bold;
-                            font-size: 44px;
-                        }
-                        
-                        .qr-section {
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                            margin-top: 25px;
-                            padding: 15px;
-                            background: #f8f9fa;
-                            border: 2px solid #000;
-                        }
-                        
-                        .qr-code-box {
-                            background: white;
-                            padding: 15px;
-                            border: 2px solid #000;
-                        }
-                        
-                        #qrcode-img {
-                            width: 180px;
-                            height: 180px;
-                        }
-                        
-                        .qr-info {
-                            font-size: 22px;
-                            margin-left: 25px;
-                        }
-                        
-                        .qr-info p {
-                            margin: 8px 0;
-                        }
-                        
-                        @media print {
-                            body {
-                                padding: 0;
-                                margin: 0;
-                            }
-                            .etiqueta {
-                                box-shadow: none;
-                                margin: 0;
-                                width: 100%;
-                                height: auto;
-                                page-break-after: avoid;
-                                page-break-before: avoid;
-                                page-break-inside: avoid;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="etiqueta">
-                        <div class="etiqueta-header">
-                            <div class="etiqueta-codigo">CODIGO: ${sku}</div>
-                            <div class="etiqueta-ordem">${ordem}</div>
-                        </div>
-                        <div class="etiqueta-descricao">${produtoNome}</div>
-                        <div class="etiqueta-linha">
-                            <span class="etiqueta-label">LOTE:</span>
-                            <span class="etiqueta-valor">${lote}</span>
-                        </div>
-                        <div class="etiqueta-linha">
-                            <span class="etiqueta-label">VALIDADE:</span>
-                            <span class="etiqueta-valor">${dataExibicao}</span>
-                        </div>
-                        <div class="etiqueta-footer">
-                            <span>${volume} Kg</span>
-                            <span>${quantidade} ${unidade}</span>
-                        </div>
-                        <div class="qr-section">
-                            <div class="qr-code-box">
-                                <img src="${document.querySelector('#qrcode canvas').toDataURL()}" id="qrcode-img">
-                            </div>
-                            <div class="qr-info">
-                                <p><strong>SKU:</strong> ${sku}</p>
-                                <p><strong>Total:</strong> ${resultado.totalUnidades} unidades</p>
-                                <p><strong>ID:</strong> ${unidadeId}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <script>
-                        window.onload = function() { 
-                            window.print();
-                        }
-                    <\/script>
-                </body>
-                </html>
-            `;
-            
-            janelaImpressao.document.write(conteudoImpressao);
-            janelaImpressao.document.close();
+    // ============================================
+    // IMPRIMIR ETIQUETA
+    // ============================================
+    function imprimirEtiqueta() {
+        window.print();
+    }
+
+    // ============================================
+    // BAIXAR ETIQUETA COMO PNG
+    // ============================================
+    function baixarEtiqueta() {
+        const qrCanvas = document.querySelector('#qrcode canvas');
+        
+        if (!qrCanvas) {
+            alert('Aguarde o QR Code ser gerado!');
+            return;
         }
-
-        // Função para baixar a etiqueta como imagem
-        function baixarEtiqueta() {
-            const qrCanvas = document.querySelector('#qrcode canvas');
-            
-            if (!qrCanvas) {
-                alert('Aguarde o QR Code ser gerado!');
-                return;
-            }
-            
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            canvas.width = 1200;
-            canvas.height = 800;
-            
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 6;
-            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-            
-            let dataExibicao = validade;
-            if (validade.includes('/')) {
-                const partes = validade.split('/');
-                dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
-            }
-            
-            ctx.font = 'bold 48px "Courier New"';
-            ctx.fillStyle = 'black';
-            
-            ctx.font = 'bold 52px "Courier New"';
-            ctx.fillText(`CODIGO: ${sku}`, 50, 100);
-            ctx.font = 'bold 140px "Courier New"';
-            ctx.fillText(ordem, 900, 150);
-            
-            ctx.beginPath();
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 4;
-            ctx.moveTo(50, 180);
-            ctx.lineTo(1150, 180);
-            ctx.stroke();
-            
-            ctx.font = 'bold 48px "Courier New"';
-            let descricao = produtoNome;
-            if (descricao.length > 25) {
-                ctx.fillText(descricao.substring(0, 25), 50, 260);
-                ctx.fillText(descricao.substring(25, 50), 50, 320);
-            } else {
-                ctx.fillText(descricao, 50, 260);
-            }
-            
-            ctx.font = '44px "Courier New"';
-            ctx.fillText('LOTE:', 50, 420);
-            ctx.font = 'bold 44px "Courier New"';
-            ctx.fillText(lote, 250, 420);
-            
-            ctx.font = '44px "Courier New"';
-            ctx.fillText('VALIDADE:', 50, 490);
-            ctx.font = 'bold 44px "Courier New"';
-            ctx.fillText(dataExibicao, 300, 490);
-            
-            ctx.beginPath();
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 4;
-            ctx.moveTo(50, 570);
-            ctx.lineTo(1150, 570);
-            ctx.stroke();
-            
-            ctx.font = 'bold 52px "Courier New"';
-            ctx.fillText(`${volume} Kg`, 50, 650);
-            ctx.fillText(`${quantidade} ${unidade}`, 800, 650);
-            
-            ctx.drawImage(qrCanvas, 150, 680, 150, 150);
-            
-            ctx.font = '24px "Courier New"';
-            ctx.fillText(`SKU: ${sku} | Total: ${resultado.totalUnidades} unidades`, 350, 780);
-            
-            const link = document.createElement('a');
-            link.download = `etiqueta-${sku}-${ordem}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 1200;
+        canvas.height = 800;
+        
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+        
+        let dataExibicao = validade;
+        if (validade.includes('/')) {
+            const partes = validade.split('/');
+            dataExibicao = `${partes[2]}-${partes[1]}-${partes[0]}`;
         }
+        
+        ctx.font = 'bold 48px "Courier New"';
+        ctx.fillStyle = 'black';
+        
+        ctx.font = 'bold 52px "Courier New"';
+        ctx.fillText(`CODIGO: ${sku}`, 50, 100);
+        ctx.font = 'bold 140px "Courier New"';
+        ctx.fillText(ordem, 900, 150);
+        
+        ctx.beginPath();
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 4;
+        ctx.moveTo(50, 180);
+        ctx.lineTo(1150, 180);
+        ctx.stroke();
+        
+        ctx.font = 'bold 48px "Courier New"';
+        let descricao = produtoNome;
+        if (descricao.length > 25) {
+            ctx.fillText(descricao.substring(0, 25), 50, 260);
+            ctx.fillText(descricao.substring(25, 50), 50, 320);
+        } else {
+            ctx.fillText(descricao, 50, 260);
+        }
+        
+        ctx.font = '44px "Courier New"';
+        ctx.fillText('LOTE:', 50, 420);
+        ctx.font = 'bold 44px "Courier New"';
+        ctx.fillText(lote, 250, 420);
+        
+        ctx.font = '44px "Courier New"';
+        ctx.fillText('VALIDADE:', 50, 490);
+        ctx.font = 'bold 44px "Courier New"';
+        ctx.fillText(dataExibicao, 300, 490);
+        
+        ctx.beginPath();
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 4;
+        ctx.moveTo(50, 570);
+        ctx.lineTo(1150, 570);
+        ctx.stroke();
+        
+        ctx.font = 'bold 52px "Courier New"';
+        ctx.fillText(`${volume} Kg`, 50, 650);
+        ctx.fillText(`${quantidade} ${unidade}`, 800, 650);
+        
+        ctx.drawImage(qrCanvas, 150, 680, 150, 150);
+        
+        ctx.font = '24px "Courier New"';
+        ctx.fillText(`SKU: ${sku} | Total: ${infoOrdem.totalDatas} datas`, 350, 780);
+        
+        const link = document.createElement('a');
+        link.download = `etiqueta-${sku}-${ordem}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
 
-        // Inicializar
-        window.onload = function() {
-            atualizarEtiqueta();
-            setTimeout(gerarQRCode, 100);
-        };
-    </script>
+    // ============================================
+    // INICIALIZAR
+    // ============================================
+    window.onload = function() {
+        atualizarEtiqueta();
+        setTimeout(gerarQRCode, 100);
+    };
+</script>
 </body>
 </html>
+
