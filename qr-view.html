@@ -104,6 +104,22 @@
             font-weight: 600;
         }
         
+        .ordem-badge {
+            background: #fbbf24;
+            color: #0f172a;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .ordem-badge sup {
+            font-size: 1rem;
+            vertical-align: super;
+        }
+        
         .qr-actions {
             display: flex;
             gap: 15px;
@@ -200,8 +216,44 @@
             letter-spacing: 0.5px;
         }
         
+        .unidades-lista {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #fbbf24;
+        }
+        
+        .unidades-lista h4 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .tabela-unidades {
+            width: 100%;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+        }
+        
+        .tabela-unidades th {
+            color: #fbbf24;
+            padding: 8px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .tabela-unidades td {
+            padding: 8px;
+            border-bottom: 1px solid #1e293b;
+        }
+        
+        .tabela-unidades tr.atual {
+            background: #2d3a4f;
+            border-radius: 8px;
+        }
+        
         @media print {
-            .qr-actions, .badge-unidade {
+            .qr-actions, .badge-unidade, .unidades-lista {
                 display: none;
             }
             
@@ -219,6 +271,9 @@
                 <i class="bi bi-qr-code-scan"></i> QR CODE DA UNIDADE
             </div>
             
+            <!-- BADGE DA ORDEM -->
+            <div id="ordem-container" style="min-height: 60px;"></div>
+            
             <div class="qr-code-box" id="qr-code-container">
                 <div id="qrcode"></div>
             </div>
@@ -229,6 +284,21 @@
             
             <div class="volume-info" id="volume-info">
                 <!-- Informações de volume serão preenchidas -->
+            </div>
+            
+            <!-- LISTA DE UNIDADES DO MESMO SKU -->
+            <div class="unidades-lista" id="unidades-lista" style="display: none;">
+                <h4>📦 Outras unidades do mesmo SKU</h4>
+                <table class="tabela-unidades">
+                    <thead>
+                        <tr>
+                            <th>Lote</th>
+                            <th>Validade</th>
+                            <th>Ordem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-unidades-body"></tbody>
+                </table>
             </div>
             
             <div class="info-id" id="info-id"></div>
@@ -248,7 +318,34 @@
     </div>
 
     <script>
-        // Carregar dados da URL
+        // ============================================
+        // CAPTURAR DADOS DA JANELA PRINCIPAL
+        // ============================================
+        let unidadesGlobais = [];
+        let produtosGlobais = [];
+
+        try {
+            // Tentar acessar a variável 'unidades' da janela principal
+            if (window.opener && window.opener.unidades) {
+                unidadesGlobais = window.opener.unidades;
+                produtosGlobais = window.opener.produtos || [];
+                console.log('✅ Dados carregados via opener:', unidadesGlobais.length);
+            } else if (window.parent && window.parent.unidades) {
+                unidadesGlobais = window.parent.unidades;
+                produtosGlobais = window.parent.produtos || [];
+                console.log('✅ Dados carregados via parent:', unidadesGlobais.length);
+            } else if (typeof unidades !== 'undefined') {
+                unidadesGlobais = unidades;
+                produtosGlobais = typeof produtos !== 'undefined' ? produtos : [];
+                console.log('✅ Dados carregados diretamente:', unidadesGlobais.length);
+            }
+        } catch (e) {
+            console.warn('Erro ao capturar dados:', e);
+        }
+
+        // ============================================
+        // CARREGAR DADOS DA URL
+        // ============================================
         const urlParams = new URLSearchParams(window.location.search);
         const unidadeId = urlParams.get('id');
         const sku = urlParams.get('sku');
@@ -259,11 +356,91 @@
         const quantidade = urlParams.get('quantidade') || '0';
         const unidade = urlParams.get('unidade') || 'UN';
 
-        // Construir link completo
-        const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
-        const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
+        // ============================================
+        // FUNÇÕES PARA CALCULAR ORDEM
+        // ============================================
+        
+        // Buscar unidades do mesmo SKU nos dados reais
+        function buscarUnidadesDoMesmoSKU(sku) {
+            if (!unidadesGlobais || unidadesGlobais.length === 0) {
+                console.warn('⚠️ Nenhuma unidade carregada');
+                return [];
+            }
+            
+            // Filtrar pelo SKU e quantidade > 0
+            const filtradas = unidadesGlobais.filter(u => 
+                u.sku === sku && 
+                u.quantidade > 0
+            );
+            
+            console.log(`📦 Encontradas ${filtradas.length} unidades para o SKU ${sku}`);
+            return filtradas;
+        }
 
-        // Função para gerar QR Code
+        // Normalizar data para comparação
+        function normalizarData(data) {
+            if (!data) return '';
+            
+            // Se já vier YYYY-MM-DD
+            if (data.includes('-')) {
+                return data;
+            }
+            
+            // Se vier DD/MM/YYYY
+            if (data.includes('/')) {
+                const [d, m, y] = data.split('/');
+                return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+            }
+            
+            return data;
+        }
+
+        // Calcular ordem baseada nas validades
+        function calcularOrdem() {
+            const unidadesDoSKU = buscarUnidadesDoMesmoSKU(sku);
+            
+            if (unidadesDoSKU.length === 0) {
+                return { numero: 1, lista: [] };
+            }
+            
+            // Normalizar todas as datas
+            const unidadesComData = unidadesDoSKU.map(u => ({
+                ...u,
+                dataNorm: normalizarData(u.validade)
+            }));
+            
+            // Pegar datas únicas e ordenar
+            const datasUnicas = [...new Set(unidadesComData.map(u => u.dataNorm))]
+                .filter(d => d)
+                .sort();
+            
+            // Mapear ordem por data
+            const ordemPorData = {};
+            datasUnicas.forEach((data, index) => {
+                ordemPorData[data] = index + 1;
+            });
+            
+            // Encontrar ordem da unidade atual
+            const dataAtualNorm = normalizarData(validade);
+            const numeroOrdem = ordemPorData[dataAtualNorm] || 1;
+            
+            // Preparar lista para exibição
+            const listaUnidades = unidadesComData.map(u => ({
+                lote: u.lote,
+                validade: u.validade,
+                ordem: ordemPorData[u.dataNorm] || 1,
+                isAtual: u.id === unidadeId
+            })).sort((a, b) => a.ordem - b.ordem || a.validade.localeCompare(b.validade));
+            
+            return {
+                numero: numeroOrdem,
+                lista: listaUnidades
+            };
+        }
+
+        // ============================================
+        // GERAR QR CODE
+        // ============================================
         function gerarQRCode() {
             const qrcodeDiv = document.getElementById('qrcode');
             qrcodeDiv.innerHTML = ''; // Limpar
@@ -273,17 +450,15 @@
                 return;
             }
 
-            // Usar a biblioteca QRCode.js
+            // Construir link completo
+            const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
+            const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}`;
+
             if (typeof QRCode !== 'undefined') {
                 try {
-                    // Gerar QR Code
                     QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
                         width: 250,
-                        margin: 2,
-                        color: {
-                            dark: '#000000',
-                            light: '#ffffff'
-                        }
+                        margin: 2
                     }, function(err, canvas) {
                         if (err) {
                             console.error('Erro ao gerar QR Code:', err);
@@ -291,48 +466,86 @@
                             return;
                         }
                         
-                        // Limpar e adicionar o canvas
                         qrcodeDiv.innerHTML = '';
                         canvas.style.width = '100%';
                         canvas.style.height = 'auto';
                         canvas.style.borderRadius = '8px';
                         qrcodeDiv.appendChild(canvas);
                     });
-
-                    // Preencher informações
-                    document.getElementById('qr-info').innerHTML = `
-                        <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
-                        <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
-                        <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
-                        <p><strong>Validade:</strong> ${validade ? new Date(validade).toLocaleDateString('pt-BR') : 'N/A'}</p>
-                    `;
-
-                    document.getElementById('volume-info').innerHTML = `
-                        <div class="volume-item">
-                            <div class="volume-value">${volume}</div>
-                            <div class="volume-label">${unidade}</div>
-                        </div>
-                        <div class="volume-item">
-                            <div class="volume-value">${quantidade}</div>
-                            <div class="volume-label">UNIDADES</div>
-                        </div>
-                    `;
-
-                    document.getElementById('info-id').innerHTML = `
-                        <i class="bi bi-upc-scan"></i> ID: ${unidadeId}
-                    `;
-
                 } catch (e) {
                     console.error('Erro:', e);
-                    qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
                 }
-            } else {
-                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Biblioteca QR Code não carregada</p>';
-                console.error('QRCode library not loaded');
             }
         }
 
-        // Função para baixar QR Code
+        // ============================================
+        // ATUALIZAR INFORMAÇÕES
+        // ============================================
+        function atualizarInfo() {
+            // Calcular ordem
+            const ordemInfo = calcularOrdem();
+            const ordemNumero = ordemInfo.numero;
+            
+            // Criar HTML do ordinal
+            const ordemHTML = `${ordemNumero}<sup>º</sup>`;
+            
+            // Adicionar badge de ordem
+            document.getElementById('ordem-container').innerHTML = `
+                <div class="ordem-badge">${ordemHTML}</div>
+            `;
+            
+            // Preencher informações principais
+            document.getElementById('qr-info').innerHTML = `
+                <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
+                <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
+                <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
+                <p><strong>Validade:</strong> ${validade ? new Date(validade).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                <p><strong>Ordem:</strong> ${ordemHTML}</p>
+            `;
+
+            // Preencher volume
+            document.getElementById('volume-info').innerHTML = `
+                <div class="volume-item">
+                    <div class="volume-value">${volume}</div>
+                    <div class="volume-label">${unidade}</div>
+                </div>
+                <div class="volume-item">
+                    <div class="volume-value">${quantidade}</div>
+                    <div class="volume-label">UNIDADES</div>
+                </div>
+            `;
+
+            // Preencher ID
+            document.getElementById('info-id').innerHTML = `
+                <i class="bi bi-upc-scan"></i> ID: ${unidadeId}
+            `;
+            
+            // Mostrar lista de outras unidades se houver
+            if (ordemInfo.lista.length > 1) {
+                const tbody = document.getElementById('tabela-unidades-body');
+                tbody.innerHTML = '';
+                
+                ordemInfo.lista.forEach(u => {
+                    const row = document.createElement('tr');
+                    if (u.isAtual) row.className = 'atual';
+                    
+                    const ordemItemHTML = `${u.ordem}<sup>º</sup>`;
+                    
+                    row.innerHTML = `
+                        <td>${u.lote}</td>
+                        <td>${u.validade}</td>
+                        <td><strong style="color: #fbbf24;">${ordemItemHTML}</strong></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                document.getElementById('unidades-lista').style.display = 'block';
+            }
+        }
+
+        // ============================================
+        // BAIXAR QR CODE
+        // ============================================
         function baixarQR() {
             const canvas = document.querySelector('#qrcode canvas');
             if (!canvas) {
@@ -346,16 +559,22 @@
             link.click();
         }
 
-        // Gerar QR Code quando a página carregar
+        // ============================================
+        // INICIALIZAR
+        // ============================================
         window.onload = function() {
-            setTimeout(gerarQRCode, 100); // Pequeno delay para garantir que tudo carregou
+            atualizarInfo();
+            setTimeout(gerarQRCode, 100);
         };
 
-        // Fallback se a biblioteca demorar a carregar
         if (document.readyState === 'complete') {
+            atualizarInfo();
             gerarQRCode();
         } else {
-            window.addEventListener('load', gerarQRCode);
+            window.addEventListener('load', function() {
+                atualizarInfo();
+                gerarQRCode();
+            });
         }
     </script>
 </body>
