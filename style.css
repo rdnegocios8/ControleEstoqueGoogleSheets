@@ -1486,3 +1486,45 @@ h2 {
     padding: 40px !important;
     background-color: #0f172a !important;
 }
+
+/* ============================================ */
+/* ESTILO PARA LISTA DE PRODUTOS NO MODAL */
+/* ============================================ */
+
+#lista-produtos {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#lista-produtos .list-group-item {
+    cursor: pointer;
+    padding: 10px 15px;
+    transition: all 0.2s ease;
+}
+
+#lista-produtos .list-group-item:hover {
+    background-color: #2d3748 !important;
+    transform: translateX(3px);
+}
+
+#lista-produtos .list-group-item .text-info {
+    color: #fbbf24 !important;
+}
+
+#busca-produto {
+    margin-bottom: 5px;
+}
+
+/* Scrollbar personalizada */
+#lista-produtos::-webkit-scrollbar {
+    width: 8px;
+}
+
+#lista-produtos::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+#lista-produtos::-webkit-scrollbar-thumb {
+    background: #fbbf24;
+    border-radius: 4px;
+}
