@@ -1309,7 +1309,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
     tbody.innerHTML = '';
     
     if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="text-center">Nenhuma unidade ativa encontrada</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center">Nenhuma unidade ativa encontrada</td></tr>';
         return;
     }
     
@@ -1318,34 +1318,48 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
         const validadeDate = new Date(u.validade);
         const vencido = validadeDate < hoje;
         
-        // CORREÇÃO: Formatar com 2 casas decimais
+        // Formatar quantidade com 2 casas decimais
         const quantidadeFormatada = u.quantidade.toFixed(2).replace('.', ',');
         
         const tr = document.createElement('tr');
+        
+        // ORDEM CORRETA DAS COLUNAS NO SITE:
+        // 1. ID
+        // 2. Produto
+        // 3. Categoria
+        // 4. Embalagem
+        // 5. Lote
+        // 6. Validade
+        // 7. Volume
+        // 8. Quantidade
+        // 9. STATUS (deve vir de u.status)
+        // 10. DESTINO (deve vir de u.destino)
+        // 11. TIPO DE ENTRADA (deve vir de u.tipoEntrada)
+        // 12. Ações
+        
         tr.innerHTML = `
-    <td><small>${u.id}</small></td>
-    <td>${produto ? produto.nome : u.sku}</td>
-    <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
-    <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
-    <td>${u.lote}</td>
-    <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
-    <td>${u.volume}</td>
-    <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
-    <!-- NOVA LINHA: Tipo de Entrada -->
-    <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">${u.tipoEntrada || 'Manual'}</span></td>
-    <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
-    <td>${u.destino || '-'}</td>
-    <td>
-        <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
-            <i class="bi bi-eye"></i>
-        </button>
-        ${u.status === 'Disponível' && u.quantidade > 0 ? `
-            <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
-                <i class="bi bi-arrow-right"></i>
-            </button>
-        ` : ''}
-    </td>
-`;
+            <td><small>${u.id}</small></td>
+            <td>${produto ? produto.nome : u.sku}</td>
+            <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
+            <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
+            <td>${u.lote}</td>
+            <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
+            <td>${u.volume}</td>
+            <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
+            <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
+            <td>${u.destino || '-'}</td>
+            <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">${u.tipoEntrada || 'Manual'}</span></td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
+                    <i class="bi bi-eye"></i>
+                </button>
+                ${u.status === 'Disponível' && u.quantidade > 0 ? `
+                    <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                ` : ''}
+            </td>
+        `;
         tbody.appendChild(tr);
     });
 }
@@ -2216,6 +2230,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
