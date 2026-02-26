@@ -667,31 +667,39 @@ async function carregarDados() {
     try {
         console.log('Carregando dados...');
         
-        const produtosRes = await fetch(PRODUTOS_URL);
-        const produtosData = await produtosRes.json();
-        if (produtosData.values && produtosData.values.length > 1) {
-            produtos = produtosData.values.slice(1).map(row => {
-                let sku = row[0] || '';
-                
-                // CORREÇÃO: Adicionar zeros à esquerda se necessário (para 8 dígitos)
-                if (sku && !isNaN(sku) && sku.length < 8) {
-                    sku = sku.padStart(8, '0');
-                }
-                
-                return {
-                    sku: sku,
-                    nome: row[1] || '',
-                    descricao: row[2] || '',
-                    categoria: row[3] || 'Insumos',
-                    tipoEmbalagem: row[4] || 'UN',
-                    qtdPorEmbalagem: parseInt(row[5]) || 1,  // Aqui parseInt está correto (é quantidade inteira)
-                    unidadeBase: row[6] || 'UN',
-                    imagem: row[7] || ''
-                };
-            }).filter(p => p.sku);
-            
-            console.log(`✅ ${produtos.length} produtos carregados`);
+        cconst unidadesRes = await fetch(UNIDADES_URL);
+const unidadesData = await unidadesRes.json();
+if (unidadesData.values && unidadesData.values.length > 1) {
+    unidades = unidadesData.values.slice(1).map(row => {
+        let sku = row[1] || '';
+        
+        if (sku && !isNaN(sku) && sku.length < 8) {
+            sku = sku.padStart(8, '0');
         }
+        
+                    // CORREÇÃO: Converter string com vírgula para número
+                    const quantidadeStr = row[5] || '0';
+                    const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
+                    
+                    return {
+                        id: row[0] || '',
+                        sku: sku,
+                        lote: row[2] || '',
+                        validade: row[3] || '',
+                        volume: parseInt(row[4]) || 1,
+                        quantidade: quantidade,  
+                        unidadeEmbalagem: row[6] || 'UN',
+                        status: row[7] || 'Disponível',
+                        localizacao: row[8] || '-',
+                        destino: row[9] || '',
+                        foraPadrao: row[10] === 'Sim',
+                        qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null,
+                        tipoEntrada: row[12] || 'Manual'  // <--- NOVA LINHA (coluna 13)
+                    };
+                }).filter(u => u.id);
+                
+                console.log(`✅ ${unidades.length} unidades carregadas`);
+            }
 
         const unidadesRes = await fetch(UNIDADES_URL);
         const unidadesData = await unidadesRes.json();
@@ -2175,6 +2183,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
