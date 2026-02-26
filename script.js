@@ -662,45 +662,37 @@ function preencherSelectProdutos() {
     });
 }
 
-// Carregar dados
 async function carregarDados() {
     try {
         console.log('Carregando dados...');
         
-        cconst unidadesRes = await fetch(UNIDADES_URL);
-const unidadesData = await unidadesRes.json();
-if (unidadesData.values && unidadesData.values.length > 1) {
-    unidades = unidadesData.values.slice(1).map(row => {
-        let sku = row[1] || '';
-        
-        if (sku && !isNaN(sku) && sku.length < 8) {
-            sku = sku.padStart(8, '0');
-        }
-        
-                    // CORREÇÃO: Converter string com vírgula para número
-                    const quantidadeStr = row[5] || '0';
-                    const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
-                    
-                    return {
-                        id: row[0] || '',
-                        sku: sku,
-                        lote: row[2] || '',
-                        validade: row[3] || '',
-                        volume: parseInt(row[4]) || 1,
-                        quantidade: quantidade,  
-                        unidadeEmbalagem: row[6] || 'UN',
-                        status: row[7] || 'Disponível',
-                        localizacao: row[8] || '-',
-                        destino: row[9] || '',
-                        foraPadrao: row[10] === 'Sim',
-                        qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null,
-                        tipoEntrada: row[12] || 'Manual'  // <--- NOVA LINHA (coluna 13)
-                    };
-                }).filter(u => u.id);
+        // Carregar produtos
+        const produtosRes = await fetch(PRODUTOS_URL);
+        const produtosData = await produtosRes.json();
+        if (produtosData.values && produtosData.values.length > 1) {
+            produtos = produtosData.values.slice(1).map(row => {
+                let sku = row[0] || '';
                 
-                console.log(`✅ ${unidades.length} unidades carregadas`);
-            }
+                if (sku && !isNaN(sku) && sku.length < 8) {
+                    sku = sku.padStart(8, '0');
+                }
+                
+                return {
+                    sku: sku,
+                    nome: row[1] || '',
+                    descricao: row[2] || '',
+                    categoria: row[3] || 'Insumos',
+                    tipoEmbalagem: row[4] || 'UN',
+                    qtdPorEmbalagem: parseInt(row[5]) || 1,
+                    unidadeBase: row[6] || 'UN',
+                    imagem: row[7] || ''
+                };
+            }).filter(p => p.sku);
+            
+            console.log(`✅ ${produtos.length} produtos carregados`);
+        }
 
+        // Carregar unidades
         const unidadesRes = await fetch(UNIDADES_URL);
         const unidadesData = await unidadesRes.json();
         if (unidadesData.values && unidadesData.values.length > 1) {
@@ -711,7 +703,6 @@ if (unidadesData.values && unidadesData.values.length > 1) {
                     sku = sku.padStart(8, '0');
                 }
                 
-                // CORREÇÃO: Converter string com vírgula para número
                 const quantidadeStr = row[5] || '0';
                 const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
                 
@@ -721,7 +712,7 @@ if (unidadesData.values && unidadesData.values.length > 1) {
                     lote: row[2] || '',
                     validade: row[3] || '',
                     volume: parseInt(row[4]) || 1,
-                    quantidade: quantidade,  
+                    quantidade: quantidade,
                     unidadeEmbalagem: row[6] || 'UN',
                     status: row[7] || 'Disponível',
                     localizacao: row[8] || '-',
@@ -735,13 +726,13 @@ if (unidadesData.values && unidadesData.values.length > 1) {
             console.log(`✅ ${unidades.length} unidades carregadas`);
         }
 
+        // Carregar movimentações
         const movRes = await fetch(MOVIMENTACOES_URL);
         const movData = await movRes.json();
         if (movData.values && movData.values.length > 1) {
             movimentacoes = movData.values.slice(1).map(row => {
                 let sku = row[3] || '';
                 
-                // CORREÇÃO: Adicionar zeros à esquerda no SKU das movimentações
                 if (sku && !isNaN(sku) && sku.length < 8) {
                     sku = sku.padStart(8, '0');
                 }
@@ -751,8 +742,8 @@ if (unidadesData.values && unidadesData.values.length > 1) {
                     tipo: row[1] || '',
                     idUnidade: row[2] || '',
                     sku: sku,
-                    volume: parseInt(row[4]) || 0,        // Volume geralmente é inteiro
-                    quantidade: parseFloat(row[5]) || 0,  // Quantidade pode ter decimais
+                    volume: parseInt(row[4]) || 0,
+                    quantidade: parseFloat(row[5]) || 0,
                     unidadeEmbalagem: row[6] || '',
                     destino: row[7] || '',
                     responsavel: row[8] || '',
@@ -765,6 +756,7 @@ if (unidadesData.values && unidadesData.values.length > 1) {
 
         await carregarRecebimentos();
         atualizarInterface();
+        
     } catch (error) {
         console.error('❌ Erro ao carregar dados:', error);
         carregarDadosExemplo();
@@ -2183,6 +2175,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
