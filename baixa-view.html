@@ -365,168 +365,194 @@
 
     <script>
         // Carregar dados da URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const unidadeId = urlParams.get('id');
-        const sku = urlParams.get('sku');
-        const lote = urlParams.get('lote');
-        const validade = urlParams.get('validade');
-        const produtoNome = decodeURIComponent(urlParams.get('produto') || '');
-        const volumeTotal = parseInt(urlParams.get('volume')) || 0;
-        const quantidadeTotal = parseInt(urlParams.get('quantidade')) || 0;
-        const unidadeVolume = urlParams.get('unidade') || 'UN';
-        const qtdPorEmbalagem = parseInt(urlParams.get('qtdPorEmbalagem')) || 1;
+    const urlParams = new URLSearchParams(window.location.search);
+    const unidadeId = urlParams.get('id');
+    const sku = urlParams.get('sku');
+    const lote = urlParams.get('lote');
+    const validade = urlParams.get('validade');
+    const produtoNome = decodeURIComponent(urlParams.get('produto') || '');
+    
+    // CORREÇÃO: Usar parseFloat em vez de parseInt para permitir decimais
+    const volumeTotal = parseFloat(urlParams.get('volume')) || 0;
+    const quantidadeTotal = parseFloat(urlParams.get('quantidade')) || 0;
+    const unidadeVolume = urlParams.get('unidade') || 'UN';
+    const qtdPorEmbalagem = parseFloat(urlParams.get('qtdPorEmbalagem')) || 1;
 
-        let destinoSelecionado = '';
+    let destinoSelecionado = '';
 
-        // ============================================
-        // FUNÇÃO PARA FORMATAR DATA SEM PROBLEMAS DE FUSO
-        // ============================================
-        function formatarDataSemFuso(dataString) {
-            if (!dataString) return 'N/A';
-            
-            // Se for string no formato YYYY-MM-DD
-            if (typeof dataString === 'string' && dataString.includes('-')) {
-                const partes = dataString.split('-');
-                if (partes.length === 3) {
-                    const ano = partes[0];
-                    const mes = partes[1];
-                    const dia = partes[2];
-                    return `${dia}/${mes}/${ano}`;
-                }
-            }
-            
-            // Tentar converter outros formatos
-            try {
-                const data = new Date(dataString);
-                if (isNaN(data.getTime())) return dataString;
-                
-                const dia = data.getDate().toString().padStart(2, '0');
-                const mes = (data.getMonth() + 1).toString().padStart(2, '0');
-                const ano = data.getFullYear();
-                return `${dia}/${mes}/${ano}`;
-            } catch (e) {
-                return dataString;
-            }
-        }
+    // ============================================
+    // FUNÇÃO PARA FORMATAR NÚMERO COM VÍRGULA
+    // ============================================
+    function formatarNumero(valor) {
+        if (valor === undefined || valor === null) return '0,00';
+        return valor.toFixed(2).replace('.', ',');
+    }
 
-        // Calcular unidades por embalagem
-        const unidadesPorEmbalagem = Math.floor(quantidadeTotal / volumeTotal) || qtdPorEmbalagem;
+    // ============================================
+    // FUNÇÃO PARA CONVERTER STRING COM VÍRGULA PARA NÚMERO
+    // ============================================
+    function converterParaNumero(valorStr) {
+        if (!valorStr) return 0;
+        if (typeof valorStr === 'number') return valorStr;
+        return parseFloat(valorStr.replace(',', '.')) || 0;
+    }
 
-        // Preencher dados iniciais
-        document.getElementById('produto-nome').textContent = produtoNome;
-        document.getElementById('produto-sku').textContent = `SKU: ${sku}`;
-        document.getElementById('unidade-id').value = unidadeId;
-        document.getElementById('unidade-sku').value = sku;
-        document.getElementById('lote').textContent = lote;
-        document.getElementById('info-id').textContent = unidadeId;
+    // ============================================
+    // FUNÇÃO PARA FORMATAR DATA SEM PROBLEMAS DE FUSO
+    // ============================================
+    function formatarDataSemFuso(dataString) {
+        if (!dataString) return 'N/A';
         
-        // CORREÇÃO: Usar a função de formatação de data
-        document.getElementById('info-validade').textContent = formatarDataSemFuso(validade);
+        if (typeof dataString === 'string' && dataString.includes('-')) {
+            const partes = dataString.split('-');
+            if (partes.length === 3) {
+                const ano = partes[0];
+                const mes = partes[1];
+                const dia = partes[2];
+                return `${dia}/${mes}/${ano}`;
+            }
+        }
+        
+        try {
+            const data = new Date(dataString);
+            if (isNaN(data.getTime())) return dataString;
+            
+            const dia = data.getDate().toString().padStart(2, '0');
+            const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+            const ano = data.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        } catch (e) {
+            return dataString;
+        }
+    }
 
-        document.getElementById('display-volume').textContent = volumeTotal;
-        document.getElementById('display-unidade-volume').textContent = unidadeVolume;
-        document.getElementById('display-quantidade').textContent = quantidadeTotal;
-        document.getElementById('label-unidade-volume').textContent = unidadeVolume;
-        document.getElementById('volume-disponivel').textContent = `Disponível: ${volumeTotal} ${unidadeVolume}`;
-        document.getElementById('quantidade-disponivel').textContent = `Disponível: ${quantidadeTotal} UN`;
-        document.getElementById('volume-info').textContent = `Cada ${unidadeVolume} contém ${unidadesPorEmbalagem} unidades`;
+    // Calcular unidades por embalagem com precisão decimal
+    const unidadesPorEmbalagem = volumeTotal > 0 ? quantidadeTotal / volumeTotal : qtdPorEmbalagem;
 
-        document.getElementById('volume-transferir').max = volumeTotal;
-        document.getElementById('volume-transferir').value = 1;
-        document.getElementById('quantidade-transferir').value = unidadesPorEmbalagem;
+    // Preencher dados iniciais com formatação correta
+    document.getElementById('produto-nome').textContent = produtoNome;
+    document.getElementById('produto-sku').textContent = `SKU: ${sku}`;
+    document.getElementById('unidade-id').value = unidadeId;
+    document.getElementById('unidade-sku').value = sku;
+    document.getElementById('lote').textContent = lote;
+    document.getElementById('info-id').textContent = unidadeId;
+    document.getElementById('info-validade').textContent = formatarDataSemFuso(validade);
 
-        // Calcular quantidade ao digitar volume
-        document.getElementById('volume-transferir').addEventListener('input', function() {
-            const volume = parseInt(this.value) || 0;
-            const quantidade = volume * unidadesPorEmbalagem;
-            document.getElementById('quantidade-transferir').value = quantidade;
+    // CORREÇÃO: Mostrar valores com 2 casas decimais
+    document.getElementById('display-volume').textContent = formatarNumero(volumeTotal);
+    document.getElementById('display-unidade-volume').textContent = unidadeVolume;
+    document.getElementById('display-quantidade').textContent = formatarNumero(quantidadeTotal);
+    document.getElementById('label-unidade-volume').textContent = unidadeVolume;
+    
+    // Badges de disponível
+    document.getElementById('volume-disponivel').textContent = `Disponível: ${formatarNumero(volumeTotal)} ${unidadeVolume}`;
+    document.getElementById('quantidade-disponivel').textContent = `Disponível: ${formatarNumero(quantidadeTotal)} UN`;
+    
+    // Informação de conversão
+    document.getElementById('volume-info').textContent = `Cada ${unidadeVolume} contém ${formatarNumero(unidadesPorEmbalagem)} unidades`;
+
+    // CORREÇÃO: Input aceita decimais e step="any"
+    document.getElementById('volume-transferir').max = volumeTotal;
+    document.getElementById('volume-transferir').value = formatarNumero(1).replace(',', '.');
+    document.getElementById('volume-transferir').step = "any";
+    
+    // Calcular quantidade inicial
+    document.getElementById('quantidade-transferir').value = formatarNumero(unidadesPorEmbalagem).replace(',', '.');
+
+    // Calcular quantidade ao digitar volume (com decimais)
+    document.getElementById('volume-transferir').addEventListener('input', function() {
+        const volume = converterParaNumero(this.value);
+        const quantidade = volume * unidadesPorEmbalagem;
+        document.getElementById('quantidade-transferir').value = formatarNumero(quantidade).replace(',', '.');
+    });
+
+    function selecionarDestino(destino) {
+        destinoSelecionado = destino;
+        document.getElementById('unidade-destino').value = destino;
+        
+        document.querySelectorAll('.transferencia-option').forEach(opt => {
+            opt.classList.remove('selected');
         });
+        event.target.classList.add('selected');
+    }
 
-        function selecionarDestino(destino) {
-            destinoSelecionado = destino;
-            document.getElementById('unidade-destino').value = destino;
-            
-            document.querySelectorAll('.transferencia-option').forEach(opt => {
-                opt.classList.remove('selected');
+    async function confirmarBaixa() {
+        // CORREÇÃO: Converter valores com vírgula para número
+        const volumeTransferir = converterParaNumero(document.getElementById('volume-transferir').value);
+        const quantidadeTransferir = volumeTransferir * unidadesPorEmbalagem;
+
+        if (!destinoSelecionado) {
+            alert('Selecione um destino para a transferência!');
+            return;
+        }
+
+        if (volumeTransferir < 0.01 || volumeTransferir > volumeTotal) {
+            alert(`Volume deve estar entre 0,01 e ${formatarNumero(volumeTotal)}`);
+            return;
+        }
+
+        const novaQuantidade = quantidadeTotal - quantidadeTransferir;
+        
+        // CORREÇÃO: Calcular novo volume com precisão decimal
+        const novoVolume = novaQuantidade <= 0.01 ? 0 : Math.ceil(novaQuantidade * 100) / 100;
+        const novoStatus = novaQuantidade <= 0.01 ? 'Transferido' : 'Disponível';
+        const novoDestino = novaQuantidade <= 0.01 ? destinoSelecionado : '';
+
+        const unidadeAtualizada = {
+            tipo: 'unidade',
+            id: unidadeId,
+            sku: sku,
+            lote: lote,
+            validade: validade,
+            volume: novoVolume,
+            quantidade: novaQuantidade,
+            unidadeEmbalagem: unidadeVolume,
+            status: novoStatus,
+            localizacao: '-',
+            destino: novoDestino,
+            foraPadrao: false,
+            qtdRealPorEmbalagem: null
+        };
+
+        const movimentacao = {
+            tipo: 'movimentacao',
+            data: new Date().toISOString().split('T')[0],
+            tipoMov: 'Transferência',
+            idUnidade: unidadeId,
+            sku: sku,
+            volume: volumeTransferir,
+            quantidade: quantidadeTransferir,
+            unidadeEmbalagem: unidadeVolume,
+            destino: destinoSelecionado,
+            responsavel: 'Sistema',
+            observacao: document.getElementById('observacao').value
+        };
+
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
+
+        try {
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(movimentacao)
             });
-            event.target.classList.add('selected');
+
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(unidadeAtualizada)
+            });
+
+            alert('Transferência realizada com sucesso!');
+            setTimeout(() => window.close(), 2000);
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao realizar transferência.');
         }
-
-        async function confirmarBaixa() {
-            const volumeTransferir = parseInt(document.getElementById('volume-transferir').value);
-            const quantidadeTransferir = volumeTransferir * unidadesPorEmbalagem;
-
-            if (!destinoSelecionado) {
-                alert('Selecione um destino para a transferência!');
-                return;
-            }
-
-            if (volumeTransferir < 1 || volumeTransferir > volumeTotal) {
-                alert(`Volume deve estar entre 1 e ${volumeTotal}`);
-                return;
-            }
-
-            const novaQuantidade = quantidadeTotal - quantidadeTransferir;
-            
-            // CORREÇÃO: Se novaQuantidade for 0, volume também deve ser 0
-            const novoVolume = novaQuantidade <= 0 ? 0 : Math.ceil(novaQuantidade / unidadesPorEmbalagem);
-            const novoStatus = novaQuantidade <= 0 ? 'Transferido' : 'Disponível';
-            const novoDestino = novaQuantidade <= 0 ? destinoSelecionado : '';
-
-            const unidadeAtualizada = {
-                tipo: 'unidade',
-                id: unidadeId,
-                sku: sku,
-                lote: lote,
-                validade: validade,
-                volume: novoVolume,
-                quantidade: novaQuantidade,
-                unidadeEmbalagem: unidadeVolume,
-                status: novoStatus,
-                localizacao: '-',
-                destino: novoDestino,
-                foraPadrao: false,
-                qtdRealPorEmbalagem: null
-            };
-
-            const movimentacao = {
-                tipo: 'movimentacao',
-                data: new Date().toISOString().split('T')[0],
-                tipoMov: 'Transferência',
-                idUnidade: unidadeId,
-                sku: sku,
-                volume: volumeTransferir,
-                quantidade: quantidadeTransferir,
-                unidadeEmbalagem: unidadeVolume,
-                destino: destinoSelecionado,
-                responsavel: 'Sistema',
-                observacao: document.getElementById('observacao').value
-            };
-
-            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(movimentacao)
-                });
-
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(unidadeAtualizada)
-                });
-
-                alert('Transferência realizada com sucesso!');
-                setTimeout(() => window.close(), 2000);
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao realizar transferência.');
-            }
-        }
+    }
     </script>
 </body>
 </html>
+
