@@ -715,38 +715,39 @@ async function carregarDados() {
         }
 
         // Carregar unidades
-        const unidadesRes = await fetch(UNIDADES_URL);
-        const unidadesData = await unidadesRes.json();
-        if (unidadesData.values && unidadesData.values.length > 1) {
-            unidades = unidadesData.values.slice(1).map(row => {
-                let sku = row[1] || '';
-                
-                if (sku && !isNaN(sku) && sku.length < 8) {
-                    sku = sku.padStart(8, '0');
-                }
-                
-                const quantidadeStr = row[5] || '0';
-                const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
-                
-                return {
-                    id: row[0] || '',
-                    sku: sku,
-                    lote: row[2] || '',
-                    validade: row[3] || '',
-                    volume: parseInt(row[4]) || 1,
-                    quantidade: quantidade,
-                    unidadeEmbalagem: row[6] || 'UN',
-                    status: row[7] || 'Disponível',
-                    localizacao: row[8] || '-',
-                    destino: row[9] || '',
-                    foraPadrao: row[10] === 'Sim',
-                    qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null,
-                    tipoEntrada: row[12] || 'Manual'
-                };
-            }).filter(u => u.id);
-            
-            console.log(`✅ ${unidades.length} unidades carregadas`);
+const unidadesRes = await fetch(UNIDADES_URL);
+const unidadesData = await unidadesRes.json();
+if (unidadesData.values && unidadesData.values.length > 1) {
+    unidades = unidadesData.values.slice(1).map(row => {
+        let sku = row[1] || '';
+        
+        if (sku && !isNaN(sku) && sku.length < 8) {
+            sku = sku.padStart(8, '0');
         }
+        
+        const quantidadeStr = row[5] || '0';
+        const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
+        
+        // 13 COLUNAS na ordem correta
+        return {
+            id: row[0] || '',                    // Coluna 1: ID
+            sku: sku,                             // Coluna 2: SKU
+            lote: row[2] || '',                   // Coluna 3: Lote
+            validade: row[3] || '',               // Coluna 4: Validade
+            volume: parseInt(row[4]) || 1,        // Coluna 5: Volume
+            quantidade: quantidade,                // Coluna 6: Quantidade
+            unidadeEmbalagem: row[6] || 'UN',      // Coluna 7: Unidade Volume
+            status: row[7] || 'Disponível',        // Coluna 8: Status
+            localizacao: row[8] || '-',            // Coluna 9: Localização
+            destino: row[9] || '',                  // Coluna 10: Destino
+            foraPadrao: row[10] === 'Sim',          // Coluna 11: Fora do Padrão
+            qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null, // Coluna 12
+            tipoEntrada: row[12] || 'Manual'       // Coluna 13: Tipo de Entrada
+        };
+    }).filter(u => u.id);
+    
+    console.log(`✅ ${unidades.length} unidades carregadas`);
+}
 
         // Carregar movimentações
         const movRes = await fetch(MOVIMENTACOES_URL);
@@ -2215,6 +2216,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
