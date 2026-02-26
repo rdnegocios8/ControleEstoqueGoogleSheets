@@ -354,7 +354,8 @@ async function salvarRecebimento() {
             localizacao: recebimento.localizacao || '-',
             destino: '',
             foraPadrao: false,
-            qtdRealPorEmbalagem: null
+            qtdRealPorEmbalagem: null,
+            tipoEntrada: 'Recebimento'
         };
         
         await fetch(WEB_APP_URL, {
@@ -712,13 +713,14 @@ async function carregarDados() {
                     lote: row[2] || '',
                     validade: row[3] || '',
                     volume: parseInt(row[4]) || 1,
-                    quantidade: quantidade,  // <-- VALOR CORRIGIDO
+                    quantidade: quantidade,  
                     unidadeEmbalagem: row[6] || 'UN',
                     status: row[7] || 'Disponível',
                     localizacao: row[8] || '-',
                     destino: row[9] || '',
                     foraPadrao: row[10] === 'Sim',
-                    qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null
+                    qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null,
+                    tipoEntrada: row[12] || 'Manual'
                 };
             }).filter(u => u.id);
             
@@ -1050,7 +1052,8 @@ async function salvarUnidade() {
         localizacao: document.getElementById('unidade-localizacao').value || '-',
         destino: '',
         foraPadrao: foraPadrao,
-        qtdRealPorEmbalagem: foraPadrao ? parseFloat(document.getElementById('unidade-quantidade-real').value) : null
+        qtdRealPorEmbalagem: foraPadrao ? parseFloat(document.getElementById('unidade-quantidade-real').value) : null,
+        tipoEntrada: 'Manual'
     };
     
     try {
@@ -2170,4 +2173,5 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
