@@ -42,7 +42,7 @@ const destinos = [
 ];
 
 // Tipos de embalagem
-const tiposEmbalagem = ['UN', 'MALA', 'PCT', 'CX', 'FD', 'PLT'];
+const tiposEmbalagem = ['UN', 'MALA', 'PCT', 'CX', 'FD', 'PLT', 'TBR', 'GAL', 'BIG'];
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
@@ -2230,6 +2230,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
