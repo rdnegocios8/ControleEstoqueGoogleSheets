@@ -1168,13 +1168,18 @@ function gerarIdUnico() {
     return id;
 }
 
-// Ver unidade
+// ============================================
+// VER UNIDADE - Função principal
+// ============================================
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
     if (!unidadeAtual) return;
     
     const produto = produtos.find(p => p.sku === unidadeAtual.sku);
+    const unidadeBase = produto?.unidadeBase || 'UN';
+    const qtdPorEmbalagem = produto?.qtdPorEmbalagem || 1;
     
+    // Preencher dados do modal
     document.getElementById('detalhe-id').textContent = unidadeAtual.id;
     document.getElementById('detalhe-produto').textContent = produto ? produto.nome : 'Produto não encontrado';
     document.getElementById('detalhe-categoria').textContent = produto ? produto.categoria : '-';
@@ -1183,15 +1188,20 @@ function verUnidade(id) {
     document.getElementById('detalhe-validade').textContent = formatarData(unidadeAtual.validade);
     document.getElementById('detalhe-embalagem').textContent = unidadeAtual.unidadeEmbalagem;
     document.getElementById('detalhe-volume').textContent = unidadeAtual.volume;
-    document.getElementById('detalhe-quantidade').textContent = unidadeAtual.quantidade.toFixed(2) + ' ' + (produto?.unidadeBase || 'UN');
+    document.getElementById('detalhe-quantidade').textContent = unidadeAtual.quantidade.toFixed(2) + ' ' + unidadeBase;
     document.getElementById('detalhe-fora-padrao').textContent = unidadeAtual.foraPadrao ? 'Sim' : 'Não';
     document.getElementById('detalhe-status').innerHTML = `<span class="badge ${unidadeAtual.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${unidadeAtual.status}</span>`;
     document.getElementById('detalhe-localizacao').textContent = unidadeAtual.localizacao;
     document.getElementById('detalhe-destino').textContent = unidadeAtual.destino || '-';
     
-    // GERAR QR CODE - VERSÃO CORRIGIDA
+    // ============================================
+    // GERAR QR CODE com URL completa para qr-view.html
+    // ============================================
     const qrContainer = document.getElementById('unidade-qr-code');
     qrContainer.innerHTML = ''; // Limpar
+    
+    // Construir URL completa para o qr-view.html
+    const qrViewUrl = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
     
     // Pequeno delay para garantir que o container está pronto
     setTimeout(() => {
@@ -1201,21 +1211,21 @@ function verUnidade(id) {
                 // Limpar o container novamente
                 qrContainer.innerHTML = '';
                 
-                // Criar novo QR Code
+                // Criar novo QR Code com a URL completa
                 new QRCode(qrContainer, {
-                    text: unidadeAtual.id,
+                    text: qrViewUrl,  // <--- AGORA É A URL COMPLETA
                     width: 150,
                     height: 150,
                     colorDark: '#000000',
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.H
                 });
-                console.log('✅ QR Code gerado com sucesso!');
+                console.log('✅ QR Code gerado com URL completa!');
             } else {
                 console.error('❌ Biblioteca QRCode não encontrada');
-                // Fallback para API externa
+                // Fallback para API externa com a URL completa
                 qrContainer.innerHTML = `
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(unidadeAtual.id)}" 
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrViewUrl)}" 
                          alt="QR Code" 
                          style="width: 150px; height: 150px; border-radius: 8px; border: 2px solid #fbbf24;">
                 `;
@@ -1233,32 +1243,66 @@ function verUnidade(id) {
                 </div>
             `;
         }
-    }, 100); // Pequeno delay para garantir
+    }, 100);
     
     const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
     modal.show();
 }
 
-// Ver QR Code completo (usando API externa)
+// ============================================
+// VER QR CODE COMPLETO - Abre o qr-view.html
+// ============================================
 function verQRCodeCompleto() {
     if (!unidadeAtual) return;
     
     const produto = produtos.find(p => p.sku === unidadeAtual.sku);
+    const unidadeBase = produto?.unidadeBase || 'UN';
+    const qtdPorEmbalagem = produto?.qtdPorEmbalagem || 1;
     
-    // Usar a API do QRServer como fallback
-    const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(unidadeAtual.id)}`;
-    window.open(url, '_blank');
-}
-
-// Ver QR Code completo
-function verQRCodeCompleto() {
-    if (!unidadeAtual) return;
-    
-    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
-    
-    const url = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}`;
+    // Construir URL com TODOS os parâmetros
+    const url = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
     
     window.open(url, '_blank', 'width=600,height=700');
+}
+
+// ============================================
+// BAIXAR QR CODE - Para download da imagem
+// ============================================
+function baixarQRCode() {
+    if (!unidadeAtual) return;
+    
+    const qrContainer = document.getElementById('unidade-qr-code');
+    const canvas = qrContainer.querySelector('canvas');
+    
+    if (canvas) {
+        const link = document.createElement('a');
+        link.download = `qrcode-${unidadeAtual.id}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } else {
+        // Se não tiver canvas, abrir o qr-view
+        verQRCodeCompleto();
+    }
+}
+
+// ============================================
+// GERAR QR CODE EXTERNO - Fallback com API
+// ============================================
+function gerarQRCodeExterno() {
+    if (!unidadeAtual) return;
+    
+    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
+    const unidadeBase = produto?.unidadeBase || 'UN';
+    const qtdPorEmbalagem = produto?.qtdPorEmbalagem || 1;
+    
+    const url = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
+    
+    const qrContainer = document.getElementById('unidade-qr-code');
+    qrContainer.innerHTML = `
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}" 
+             alt="QR Code" 
+             style="width: 150px; height: 150px; border-radius: 8px; border: 2px solid #fbbf24;">
+    `;
 }
 
 // Filtrar unidades
@@ -2230,6 +2274,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
