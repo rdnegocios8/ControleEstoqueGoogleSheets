@@ -2106,7 +2106,8 @@ async function salvarRecebimento() {
             volume: volume,
             quantidade: quantidade,
             unidadeMedida: unidadeMedida,
-            localizacao: localizacao
+            localizacao: localizacao,
+            qtdPorEmbalagem: produto?.qtdPorEmbalagem || 1
         });
     }
     
@@ -2116,57 +2117,71 @@ async function salvarRecebimento() {
     }
     
     try {
+        let sucessos = 0;
+        let erros = 0;
+        
         // Salvar cada item como um recebimento separado
         for (const item of itens) {
-            const recebimento = {
-                tipo: 'recebimento',
-                dataRecebimento: dataRecebimento,
-                numeroNF: numeroNF,
-                fornecedor: fornecedor,
-                codigoSKU: item.sku,
-                nomeProduto: item.nomeProduto,
-                lote: item.lote,
-                validade: item.validade,
-                quantidade: item.quantidade,
-                volume: item.volume,
-                unidadeMedida: item.unidadeMedida,
-                qtdPorEmbalagem: 1, // Pode ajustar se necessário
-                localizacao: item.localizacao,
-                responsavel: 'Sistema',
-                observacoes: observacoes
-            };
-            
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(recebimento)
-            });
-            
-            // Criar unidade automaticamente
-            const idUnidade = gerarIdUnico();
-            const unidade = {
-                tipo: 'unidade',
-                id: idUnidade,
-                sku: item.sku,
-                lote: item.lote,
-                validade: item.validade,
-                volume: item.volume,
-                quantidade: item.quantidade,
-                unidadeEmbalagem: item.unidadeMedida,
-                status: 'Disponível',
-                localizacao: item.localizacao || '-',
-                destino: '',
-                foraPadrao: false,
-                qtdRealPorEmbalagem: null
-            };
-            
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(unidade)
-            });
+            try {
+                // 1. SALVAR RECEBIMENTO
+                const recebimento = {
+                    tipo: 'recebimento',
+                    dataRecebimento: dataRecebimento,
+                    numeroNF: numeroNF,
+                    fornecedor: fornecedor,
+                    codigoSKU: item.sku,
+                    nomeProduto: item.nomeProduto,
+                    lote: item.lote,
+                    validade: item.validade,
+                    quantidade: item.quantidade,
+                    volume: item.volume,
+                    unidadeMedida: item.unidadeMedida,
+                    qtdPorEmbalagem: item.qtdPorEmbalagem,
+                    localizacao: item.localizacao,
+                    responsavel: 'Sistema',
+                    observacoes: observacoes
+                };
+                
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(recebimento)
+                });
+                
+                // 2. CRIAR UNIDADE COM TIPO DE ENTRADA = RECEBIMENTO
+                const idUnidade = gerarIdUnico();
+                const unidade = {
+                    tipo: 'unidade',
+                    id: idUnidade,
+                    sku: item.sku,
+                    lote: item.lote,
+                    validade: item.validade,
+                    volume: item.volume,
+                    quantidade: item.quantidade,
+                    unidadeEmbalagem: item.unidadeMedida,
+                    status: 'Disponível',
+                    localizacao: item.localizacao || '-',
+                    destino: '',
+                    foraPadrao: false,
+                    qtdRealPorEmbalagem: null,
+                    tipoEntrada: 'Recebimento'  // <--- CAMPO OBRIGATÓRIO
+                };
+                
+                console.log('📤 Enviando unidade com tipoEntrada:', unidade.tipoEntrada);
+                
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(unidade)
+                });
+                
+                sucessos++;
+            } catch (itemError) {
+                console.error('Erro no item:', itemError);
+                erros++;
+            }
         }
         
         // Limpar formulário
@@ -2182,12 +2197,15 @@ async function salvarRecebimento() {
         contadorItens = 0;
         
         bootstrap.Modal.getInstance(document.getElementById('modalRecebimento')).hide();
+        
+        // Recarregar dados
         await carregarDados();
         
-        alert(`${itens.length} produto(s) recebido(s) com sucesso!`);
+        alert(`${sucessos} produto(s) recebido(s) com sucesso! ${erros > 0 ? erros + ' erro(s).' : ''}`);
+        
     } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao registrar recebimento.');
+        console.error('Erro geral:', error);
+        alert('Erro ao registrar recebimento. Verifique o console (F12).');
     }
 }
 
@@ -2197,6 +2215,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
