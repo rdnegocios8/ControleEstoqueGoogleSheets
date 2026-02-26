@@ -53,38 +53,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Configurar event listeners
 function setupEventListeners() {
-    document.getElementById('menu-painel').addEventListener('click', () => mostrarView('painel'));
-    document.getElementById('menu-produtos').addEventListener('click', () => mostrarView('produtos'));
-    document.getElementById('menu-unidades').addEventListener('click', () => mostrarView('unidades'));
-    document.getElementById('menu-scanner').addEventListener('click', () => mostrarView('scanner'));
-    document.getElementById('menu-recebimentos').addEventListener('click', () => mostrarView('recebimentos'));
-    document.getElementById('menu-movimentacoes').addEventListener('click', () => mostrarView('movimentacoes'));
-    document.getElementById('menu-relatorios').addEventListener('click', () => mostrarView('relatorios'));
-    document.getElementById('menu-categorias').addEventListener('click', () => mostrarView('categorias'));
+    // Menu principal - sempre existem
+    document.getElementById('menu-painel')?.addEventListener('click', () => mostrarView('painel'));
+    document.getElementById('menu-produtos')?.addEventListener('click', () => mostrarView('produtos'));
+    document.getElementById('menu-unidades')?.addEventListener('click', () => mostrarView('unidades'));
+    document.getElementById('menu-scanner')?.addEventListener('click', () => mostrarView('scanner'));
+    document.getElementById('menu-recebimentos')?.addEventListener('click', () => mostrarView('recebimentos'));
+    document.getElementById('menu-movimentacoes')?.addEventListener('click', () => mostrarView('movimentacoes'));
+    document.getElementById('menu-relatorios')?.addEventListener('click', () => mostrarView('relatorios'));
+    document.getElementById('menu-categorias')?.addEventListener('click', () => mostrarView('categorias'));
     
-    document.getElementById('salvar-produto').addEventListener('click', salvarProduto);
-    document.getElementById('salvar-unidade').addEventListener('click', salvarUnidade);
-    document.getElementById('salvar-categoria').addEventListener('click', salvarCategoria);
-    document.getElementById('salvar-recebimento').addEventListener('click', salvarRecebimento);
+    // Botões de salvar - verificam se existem
+    document.getElementById('salvar-produto')?.addEventListener('click', salvarProduto);
+    document.getElementById('salvar-unidade')?.addEventListener('click', salvarUnidade);
+    document.getElementById('salvar-categoria')?.addEventListener('click', salvarCategoria);
+    document.getElementById('salvar-recebimento')?.addEventListener('click', salvarRecebimento);
     
-    document.getElementById('search-produto').addEventListener('keyup', filtrarProdutos);
-    document.getElementById('filtro-categoria-produto').addEventListener('change', filtrarProdutos);
-    document.getElementById('filtro-embalagem-produto').addEventListener('change', filtrarProdutos);
+    // Filtros de produtos - verificam se existem
+    document.getElementById('search-produto')?.addEventListener('keyup', filtrarProdutos);
+    document.getElementById('filtro-categoria-produto')?.addEventListener('change', filtrarProdutos);
+    document.getElementById('filtro-embalagem-produto')?.addEventListener('change', filtrarProdutos);
     
-    document.getElementById('filtro-produto-unidades').addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-status-unidades').addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-destino-unidades').addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-embalagem-unidades').addEventListener('change', filtrarUnidades);
+    // Filtros de unidades - verificam se existem
+    document.getElementById('filtro-produto-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-status-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-destino-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-embalagem-unidades')?.addEventListener('change', filtrarUnidades);
     
-    document.getElementById('produto-tipo-embalagem').addEventListener('change', toggleCampoQtdEmbalagem);
-    document.getElementById('unidade-sku').addEventListener('change', atualizarInfoEmbalagem);
-    document.getElementById('unidade-volume').addEventListener('input', calcularQuantidadeAutomatica);
-    document.getElementById('unidade-fora-padrao').addEventListener('change', toggleCampoQuantidadeReal);
+    // Campos do modal de unidade - verificam se existem
+    document.getElementById('produto-tipo-embalagem')?.addEventListener('change', toggleCampoQtdEmbalagem);
+    document.getElementById('unidade-sku')?.addEventListener('change', atualizarInfoEmbalagem);
+    document.getElementById('unidade-volume')?.addEventListener('input', calcularQuantidadeAutomatica);
+    document.getElementById('unidade-fora-padrao')?.addEventListener('change', toggleCampoQuantidadeReal);
     
-    document.getElementById('recebimento-sku').addEventListener('change', atualizarInfoRecebimento);
-    document.getElementById('recebimento-volume').addEventListener('input', calcularQuantidadeRecebimento);
+    // Campos do recebimento - verificam se existem
+    document.getElementById('recebimento-sku')?.addEventListener('change', atualizarInfoRecebimento);
+    document.getElementById('recebimento-volume')?.addEventListener('input', calcularQuantidadeRecebimento);
     
-    // Event listener para o filtro de período
+    // Event listener para o filtro de período - verifica se existe
     const periodoFilter = document.getElementById('filtro-recebimento-periodo');
     if (periodoFilter) {
         periodoFilter.addEventListener('change', function() {
@@ -104,7 +110,7 @@ function setupEventListeners() {
         });
     }
     
-    // Event listeners para filtros do Estoque Geral
+    // Event listeners para filtros do Estoque Geral - verificam se existem
     const filtroSku = document.getElementById('filtro-estoque-sku');
     const filtroDescricao = document.getElementById('filtro-estoque-descricao');
     const filtroStatus = document.getElementById('filtro-estoque-status');
@@ -114,6 +120,22 @@ function setupEventListeners() {
     if (filtroDescricao) filtroDescricao.addEventListener('keyup', filtrarEstoqueGeral);
     if (filtroStatus) filtroStatus.addEventListener('change', filtrarEstoqueGeral);
     if (filtroUnidade) filtroUnidade.addEventListener('change', filtrarEstoqueGeral);
+    
+    // Busca de produtos no modal - verificam se existem
+    document.getElementById('busca-produto')?.addEventListener('keyup', filtrarProdutosLista);
+    document.getElementById('busca-produto')?.addEventListener('focus', function() {
+        if (this.value) {
+            filtrarProdutosLista();
+        }
+    });
+    
+    // Busca de produtos no recebimento - verificam se existem
+    document.getElementById('busca-recebimento-produto')?.addEventListener('keyup', filtrarProdutosRecebimento);
+    document.getElementById('busca-recebimento-produto')?.addEventListener('focus', function() {
+        if (this.value) {
+            filtrarProdutosRecebimento();
+        }
+    });
 }
 
 // Mostrar/esconder campo de quantidade por embalagem
@@ -2175,6 +2197,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
