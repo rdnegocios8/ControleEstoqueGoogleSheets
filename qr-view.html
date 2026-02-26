@@ -247,7 +247,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
     // Carregar dados da URL
     const urlParams = new URLSearchParams(window.location.search);
     const unidadeId = urlParams.get('id');
@@ -259,18 +259,16 @@
     const quantidade = urlParams.get('quantidade') || '0';
     const unidade = urlParams.get('unidade') || 'UN';
     
-    // ============================================
-    // NOVO: Carregar unidadeBase e qtdPorEmbalagem
-    // ============================================
+    // Carregar unidadeBase (se não vier, padrão 'UN')
     const unidadeBase = urlParams.get('unidadeBase') || 'UN';
     const qtdPorEmbalagem = urlParams.get('qtdPorEmbalagem') || '1';
 
-    // Construir link completo (AGORA COM TODOS OS PARÂMETROS)
+    // Construir link completo
     const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
     const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
 
     // ============================================
-    // FUNÇÃO PARA FORMATAR DATA SEM PROBLEMAS DE FUSO
+    // FUNÇÃO PARA FORMATAR DATA
     // ============================================
     function formatarDataSemFuso(dataString) {
         if (!dataString) return 'N/A';
@@ -278,24 +276,10 @@
         if (typeof dataString === 'string' && dataString.includes('-')) {
             const partes = dataString.split('-');
             if (partes.length === 3) {
-                const ano = partes[0];
-                const mes = partes[1];
-                const dia = partes[2];
-                return `${dia}/${mes}/${ano}`;
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
         }
-        
-        try {
-            const data = new Date(dataString);
-            if (isNaN(data.getTime())) return dataString;
-            
-            const dia = data.getDate().toString().padStart(2, '0');
-            const mes = (data.getMonth() + 1).toString().padStart(2, '0');
-            const ano = data.getFullYear();
-            return `${dia}/${mes}/${ano}`;
-        } catch (e) {
-            return dataString;
-        }
+        return dataString;
     }
 
     // ============================================
@@ -311,7 +295,7 @@
     // ============================================
     function gerarQRCode() {
         const qrcodeDiv = document.getElementById('qrcode');
-        qrcodeDiv.innerHTML = ''; // Limpar
+        qrcodeDiv.innerHTML = '';
         
         if (!unidadeId) {
             qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID da unidade não encontrado</p>';
@@ -322,14 +306,10 @@
             try {
                 QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
                     width: 250,
-                    margin: 2,
-                    color: {
-                        dark: '#000000',
-                        light: '#ffffff'
-                    }
+                    margin: 2
                 }, function(err, canvas) {
                     if (err) {
-                        console.error('Erro ao gerar QR Code:', err);
+                        console.error('Erro:', err);
                         qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
                         return;
                     }
@@ -337,11 +317,12 @@
                     qrcodeDiv.innerHTML = '';
                     canvas.style.width = '100%';
                     canvas.style.height = 'auto';
-                    canvas.style.borderRadius = '8px';
                     qrcodeDiv.appendChild(canvas);
                 });
 
-                // Preencher informações
+                // ============================================
+                // PREENCHER INFORMAÇÕES - CORRIGIDO!
+                // ============================================
                 document.getElementById('qr-info').innerHTML = `
                     <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
                     <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
@@ -349,6 +330,7 @@
                     <p><strong>Validade:</strong> ${formatarDataSemFuso(validade)}</p>
                 `;
 
+                // CORREÇÃO: Agora usa unidadeBase em vez de "UNIDADES" fixo
                 document.getElementById('volume-info').innerHTML = `
                     <div class="volume-item">
                         <div class="volume-value">${formatarNumero(volume)}</div>
@@ -369,7 +351,7 @@
                 qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
             }
         } else {
-            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Biblioteca QR Code não carregada</p>';
+            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Biblioteca não carregada</p>';
         }
     }
 
@@ -389,13 +371,8 @@
     window.onload = function() {
         setTimeout(gerarQRCode, 100);
     };
-
-    if (document.readyState === 'complete') {
-        gerarQRCode();
-    } else {
-        window.addEventListener('load', gerarQRCode);
-    }
 </script>
 </body>
 </html>
+
 
