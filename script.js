@@ -1300,27 +1300,29 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><small>${u.id}</small></td>
-            <td>${produto ? produto.nome : u.sku}</td>
-            <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
-            <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
-            <td>${u.lote}</td>
-            <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
-            <td>${u.volume}</td>
-            <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
-            <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
-            <td>${u.destino || '-'}</td>
-            <td>
-                <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
-                    <i class="bi bi-eye"></i>
-                </button>
-                ${u.status === 'Disponível' && u.quantidade > 0 ? `
-                    <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
-                        <i class="bi bi-arrow-right"></i>
-                    </button>
-                ` : ''}
-            </td>
-        `;
+    <td><small>${u.id}</small></td>
+    <td>${produto ? produto.nome : u.sku}</td>
+    <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
+    <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
+    <td>${u.lote}</td>
+    <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
+    <td>${u.volume}</td>
+    <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
+    <!-- NOVA LINHA: Tipo de Entrada -->
+    <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">${u.tipoEntrada || 'Manual'}</span></td>
+    <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
+    <td>${u.destino || '-'}</td>
+    <td>
+        <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
+            <i class="bi bi-eye"></i>
+        </button>
+        ${u.status === 'Disponível' && u.quantidade > 0 ? `
+            <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        ` : ''}
+    </td>
+`;
         tbody.appendChild(tr);
     });
 }
@@ -2173,5 +2175,6 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
