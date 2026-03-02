@@ -245,77 +245,91 @@
                 </div>
 
                 <!-- UNIDADES VIEW -->
-                <div id="unidades-view" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h2>Unidades</h2>
-                        <button class="btn btn-success" onclick="abrirModalUnidade('')">
-                            <i class="bi bi-plus"></i> Nova Unidade
-                        </button>
-                    </div>
-                    
-                    <div class="row mt-4">
-                        <div class="col-md-3">
-                            <select class="form-control" id="filtro-produto-unidades">
-                                <option value="">Todos os produtos</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-control" id="filtro-status-unidades">
-                                <option value="">Todos os status</option>
-                                <option value="Disponível">Disponível</option>
-                                <option value="Bloqueado">Bloqueado</option>
-                                <option value="Transferido">Transferido</option>
-                                <option value="Vencido">Vencido</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-control" id="filtro-destino-unidades">
-                                <option value="">Todos os destinos</option>
-                                <option value="Farinheira">Farinheira</option>
-                                <option value="Doméstica">Doméstica</option>
-                                <option value="Massas">Massas</option>
-                                <option value="Biscoito">Biscoito</option>
-                                <option value="Transferência MV">Transferência MV</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-control" id="filtro-embalagem-unidades">
-                                <option value="">Todas embalagens</option>
-                                <option value="MALA">MALA</option>
-                                <option value="PCT">PCT</option>
-                                <option value="CX">CX</option>
-                                <option value="FD">FD</option>
-                                <option value="PLT">PLT</option>
-                                <option value="TBR">TBR</option>
-                                <option value="GAL">GAL</option>     
-                                <option value="BIG">BIG</option>      
-                            </select>
-                        </div>
-                    </div>
+<div id="unidades-view" style="display: none;">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Unidades</h2>
+        <button class="btn btn-success" onclick="abrirModalUnidade('')">
+            <i class="bi bi-plus"></i> Nova Unidade
+        </button>
+    </div>
+    
+    <div class="row mt-4">
+        <!-- CAMPO DE BUSCA POR NOME DO PRODUTO OU ID -->
+        <div class="col-md-4">
+            <input type="text" class="form-control" id="busca-unidades" 
+                   placeholder="Buscar por produto ou ID...">
+        </div>
+        
+        <!-- FILTRO POR STATUS (dropdown) -->
+        <div class="col-md-2">
+            <select class="form-control" id="filtro-status-unidades">
+                <option value="">Todos os status</option>
+                <option value="Disponível">Disponível</option>
+                <option value="Bloqueado">Bloqueado</option>
+                <option value="Transferido">Transferido</option>
+                <option value="Vencido">Vencido</option>
+            </select>
+        </div>
+        
+        <!-- FILTRO POR DESTINO (dropdown) -->
+        <div class="col-md-2">
+            <select class="form-control" id="filtro-destino-unidades">
+                <option value="">Todos os destinos</option>
+                <option value="Farinheira">Farinheira</option>
+                <option value="Doméstica">Doméstica</option>
+                <option value="Massas">Massas</option>
+                <option value="Biscoito">Biscoito</option>
+                <option value="Transferência MV">Transferência MV</option>
+            </select>
+        </div>
+        
+        <!-- FILTRO POR EMBALAGEM (dropdown) -->
+        <div class="col-md-2">
+            <select class="form-control" id="filtro-embalagem-unidades">
+                <option value="">Todas embalagens</option>
+                <option value="UN">UN</option>
+                <option value="MALA">MALA</option>
+                <option value="PCT">PCT</option>
+                <option value="CX">CX</option>
+                <option value="FD">FD</option>
+                <option value="PLT">PLT</option>
+                <option value="TBR">TBR</option>
+                <option value="GAL">GAL</option>
+                <option value="BIG">BIG</option>
+            </select>
+        </div>
+        
+        <!-- BOTÃO PARA LIMPAR FILTROS -->
+        <div class="col-md-2">
+            <button class="btn btn-secondary w-100" onclick="limparFiltrosUnidades()">
+                <i class="bi bi-eraser"></i> Limpar
+            </button>
+        </div>
+    </div>
 
-                    <div class="table-responsive mt-4">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Produto</th>
-                                    <th>Categoria</th>
-                                    <th>Embalagem</th>
-                                    <th>Lote</th>
-                                    <th>Validade</th>
-                                    <th>Volume</th>
-                                    <th>Quantidade</th>
-                                    <th>Status</th>
-                                    <th>Destino</th>
-                                    <th>Tipo de Entrada</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-unidades">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <div class="table-responsive mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Produto</th>
+                    <th>Categoria</th>
+                    <th>Embalagem</th>
+                    <th>Lote</th>
+                    <th>Validade</th>
+                    <th>Volume</th>
+                    <th>Quantidade</th>
+                    <th>Status</th>
+                    <th>Destino</th>
+                    <th>Tipo de Entrada</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-unidades">
+            </tbody>
+        </table>
+    </div>
+</div>
 
                 <!-- SCANNER VIEW -->
                 <div id="scanner-view" style="display: none;">
@@ -999,6 +1013,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
