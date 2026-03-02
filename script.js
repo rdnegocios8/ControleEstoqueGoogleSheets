@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Configurar event listeners
+// Configurar event listeners
 function setupEventListeners() {
     // Menu principal - sempre existem
     document.getElementById('menu-painel')?.addEventListener('click', () => mostrarView('painel'));
@@ -74,11 +75,17 @@ function setupEventListeners() {
     document.getElementById('filtro-categoria-produto')?.addEventListener('change', filtrarProdutos);
     document.getElementById('filtro-embalagem-produto')?.addEventListener('change', filtrarProdutos);
     
-    // Filtros de unidades - verificam se existem
-    document.getElementById('filtro-produto-unidades')?.addEventListener('change', );
-    document.getElementById('filtro-status-unidades')?.addEventListener('change', );
-    document.getElementById('filtro-destino-unidades')?.addEventListener('change', );
-    document.getElementById('filtro-embalagem-unidades')?.addEventListener('change', );
+    // ============================================
+    // FILTROS DE UNIDADES - CORRIGIDOS!
+    // ============================================
+    // Campos de busca e filtros (agora com as funções corretas)
+    document.getElementById('busca-unidades')?.addEventListener('keyup', filtrarUnidades);
+    document.getElementById('filtro-status-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-destino-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-embalagem-unidades')?.addEventListener('change', filtrarUnidades);
+    
+    // REMOVER esta linha se ainda existir (está com ID errado):
+    // document.getElementById('filtro-produto-unidades')?.addEventListener('change', );
     
     // Campos do modal de unidade - verificam se existem
     document.getElementById('produto-tipo-embalagem')?.addEventListener('change', toggleCampoQtdEmbalagem);
@@ -620,6 +627,7 @@ function mostrarView(view) {
     if (view === 'unidades') {
         preencherFiltros();
         atualizarTabelaUnidades();
+        setupFiltrosUnidades();
     }
     if (view === 'recebimentos') {
         preencherSelectProdutosRecebimento();
@@ -2331,6 +2339,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
