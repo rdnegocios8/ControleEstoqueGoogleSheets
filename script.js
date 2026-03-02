@@ -75,10 +75,10 @@ function setupEventListeners() {
     document.getElementById('filtro-embalagem-produto')?.addEventListener('change', filtrarProdutos);
     
     // Filtros de unidades - verificam se existem
-    document.getElementById('filtro-produto-unidades')?.addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-status-unidades')?.addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-destino-unidades')?.addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-embalagem-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-produto-unidades')?.addEventListener('change', );
+    document.getElementById('filtro-status-unidades')?.addEventListener('change', );
+    document.getElementById('filtro-destino-unidades')?.addEventListener('change', );
+    document.getElementById('filtro-embalagem-unidades')?.addEventListener('change', );
     
     // Campos do modal de unidade - verificam se existem
     document.getElementById('produto-tipo-embalagem')?.addEventListener('change', toggleCampoQtdEmbalagem);
@@ -1307,17 +1307,25 @@ function gerarQRCodeExterno() {
 
 // Filtrar unidades
 function filtrarUnidades() {
-    const skuFiltro = document.getElementById('filtro-produto-unidades')?.value;
+    const termoBusca = document.getElementById('busca-unidades')?.value.toLowerCase() || '';
     const statusFiltro = document.getElementById('filtro-status-unidades')?.value;
     const destinoFiltro = document.getElementById('filtro-destino-unidades')?.value;
     const embalagemFiltro = document.getElementById('filtro-embalagem-unidades')?.value;
     
     let unidadesFiltradas = unidades.filter(u => u.quantidade > 0);
     
-    if (skuFiltro) {
-        unidadesFiltradas = unidadesFiltradas.filter(u => u.sku === skuFiltro);
+    // Filtrar por termo de busca (nome do produto ou ID)
+    if (termoBusca) {
+        unidadesFiltradas = unidadesFiltradas.filter(u => {
+            const produto = produtos.find(p => p.sku === u.sku);
+            const nomeProduto = produto ? produto.nome.toLowerCase() : '';
+            const idUnidade = u.id.toLowerCase();
+            
+            return nomeProduto.includes(termoBusca) || idUnidade.includes(termoBusca);
+        });
     }
     
+    // Filtrar por status
     if (statusFiltro) {
         if (statusFiltro === 'Vencido') {
             const hoje = new Date();
@@ -1331,10 +1339,12 @@ function filtrarUnidades() {
         }
     }
     
+    // Filtrar por destino
     if (destinoFiltro) {
         unidadesFiltradas = unidadesFiltradas.filter(u => u.destino === destinoFiltro);
     }
     
+    // Filtrar por embalagem
     if (embalagemFiltro) {
         unidadesFiltradas = unidadesFiltradas.filter(u => u.unidadeEmbalagem === embalagemFiltro);
     }
@@ -2268,12 +2278,60 @@ async function salvarRecebimento() {
     }
 }
 
+// ============================================
+// NOVAS FUNÇÕES PARA FILTROS
+// ============================================
+
+// Configurar event listeners para os filtros
+function setupFiltrosUnidades() {
+    const buscaInput = document.getElementById('busca-unidades');
+    const statusFilter = document.getElementById('filtro-status-unidades');
+    const destinoFilter = document.getElementById('filtro-destino-unidades');
+    const embalagemFilter = document.getElementById('filtro-embalagem-unidades');
+    
+    if (buscaInput) {
+        buscaInput.addEventListener('keyup', function() {
+            filtrarUnidades();
+        });
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            filtrarUnidades();
+        });
+    }
+    
+    if (destinoFilter) {
+        destinoFilter.addEventListener('change', function() {
+            filtrarUnidades();
+        });
+    }
+    
+    if (embalagemFilter) {
+        embalagemFilter.addEventListener('change', function() {
+            filtrarUnidades();
+        });
+    }
+}
+
+// Função para limpar todos os filtros
+function limparFiltrosUnidades() {
+    document.getElementById('busca-unidades').value = '';
+    document.getElementById('filtro-status-unidades').value = '';
+    document.getElementById('filtro-destino-unidades').value = '';
+    document.getElementById('filtro-embalagem-unidades').value = '';
+    
+    // Recarregar todas as unidades
+    atualizarTabelaUnidades();
+}
+
 // Inicializar o primeiro item
 document.addEventListener('DOMContentLoaded', function() {
     // Configurar busca para o primeiro item
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
