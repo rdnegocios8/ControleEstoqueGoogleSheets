@@ -52,9 +52,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Configurar event listeners
-// Configurar event listeners
 function setupEventListeners() {
-    // Menu principal - sempre existem
+    // Menu principal
     document.getElementById('menu-painel')?.addEventListener('click', () => mostrarView('painel'));
     document.getElementById('menu-produtos')?.addEventListener('click', () => mostrarView('produtos'));
     document.getElementById('menu-unidades')?.addEventListener('click', () => mostrarView('unidades'));
@@ -64,40 +63,30 @@ function setupEventListeners() {
     document.getElementById('menu-relatorios')?.addEventListener('click', () => mostrarView('relatorios'));
     document.getElementById('menu-categorias')?.addEventListener('click', () => mostrarView('categorias'));
     
-    // Botões de salvar - verificam se existem
+    // Botões de salvar
     document.getElementById('salvar-produto')?.addEventListener('click', salvarProduto);
     document.getElementById('salvar-unidade')?.addEventListener('click', salvarUnidade);
     document.getElementById('salvar-categoria')?.addEventListener('click', salvarCategoria);
     document.getElementById('salvar-recebimento')?.addEventListener('click', salvarRecebimento);
     
-    // Filtros de produtos - verificam se existem
+    // Filtros de produtos
     document.getElementById('search-produto')?.addEventListener('keyup', filtrarProdutos);
     document.getElementById('filtro-categoria-produto')?.addEventListener('change', filtrarProdutos);
     document.getElementById('filtro-embalagem-produto')?.addEventListener('change', filtrarProdutos);
     
-    // ============================================
-    // FILTROS DE UNIDADES - CORRIGIDOS!
-    // ============================================
-    // Campos de busca e filtros (agora com as funções corretas)
+    // Filtros de unidades
     document.getElementById('busca-unidades')?.addEventListener('keyup', filtrarUnidades);
     document.getElementById('filtro-status-unidades')?.addEventListener('change', filtrarUnidades);
     document.getElementById('filtro-destino-unidades')?.addEventListener('change', filtrarUnidades);
     document.getElementById('filtro-embalagem-unidades')?.addEventListener('change', filtrarUnidades);
     
-    // REMOVER esta linha se ainda existir (está com ID errado):
-    // document.getElementById('filtro-produto-unidades')?.addEventListener('change', );
-    
-    // Campos do modal de unidade - verificam se existem
+    // Campos do modal de unidade
     document.getElementById('produto-tipo-embalagem')?.addEventListener('change', toggleCampoQtdEmbalagem);
     document.getElementById('unidade-sku')?.addEventListener('change', atualizarInfoEmbalagem);
     document.getElementById('unidade-volume')?.addEventListener('input', calcularQuantidadeAutomatica);
     document.getElementById('unidade-fora-padrao')?.addEventListener('change', toggleCampoQuantidadeReal);
     
-    // Campos do recebimento - verificam se existem
-    document.getElementById('recebimento-sku')?.addEventListener('change', atualizarInfoRecebimento);
-    document.getElementById('recebimento-volume')?.addEventListener('input', calcularQuantidadeRecebimento);
-    
-    // Event listener para o filtro de período - verifica se existe
+    // Filtro de período do recebimento
     const periodoFilter = document.getElementById('filtro-recebimento-periodo');
     if (periodoFilter) {
         periodoFilter.addEventListener('change', function() {
@@ -106,42 +95,28 @@ function setupEventListeners() {
             const containerFim = document.getElementById('filtro-data-fim-container');
             
             if (containerInicio && containerFim) {
-                if (periodo === 'personalizado') {
-                    containerInicio.style.display = 'block';
-                    containerFim.style.display = 'block';
-                } else {
-                    containerInicio.style.display = 'none';
-                    containerFim.style.display = 'none';
-                }
+                containerInicio.style.display = periodo === 'personalizado' ? 'block' : 'none';
+                containerFim.style.display = periodo === 'personalizado' ? 'block' : 'none';
             }
         });
     }
     
-    // Event listeners para filtros do Estoque Geral - verificam se existem
-    const filtroSku = document.getElementById('filtro-estoque-sku');
-    const filtroDescricao = document.getElementById('filtro-estoque-descricao');
-    const filtroStatus = document.getElementById('filtro-estoque-status');
-    const filtroUnidade = document.getElementById('filtro-estoque-unidade');
+    // Filtros do Estoque Geral
+    document.getElementById('filtro-estoque-sku')?.addEventListener('keyup', filtrarEstoqueGeral);
+    document.getElementById('filtro-estoque-descricao')?.addEventListener('keyup', filtrarEstoqueGeral);
+    document.getElementById('filtro-estoque-status')?.addEventListener('change', filtrarEstoqueGeral);
+    document.getElementById('filtro-estoque-unidade')?.addEventListener('change', filtrarEstoqueGeral);
     
-    if (filtroSku) filtroSku.addEventListener('keyup', filtrarEstoqueGeral);
-    if (filtroDescricao) filtroDescricao.addEventListener('keyup', filtrarEstoqueGeral);
-    if (filtroStatus) filtroStatus.addEventListener('change', filtrarEstoqueGeral);
-    if (filtroUnidade) filtroUnidade.addEventListener('change', filtrarEstoqueGeral);
-    
-    // Busca de produtos no modal - verificam se existem
+    // Busca de produtos no modal
     document.getElementById('busca-produto')?.addEventListener('keyup', filtrarProdutosLista);
     document.getElementById('busca-produto')?.addEventListener('focus', function() {
-        if (this.value) {
-            filtrarProdutosLista();
-        }
+        if (this.value) filtrarProdutosLista();
     });
     
-    // Busca de produtos no recebimento - verificam se existem
+    // Busca de produtos no recebimento
     document.getElementById('busca-recebimento-produto')?.addEventListener('keyup', filtrarProdutosRecebimento);
     document.getElementById('busca-recebimento-produto')?.addEventListener('focus', function() {
-        if (this.value) {
-            filtrarProdutosRecebimento();
-        }
+        if (this.value) filtrarProdutosRecebimento();
     });
 }
 
@@ -178,29 +153,27 @@ function calcularQuantidadeAutomatica() {
     const produto = produtos.find(p => p.sku === sku);
     if (!produto) return;
     
-    const volume = parseInt(document.getElementById('unidade-volume').value) || 1;
-    const qtdPorEmbalagem = parseInt(produto.qtdPorEmbalagem) || 1;
+    const volume = parseFloat(document.getElementById('unidade-volume').value) || 1;
+    const qtdPorEmbalagem = parseFloat(produto.qtdPorEmbalagem) || 1;
     const foraPadrao = document.getElementById('unidade-fora-padrao').checked;
     
     if (!foraPadrao) {
         const quantidadeTotal = volume * qtdPorEmbalagem;
-        document.getElementById('unidade-quantidade').value = quantidadeTotal;
+        document.getElementById('unidade-quantidade').value = quantidadeTotal.toFixed(2);
     }
 }
 
-// Atualizar informações da embalagem e unidade base ao selecionar produto
+// Atualizar informações da embalagem
 function atualizarInfoEmbalagem() {
     const select = document.getElementById('unidade-sku');
     const selectedOption = select.options[select.selectedIndex];
     const tipoEmbalagem = selectedOption.dataset.tipo || 'UN';
-    const qtdPorEmbalagem = parseInt(selectedOption.dataset.qtd) || 1;
     const sku = select.value;
     const produto = produtos.find(p => p.sku === sku);
     
     document.getElementById('volume-label').textContent = `Volume (${tipoEmbalagem})`;
     document.getElementById('volume-descricao').textContent = `Número de ${tipoEmbalagem}`;
     
-    // Atualizar a unidade base no modal
     const unidadeBase = produto?.unidadeBase || 'UN';
     document.getElementById('quantidade-unidade').textContent = `(${unidadeBase})`;
     document.getElementById('quantidade-descricao').textContent = `Total em ${unidadeBase}`;
@@ -219,7 +192,6 @@ function preencherFiltroSKU() {
     
     select.innerHTML = '<option value="">Todos os SKUs</option>';
     
-    // Pegar SKUs únicos dos produtos
     const skusUnicos = [...new Set(produtos.map(p => p.sku))];
     skusUnicos.sort().forEach(sku => {
         const produto = produtos.find(p => p.sku === sku);
@@ -233,17 +205,13 @@ function calcularDatasPorPeriodo(periodo) {
     let dataInicio = new Date();
     let dataFim = new Date();
     
-    // Ajustar para o fuso horário local
-    const ajustarData = (data) => {
-        return data.toISOString().split('T')[0];
-    };
+    const ajustarData = (data) => data.toISOString().split('T')[0];
     
     switch(periodo) {
         case 'hoje':
             dataInicio = new Date(hoje.setHours(0,0,0,0));
             dataFim = new Date(hoje.setHours(23,59,59,999));
             break;
-            
         case 'semana':
             const primeiroDiaSemana = hoje.getDate() - hoje.getDay();
             dataInicio = new Date(hoje.setDate(primeiroDiaSemana));
@@ -251,17 +219,14 @@ function calcularDatasPorPeriodo(periodo) {
             dataFim = new Date(hoje.setDate(primeiroDiaSemana + 6));
             dataFim.setHours(23,59,59,999);
             break;
-            
         case 'mes':
             dataInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
             dataFim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59);
             break;
-            
         case 'ano':
             dataInicio = new Date(hoje.getFullYear(), 0, 1);
             dataFim = new Date(hoje.getFullYear(), 11, 31, 23, 59, 59);
             break;
-            
         case 'personalizado':
             return {
                 inicio: document.getElementById('filtro-recebimento-data-inicio')?.value || '',
@@ -269,10 +234,7 @@ function calcularDatasPorPeriodo(periodo) {
             };
     }
     
-    return {
-        inicio: ajustarData(dataInicio),
-        fim: ajustarData(dataFim)
-    };
+    return { inicio: ajustarData(dataInicio), fim: ajustarData(dataFim) };
 }
 
 // Filtrar recebimentos
@@ -283,129 +245,17 @@ function filtrarRecebimentos() {
     
     let filtrados = [...recebimentos];
     
-    // Filtrar por período
     if (periodo) {
         const datas = calcularDatasPorPeriodo(periodo);
         if (datas.inicio && datas.fim) {
-            filtrados = filtrados.filter(r => {
-                const dataRecebimento = r.data;
-                return dataRecebimento >= datas.inicio && dataRecebimento <= datas.fim;
-            });
+            filtrados = filtrados.filter(r => r.data >= datas.inicio && r.data <= datas.fim);
         }
     }
     
-    // Filtrar por NF
-    if (nfFiltro) {
-        filtrados = filtrados.filter(r => r.nf && r.nf.toLowerCase().includes(nfFiltro));
-    }
-    
-    // Filtrar por SKU
-    if (skuFiltro) {
-        filtrados = filtrados.filter(r => r.sku === skuFiltro);
-    }
+    if (nfFiltro) filtrados = filtrados.filter(r => r.nf && r.nf.toLowerCase().includes(nfFiltro));
+    if (skuFiltro) filtrados = filtrados.filter(r => r.sku === skuFiltro);
     
     atualizarTabelaRecebimentos(filtrados);
-}
-
-// Atualizar informações no recebimento
-function atualizarInfoRecebimento() {
-    const select = document.getElementById('recebimento-sku');
-    const selectedOption = select.options[select.selectedIndex];
-    const sku = select.value;
-    const produto = produtos.find(p => p.sku === sku);
-    
-    if (produto) {
-        document.getElementById('recebimento-produto').value = produto.nome;
-        document.getElementById('recebimento-unidade').value = produto.tipoEmbalagem || 'UN';
-        document.getElementById('recebimento-qtd-embalagem').value = produto.qtdPorEmbalagem || 1;
-        calcularQuantidadeRecebimento();
-    }
-}
-
-// Calcular quantidade total no recebimento
-function calcularQuantidadeRecebimento() {
-    const volume = parseInt(document.getElementById('recebimento-volume').value) || 1;
-    const qtdPorEmbalagem = parseInt(document.getElementById('recebimento-qtd-embalagem').value) || 1;
-    const quantidadeTotal = volume * qtdPorEmbalagem;
-    document.getElementById('recebimento-quantidade').value = quantidadeTotal;
-}
-
-// Salvar recebimento
-async function salvarRecebimento() {
-    const dataRecebimento = document.getElementById('recebimento-data').value;
-    const sku = document.getElementById('recebimento-sku').value;
-    const produto = produtos.find(p => p.sku === sku);
-    
-    if (!dataRecebimento || !sku) {
-        alert('Data e SKU são obrigatórios!');
-        return;
-    }
-    
-    const recebimento = {
-        tipo: 'recebimento',
-        dataRecebimento: dataRecebimento,
-        numeroNF: document.getElementById('recebimento-nf').value,
-        fornecedor: document.getElementById('recebimento-fornecedor').value,
-        codigoSKU: sku,
-        nomeProduto: produto.nome,
-        lote: document.getElementById('recebimento-lote').value,
-        validade: document.getElementById('recebimento-validade').value,
-        quantidade: parseInt(document.getElementById('recebimento-quantidade').value),
-        volume: parseInt(document.getElementById('recebimento-volume').value),
-        unidadeMedida: document.getElementById('recebimento-unidade').value,
-        qtdPorEmbalagem: parseInt(document.getElementById('recebimento-qtd-embalagem').value),
-        localizacao: document.getElementById('recebimento-localizacao').value,
-        responsavel: 'Sistema',
-        observacoes: document.getElementById('recebimento-observacoes').value
-    };
-    
-    try {
-        // Salvar recebimento
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(recebimento)
-        });
-        
-        // Criar unidade automaticamente
-        const idUnidade = gerarIdUnico();
-        const unidade = {
-            tipo: 'unidade',
-            id: idUnidade,
-            sku: sku,
-            lote: recebimento.lote,
-            validade: recebimento.validade,
-            volume: recebimento.volume,
-            quantidade: recebimento.quantidade,
-            unidadeEmbalagem: recebimento.unidadeMedida,
-            status: 'Disponível',
-            localizacao: recebimento.localizacao || '-',
-            destino: '',
-            foraPadrao: false,
-            qtdRealPorEmbalagem: null,
-            tipoEntrada: 'Recebimento'
-        };
-        
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(unidade)
-        });
-        
-        // Limpar formulário
-        document.getElementById('form-recebimento').reset();
-        bootstrap.Modal.getInstance(document.getElementById('modalRecebimento')).hide();
-        
-        // Recarregar dados
-        await carregarDados();
-        
-        alert('Recebimento registrado com sucesso!');
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao registrar recebimento.');
-    }
 }
 
 // Carregar recebimentos
@@ -415,32 +265,22 @@ async function carregarRecebimentos() {
         const data = await response.json();
         
         if (data.values && data.values.length > 1) {
-            recebimentos = data.values.slice(1).map(row => {
-                const converter = (valor) => {
-                    if (!valor) return 0;
-                    if (typeof valor === 'string') {
-                        return parseFloat(valor.replace(',', '.')) || 0;
-                    }
-                    return parseFloat(valor) || 0;
-                };
-                
-                return {
-                    data: row[0],
-                    nf: row[1],
-                    fornecedor: row[2],
-                    sku: row[3],
-                    produto: row[4],
-                    lote: row[5],
-                    validade: row[6],
-                    quantidade: converter(row[7]),
-                    volume: converter(row[8]),
-                    unidade: row[9],
-                    qtdPorEmbalagem: converter(row[10]),
-                    localizacao: row[11],
-                    responsavel: row[12],
-                    observacoes: row[13]
-                };
-            });
+            recebimentos = data.values.slice(1).map(row => ({
+                data: row[0],
+                nf: row[1],
+                fornecedor: row[2],
+                sku: row[3],
+                produto: row[4],
+                lote: row[5],
+                validade: row[6],
+                quantidade: parseFloat((row[7] || '0').replace(',', '.')) || 0,
+                volume: parseFloat((row[8] || '0').replace(',', '.')) || 0,
+                unidade: row[9],
+                qtdPorEmbalagem: parseFloat((row[10] || '0').replace(',', '.')) || 0,
+                localizacao: row[11],
+                responsavel: row[12],
+                observacoes: row[13]
+            }));
             
             atualizarTabelaRecebimentos();
         }
@@ -456,70 +296,51 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     
     const dados = recebimentosFiltrados || recebimentos;
     
-    tbody.innerHTML = '';
-    
-    if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="text-center">Nenhum recebimento encontrado</td></tr>';
-        return;
-    }
-    
-    dados.slice(-50).reverse().forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${formatarData(r.data)}</td>
-            <td>${r.nf || '-'}</td>
-            <td>${r.fornecedor || '-'}</td>
-            <td>${r.sku}</td>
-            <td>${r.produto}</td>
-            <td>${r.lote}</td>
-            <td>${formatarData(r.validade)}</td>
-            <td>${r.volume}</td>
-            <td>${r.unidade}</td>
-            <td>${r.quantidade}</td>
-            <td>${r.localizacao || '-'}</td>
-            <td>${r.responsavel}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+    tbody.innerHTML = dados.length === 0 
+        ? '<tr><td colspan="12" class="text-center">Nenhum recebimento encontrado</td></tr>'
+        : dados.slice(-50).reverse().map(r => `
+            <tr>
+                <td>${formatarData(r.data)}</td>
+                <td>${r.nf || '-'}</td>
+                <td>${r.fornecedor || '-'}</td>
+                <td>${r.sku}</td>
+                <td>${r.produto}</td>
+                <td>${r.lote}</td>
+                <td>${formatarData(r.validade)}</td>
+                <td>${r.volume}</td>
+                <td>${r.unidade}</td>
+                <td>${r.quantidade}</td>
+                <td>${r.localizacao || '-'}</td>
+                <td>${r.responsavel}</td>
+            </tr>
+        `).join('');
 }
 
 // ============================================
 // FUNÇÕES DO ESTOQUE GERAL
 // ============================================
 
-// Carregar estoque geral da planilha
+// Carregar estoque geral
 async function carregarEstoqueGeral() {
-   try {
-        console.log('📊 Carregando estoque geral da planilha...');
-        
+    try {
+        console.log('📊 Carregando estoque geral...');
         const response = await fetch(ESTOQUE_GERAL_URL);
         const data = await response.json();
         
         if (data.values && data.values.length > 1) {
-            estoqueGeral = data.values.slice(1).map(row => {
-                // Função auxiliar para converter string com vírgula
-                const converter = (valor) => {
-                    if (!valor) return 0;
-                    if (typeof valor === 'string') {
-                        return parseFloat(valor.replace(',', '.')) || 0;
-                    }
-                    return parseFloat(valor) || 0;
-                };
-                
-                return {
-                    codigo: row[0] || '',
-                    unidade: row[1] || '',
-                    descricao: row[2] || '',
-                    qtdSistema: converter(row[3]),
-                    quantidadeAnterior: converter(row[4]),
-                    lancamentos: converter(row[5]),
-                    quantidadeTotal: converter(row[6]),
-                    abastecimentos: converter(row[7]),
-                    fisicoAtual: converter(row[8]),
-                    estSistemaReal: converter(row[9]),
-                    status: row[10] || 'NORMAL'
-                };
-            }).filter(item => item.codigo);
+            estoqueGeral = data.values.slice(1).map(row => ({
+                codigo: row[0] || '',
+                unidade: row[1] || '',
+                descricao: row[2] || '',
+                qtdSistema: parseFloat((row[3] || '0').replace(',', '.')) || 0,
+                quantidadeAnterior: parseFloat((row[4] || '0').replace(',', '.')) || 0,
+                lancamentos: parseFloat((row[5] || '0').replace(',', '.')) || 0,
+                quantidadeTotal: parseFloat((row[6] || '0').replace(',', '.')) || 0,
+                abastecimentos: parseFloat((row[7] || '0').replace(',', '.')) || 0,
+                fisicoAtual: parseFloat((row[8] || '0').replace(',', '.')) || 0,
+                estSistemaReal: parseFloat((row[9] || '0').replace(',', '.')) || 0,
+                status: row[10] || 'NORMAL'
+            })).filter(item => item.codigo);
             
             console.log(`✅ ${estoqueGeral.length} itens carregados`);
         }
@@ -538,42 +359,28 @@ function atualizarTabelaEstoqueGeral(dadosFiltrados = null) {
     
     const dados = dadosFiltrados || estoqueGeral;
     
-    tbody.innerHTML = '';
-    
-    if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="text-center">Nenhum item encontrado na aba Estoque Geral</td></tr>';
-        return;
-    }
-    
-    dados.forEach(item => {
-        const tr = document.createElement('tr');
-        
-        let statusClass = '';
-        if (item.status === 'ESTOQUE ZERADO' || item.fisicoAtual <= 0) statusClass = 'table-danger';
-        else if (item.status === 'ESTOQUE BAIXO' || (item.fisicoAtual > 0 && item.fisicoAtual < 10)) statusClass = 'table-warning';
-        
-        tr.className = statusClass;
-        
-        // CORREÇÃO: Formatar com 2 casas decimais
-        tr.innerHTML = `
-            <td><strong>${item.codigo}</strong></td>
-            <td>${item.unidade}</td>
-            <td>${item.descricao}</td>
-            <td class="text-end">${item.qtdSistema.toFixed(2).replace('.', ',')}</td>
-            <td class="text-end">${item.quantidadeAnterior.toFixed(2).replace('.', ',')}</td>
-            <td class="text-end">${item.lancamentos.toFixed(2).replace('.', ',')}</td>
-            <td class="text-end"><strong>${item.quantidadeTotal.toFixed(2).replace('.', ',')}</strong></td>
-            <td class="text-end text-danger">${item.abastecimentos.toFixed(2).replace('.', ',')}</td>
-            <td class="text-end"><strong class="${item.fisicoAtual <= 0 ? 'text-danger' : item.fisicoAtual < 10 ? 'text-warning' : 'text-success'}">${item.fisicoAtual.toFixed(2).replace('.', ',')}</strong></td>
-            <td class="text-end">${item.estSistemaReal.toFixed(2).replace('.', ',')}</td>
-            <td>
-                <span class="badge ${item.status === 'NORMAL' ? 'bg-success' : item.status === 'ESTOQUE BAIXO' ? 'bg-warning' : 'bg-danger'}">
-                    ${item.status}
-                </span>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
+    tbody.innerHTML = dados.length === 0
+        ? '<tr><td colspan="11" class="text-center">Nenhum item encontrado</td></tr>'
+        : dados.map(item => {
+            const statusClass = item.fisicoAtual <= 0 ? 'table-danger' : item.fisicoAtual < 10 ? 'table-warning' : '';
+            const statusBadge = item.status === 'NORMAL' ? 'bg-success' : item.status === 'ESTOQUE BAIXO' ? 'bg-warning' : 'bg-danger';
+            
+            return `
+                <tr class="${statusClass}">
+                    <td><strong>${item.codigo}</strong></td>
+                    <td>${item.unidade}</td>
+                    <td>${item.descricao}</td>
+                    <td class="text-end">${item.qtdSistema.toFixed(2).replace('.', ',')}</td>
+                    <td class="text-end">${item.quantidadeAnterior.toFixed(2).replace('.', ',')}</td>
+                    <td class="text-end">${item.lancamentos.toFixed(2).replace('.', ',')}</td>
+                    <td class="text-end"><strong>${item.quantidadeTotal.toFixed(2).replace('.', ',')}</strong></td>
+                    <td class="text-end text-danger">${item.abastecimentos.toFixed(2).replace('.', ',')}</td>
+                    <td class="text-end"><strong class="${item.fisicoAtual <= 0 ? 'text-danger' : item.fisicoAtual < 10 ? 'text-warning' : 'text-success'}">${item.fisicoAtual.toFixed(2).replace('.', ',')}</strong></td>
+                    <td class="text-end">${item.estSistemaReal.toFixed(2).replace('.', ',')}</td>
+                    <td><span class="badge ${statusBadge}">${item.status}</span></td>
+                </tr>
+            `;
+        }).join('');
 }
 
 // Filtrar estoque geral
@@ -585,21 +392,10 @@ function filtrarEstoqueGeral() {
     
     let filtrados = [...estoqueGeral];
     
-    if (skuFiltro) {
-        filtrados = filtrados.filter(item => item.codigo.toLowerCase().includes(skuFiltro));
-    }
-    
-    if (descricaoFiltro) {
-        filtrados = filtrados.filter(item => item.descricao.toLowerCase().includes(descricaoFiltro));
-    }
-    
-    if (statusFiltro) {
-        filtrados = filtrados.filter(item => item.status === statusFiltro);
-    }
-    
-    if (unidadeFiltro) {
-        filtrados = filtrados.filter(item => item.unidade === unidadeFiltro);
-    }
+    if (skuFiltro) filtrados = filtrados.filter(item => item.codigo.toLowerCase().includes(skuFiltro));
+    if (descricaoFiltro) filtrados = filtrados.filter(item => item.descricao.toLowerCase().includes(descricaoFiltro));
+    if (statusFiltro) filtrados = filtrados.filter(item => item.status === statusFiltro);
+    if (unidadeFiltro) filtrados = filtrados.filter(item => item.unidade === unidadeFiltro);
     
     atualizarTabelaEstoqueGeral(filtrados);
 }
@@ -637,9 +433,7 @@ function mostrarView(view) {
     if (view === 'relatorios') gerarRelatorios();
     if (view === 'categorias') atualizarTabelaCategorias();
     if (view === 'painel') {
-        // Carregar os dados do estoque geral da planilha
         carregarEstoqueGeral();
-        // Atualizar outros dados do painel
         atualizarPainel();
         atualizarGraficosPainel();
     }
@@ -660,22 +454,16 @@ function preencherSelectProdutosRecebimento() {
 function preencherFiltros() {
     const selectCategoria = document.getElementById('filtro-categoria-produto');
     if (selectCategoria) {
-        selectCategoria.innerHTML = '<option value="">Todas as categorias</option>';
-        categorias.forEach(c => {
-            selectCategoria.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-        });
+        selectCategoria.innerHTML = '<option value="">Todas as categorias</option>' + 
+            categorias.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
     }
     
     preencherSelectProdutos();
     
     const selectEmbalagem = document.getElementById('filtro-embalagem-unidades');
     if (selectEmbalagem) {
-        selectEmbalagem.innerHTML = '<option value="">Todas embalagens</option>';
-        tiposEmbalagem.forEach(t => {
-            if (t !== 'UN') {
-                selectEmbalagem.innerHTML += `<option value="${t}">${t}</option>`;
-            }
-        });
+        selectEmbalagem.innerHTML = '<option value="">Todas embalagens</option>' + 
+            tiposEmbalagem.filter(t => t !== 'UN').map(t => `<option value="${t}">${t}</option>`).join('');
     }
 }
 
@@ -692,6 +480,7 @@ function preencherSelectProdutos() {
     });
 }
 
+// Carregar dados
 async function carregarDados() {
     try {
         console.log('Carregando dados...');
@@ -702,10 +491,7 @@ async function carregarDados() {
         if (produtosData.values && produtosData.values.length > 1) {
             produtos = produtosData.values.slice(1).map(row => {
                 let sku = row[0] || '';
-                
-                if (sku && !isNaN(sku) && sku.length < 8) {
-                    sku = sku.padStart(8, '0');
-                }
+                if (sku && !isNaN(sku) && sku.length < 8) sku = sku.padStart(8, '0');
                 
                 return {
                     sku: sku,
@@ -713,7 +499,7 @@ async function carregarDados() {
                     descricao: row[2] || '',
                     categoria: row[3] || 'Insumos',
                     tipoEmbalagem: row[4] || 'UN',
-                    qtdPorEmbalagem: parseInt(row[5]) || 1,
+                    qtdPorEmbalagem: parseFloat(row[5]) || 1,
                     unidadeBase: row[6] || 'UN',
                     imagem: row[7] || ''
                 };
@@ -723,39 +509,32 @@ async function carregarDados() {
         }
 
         // Carregar unidades
-const unidadesRes = await fetch(UNIDADES_URL);
-const unidadesData = await unidadesRes.json();
-if (unidadesData.values && unidadesData.values.length > 1) {
-    unidades = unidadesData.values.slice(1).map(row => {
-        let sku = row[1] || '';
-        
-        if (sku && !isNaN(sku) && sku.length < 8) {
-            sku = sku.padStart(8, '0');
+        const unidadesRes = await fetch(UNIDADES_URL);
+        const unidadesData = await unidadesRes.json();
+        if (unidadesData.values && unidadesData.values.length > 1) {
+            unidades = unidadesData.values.slice(1).map(row => {
+                let sku = row[1] || '';
+                if (sku && !isNaN(sku) && sku.length < 8) sku = sku.padStart(8, '0');
+                
+                return {
+                    id: row[0] || '',
+                    sku: sku,
+                    lote: row[2] || '',
+                    validade: row[3] || '',
+                    volume: parseInt(row[4]) || 1,
+                    quantidade: parseFloat((row[5] || '0').replace(',', '.')) || 0,
+                    unidadeEmbalagem: row[6] || 'UN',
+                    status: row[7] || 'Disponível',
+                    localizacao: row[8] || '-',
+                    destino: row[9] || '',
+                    foraPadrao: row[10] === 'Sim',
+                    qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null,
+                    tipoEntrada: row[12] || 'Manual'
+                };
+            }).filter(u => u.id);
+            
+            console.log(`✅ ${unidades.length} unidades carregadas`);
         }
-        
-        const quantidadeStr = row[5] || '0';
-        const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
-        
-        // 13 COLUNAS na ordem correta
-        return {
-            id: row[0] || '',                    // Coluna 1: ID
-            sku: sku,                             // Coluna 2: SKU
-            lote: row[2] || '',                   // Coluna 3: Lote
-            validade: row[3] || '',               // Coluna 4: Validade
-            volume: parseInt(row[4]) || 1,        // Coluna 5: Volume
-            quantidade: quantidade,                // Coluna 6: Quantidade
-            unidadeEmbalagem: row[6] || 'UN',      // Coluna 7: Unidade Volume
-            status: row[7] || 'Disponível',        // Coluna 8: Status
-            localizacao: row[8] || '-',            // Coluna 9: Localização
-            destino: row[9] || '',                  // Coluna 10: Destino
-            foraPadrao: row[10] === 'Sim',          // Coluna 11: Fora do Padrão
-            qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null, // Coluna 12
-            tipoEntrada: row[12] || 'Manual'       // Coluna 13: Tipo de Entrada
-        };
-    }).filter(u => u.id);
-    
-    console.log(`✅ ${unidades.length} unidades carregadas`);
-}
 
         // Carregar movimentações
         const movRes = await fetch(MOVIMENTACOES_URL);
@@ -763,10 +542,7 @@ if (unidadesData.values && unidadesData.values.length > 1) {
         if (movData.values && movData.values.length > 1) {
             movimentacoes = movData.values.slice(1).map(row => {
                 let sku = row[3] || '';
-                
-                if (sku && !isNaN(sku) && sku.length < 8) {
-                    sku = sku.padStart(8, '0');
-                }
+                if (sku && !isNaN(sku) && sku.length < 8) sku = sku.padStart(8, '0');
                 
                 return {
                     data: row[0] || '',
@@ -794,18 +570,14 @@ if (unidadesData.values && unidadesData.values.length > 1) {
     }
 }
 
-// Dados de exemplo (corrigido com SKUs de 8 dígitos)
+// Dados de exemplo (fallback)
 function carregarDadosExemplo() {
     produtos = [
-        { sku: 'ERRO', nome: 'ERRO', descricao: 'ERRO', categoria: 'ERRO', tipoEmbalagem: 'ERRO', qtdPorEmbalagem: 50, unidadeBase: 'ERRO', imagem: '' },
-        { sku: 'ERRO', nome: 'ERRO', descricao: 'ERRO', categoria: 'ERRO', tipoEmbalagem: 'ERRO', qtdPorEmbalagem: 100, unidadeBase: 'ERRO', imagem: '' }
+        { sku: '00000001', nome: 'Produto Exemplo 1', descricao: 'Descrição 1', categoria: 'Insumos', tipoEmbalagem: 'UN', qtdPorEmbalagem: 1, unidadeBase: 'UN', imagem: '' },
+        { sku: '00000002', nome: 'Produto Exemplo 2', descricao: 'Descrição 2', categoria: 'Embalagem', tipoEmbalagem: 'CX', qtdPorEmbalagem: 12, unidadeBase: 'UN', imagem: '' }
     ];
     
-    unidades = [
-        { id: 'ERRO', sku: 'ERRO', lote: 'ERRO', validade: 'ERRO', volume: 10, quantidade: 500, unidadeEmbalagem: 'ERRO', status: 'ERRO', localizacao: 'ERRO', destino: '', foraPadrao: false, qtdRealPorEmbalagem: null },
-        { id: 'ERRO', sku: 'ERRO', lote: 'ERRO', validade: 'ERRO', volume: 20, quantidade: 2000, unidadeEmbalagem: 'ERRO', status: 'ERRO', localizacao: 'ERRO', destino: '', foraPadrao: false, qtdRealPorEmbalagem: null }
-    ];
-    
+    unidades = [];
     movimentacoes = [];
     recebimentos = [];
     atualizarInterface();
@@ -829,17 +601,11 @@ function atualizarInterface() {
 // Atualizar painel
 function atualizarPainel() {
     const unidadesAtivas = unidades.filter(u => u.quantidade > 0);
-    
-    // Verificar se os elementos existem antes de atualizar
-    const totalProdutosEl = document.getElementById('total-produtos');
-    const totalUnidadesEl = document.getElementById('total-unidades');
-    const proximosVencerEl = document.getElementById('proximos-vencer');
-    const estoqueBaixoEl = document.getElementById('estoque-baixo');
-    
-    if (totalProdutosEl) totalProdutosEl.textContent = produtos.length;
-    if (totalUnidadesEl) totalUnidadesEl.textContent = unidadesAtivas.length;
-    
     const hoje = new Date();
+    
+    document.getElementById('total-produtos') && (document.getElementById('total-produtos').textContent = produtos.length);
+    document.getElementById('total-unidades') && (document.getElementById('total-unidades').textContent = unidadesAtivas.length);
+    
     const proximosVencer = unidadesAtivas.filter(u => {
         if (!u.validade) return false;
         const validade = new Date(u.validade);
@@ -847,10 +613,8 @@ function atualizarPainel() {
         return dias <= 30 && dias > 0;
     }).length;
     
-    if (proximosVencerEl) proximosVencerEl.textContent = proximosVencer;
-    
-    const estoqueBaixo = unidadesAtivas.filter(u => u.quantidade < 10).length;
-    if (estoqueBaixoEl) estoqueBaixoEl.textContent = estoqueBaixo;
+    document.getElementById('proximos-vencer') && (document.getElementById('proximos-vencer').textContent = proximosVencer);
+    document.getElementById('estoque-baixo') && (document.getElementById('estoque-baixo').textContent = unidadesAtivas.filter(u => u.quantidade < 10).length);
 }
 
 // Atualizar cards de produtos
@@ -862,67 +626,41 @@ function atualizarCardsProdutos() {
     const embalagemFiltro = document.getElementById('filtro-embalagem-produto')?.value || '';
     const termoBusca = document.getElementById('search-produto')?.value.toLowerCase() || '';
     
-    let produtosFiltrados = produtos;
+    let produtosFiltrados = produtos
+        .filter(p => !categoriaFiltro || p.categoria === categoriaFiltro)
+        .filter(p => !embalagemFiltro || p.tipoEmbalagem === embalagemFiltro)
+        .filter(p => !termoBusca || p.nome.toLowerCase().includes(termoBusca) || p.sku.toLowerCase().includes(termoBusca));
     
-    if (categoriaFiltro) {
-        produtosFiltrados = produtosFiltrados.filter(p => p.categoria === categoriaFiltro);
-    }
-    
-    if (embalagemFiltro) {
-        produtosFiltrados = produtosFiltrados.filter(p => p.tipoEmbalagem === embalagemFiltro);
-    }
-    
-    if (termoBusca) {
-        produtosFiltrados = produtosFiltrados.filter(p => 
-            p.nome.toLowerCase().includes(termoBusca) || 
-            p.sku.toLowerCase().includes(termoBusca)
-        );
-    }
-    
-    container.innerHTML = '';
-    
-    if (produtosFiltrados.length === 0) {
-        container.innerHTML = '<div class="col-12"><p class="text-muted">Nenhum produto encontrado</p></div>';
-        return;
-    }
-    
-    produtosFiltrados.forEach(produto => {
-        const unidadesProduto = unidades.filter(u => u.sku === produto.sku && u.quantidade > 0);
-        const totalVolume = unidadesProduto.reduce((sum, u) => sum + u.volume, 0);
-        const totalQuantidade = unidadesProduto.reduce((sum, u) => sum + u.quantidade, 0);
-        
-        const card = document.createElement('div');
-        card.className = 'col-md-4 mb-3';
-        card.innerHTML = `
-            <div class="card h-100 ${getCategoriaClass(produto.categoria)}">
-                ${produto.imagem ? `<img src="${produto.imagem}" class="card-img-top" style="height: 150px; object-fit: cover;">` : ''}
-                <div class="card-body">
-                    <h5 class="card-title">${produto.nome}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">SKU: ${produto.sku}</h6>
-                    <span class="badge ${getCategoriaBadgeClass(produto.categoria)}">${produto.categoria}</span>
-                    <span class="badge bg-info">${produto.tipoEmbalagem}</span>
-                    <p class="card-text mt-2">${produto.descricao || ''}</p>
-                    <div class="row mt-3">
-                        <div class="col-6">
-                            <small>Volume: ${totalVolume} ${produto.tipoEmbalagem}</small>
+    container.innerHTML = produtosFiltrados.length === 0
+        ? '<div class="col-12"><p class="text-muted">Nenhum produto encontrado</p></div>'
+        : produtosFiltrados.map(produto => {
+            const unidadesProduto = unidades.filter(u => u.sku === produto.sku && u.quantidade > 0);
+            const totalVolume = unidadesProduto.reduce((sum, u) => sum + u.volume, 0);
+            const totalQuantidade = unidadesProduto.reduce((sum, u) => sum + u.quantidade, 0);
+            
+            return `
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 ${getCategoriaClass(produto.categoria)}">
+                        ${produto.imagem ? `<img src="${produto.imagem}" class="card-img-top" style="height: 150px; object-fit: cover;">` : ''}
+                        <div class="card-body">
+                            <h5 class="card-title">${produto.nome}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">SKU: ${produto.sku}</h6>
+                            <span class="badge ${getCategoriaBadgeClass(produto.categoria)}">${produto.categoria}</span>
+                            <span class="badge bg-info">${produto.tipoEmbalagem}</span>
+                            <p class="card-text mt-2">${produto.descricao || ''}</p>
+                            <div class="row mt-3">
+                                <div class="col-6"><small>Volume: ${totalVolume} ${produto.tipoEmbalagem}</small></div>
+                                <div class="col-6"><small>Total: ${totalQuantidade.toFixed(2)} ${produto.unidadeBase || 'UN'}</small></div>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-primary" onclick="verProduto('${produto.sku}')"><i class="bi bi-eye"></i> Ver unidades</button>
+                                <button class="btn btn-sm btn-success" onclick="abrirModalUnidade('${produto.sku}')"><i class="bi bi-plus"></i> Nova unidade</button>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <small>Total: ${totalQuantidade.toFixed(2)} ${produto.unidadeBase || 'UN'}</small>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <button class="btn btn-sm btn-primary" onclick="verProduto('${produto.sku}')">
-                            <i class="bi bi-eye"></i> Ver unidades
-                        </button>
-                        <button class="btn btn-sm btn-success" onclick="abrirModalUnidade('${produto.sku}')">
-                            <i class="bi bi-plus"></i> Nova unidade
-                        </button>
                     </div>
                 </div>
-            </div>
-        `;
-        container.appendChild(card);
-    });
+            `;
+        }).join('');
 }
 
 // Filtrar produtos
@@ -938,15 +676,10 @@ function verProduto(sku) {
     document.getElementById('modalVerProduto-titulo').textContent = `${produto.nome} - SKU: ${sku} (${produto.tipoEmbalagem})`;
     
     const tbody = document.getElementById('tabela-unidades-produto');
-    tbody.innerHTML = '';
-    
-    if (unidadesProduto.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhuma unidade ativa encontrada</td></tr>';
-    } else {
-        unidadesProduto.forEach(u => {
-            const tr = document.createElement('tr');
-            // CORREÇÃO: Formatar com 2 casas decimais
-            tr.innerHTML = `
+    tbody.innerHTML = unidadesProduto.length === 0
+        ? '<tr><td colspan="9" class="text-center">Nenhuma unidade ativa encontrada</td></tr>'
+        : unidadesProduto.map(u => `
+            <tr>
                 <td><small>${u.id}</small></td>
                 <td>${u.lote}</td>
                 <td>${formatarData(u.validade)}</td>
@@ -955,18 +688,11 @@ function verProduto(sku) {
                 <td>${u.quantidade.toFixed(2).replace('.', ',')} ${produto?.unidadeBase || 'UN'}</td>
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.localizacao}</td>
-                <td>
-                    <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+                <td><button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')"><i class="bi bi-eye"></i></button></td>
+            </tr>
+        `).join('');
     
-    const modal = new bootstrap.Modal(document.getElementById('modalVerProduto'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('modalVerProduto')).show();
 }
 
 // Abrir modal unidade
@@ -982,36 +708,25 @@ function abrirModalUnidade(sku) {
     if (sku) {
         atualizarInfoEmbalagem();
     } else {
-        // Resetar para valor padrão se não houver SKU
         document.getElementById('quantidade-unidade').textContent = '(UN)';
         document.getElementById('quantidade-descricao').textContent = 'Total de unidades';
     }
     
-    const modal = new bootstrap.Modal(document.getElementById('modalUnidade'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('modalUnidade')).show();
 }
 
 // Salvar produto
 async function salvarProduto() {
     let sku = document.getElementById('produto-sku').value;
-    
-    // Garantir que o SKU tenha 8 dígitos e seja texto
-    if (sku) {
-        // Remover espaços e garantir que seja string
-        sku = String(sku).trim();
-        // Adicionar zeros à esquerda se necessário
-        if (sku.length < 8 && !isNaN(sku)) {
-            sku = sku.padStart(8, '0');
-        }
-    }
+    sku = String(sku).trim();
+    if (sku && !isNaN(sku) && sku.length < 8) sku = sku.padStart(8, '0');
     
     const tipoEmbalagem = document.getElementById('produto-tipo-embalagem').value;
-    const qtdPorEmbalagem = tipoEmbalagem !== 'UN' ? 
-        parseInt(document.getElementById('produto-qtd-por-embalagem').value) : 1;
+    const qtdPorEmbalagem = tipoEmbalagem !== 'UN' ? parseFloat(document.getElementById('produto-qtd-por-embalagem').value) : 1;
     
     const produto = {
         tipo: 'produto',
-        sku: sku,  // Agora é string com zeros
+        sku: sku,
         nome: document.getElementById('produto-nome').value,
         descricao: document.getElementById('produto-descricao').value,
         categoria: document.getElementById('produto-categoria').value,
@@ -1035,17 +750,16 @@ async function salvarProduto() {
         });
         
         produtos.push(produto);
-        
         bootstrap.Modal.getInstance(document.getElementById('modalProduto')).hide();
         document.getElementById('form-produto').reset();
         atualizarInterface();
-        
         alert('Produto salvo com sucesso!');
     } catch (error) {
         console.error('Erro ao salvar produto:', error);
         alert('Erro ao salvar produto.');
     }
 }
+
 // Salvar unidade
 async function salvarUnidade() {
     const id = document.getElementById('unidade-id').value || gerarIdUnico();
@@ -1055,20 +769,13 @@ async function salvarUnidade() {
     const volume = parseFloat(document.getElementById('unidade-volume').value);
     const foraPadrao = document.getElementById('unidade-fora-padrao').checked;
     
-    // CORREÇÃO CRÍTICA: usar parseFloat em vez de parseInt
     let quantidade = parseFloat(document.getElementById('unidade-quantidade').value);
-    
-    // Se for NaN, definir como 0
     if (isNaN(quantidade)) quantidade = 0;
     
     if (foraPadrao) {
         const qtdReal = parseFloat(document.getElementById('unidade-quantidade-real').value);
-        if (!isNaN(qtdReal)) {
-            quantidade = volume * qtdReal;
-        }
+        if (!isNaN(qtdReal)) quantidade = volume * qtdReal;
     }
-    
-    console.log('📤 Quantidade a ser enviada:', quantidade); // Debug
     
     const unidade = {
         tipo: 'unidade',
@@ -1077,7 +784,7 @@ async function salvarUnidade() {
         lote: document.getElementById('unidade-lote').value,
         validade: document.getElementById('unidade-validade').value,
         volume: volume,
-        quantidade: quantidade,  // Agora é número com decimais
+        quantidade: quantidade,
         unidadeEmbalagem: produto?.tipoEmbalagem || 'UN',
         status: document.getElementById('unidade-status').value,
         localizacao: document.getElementById('unidade-localizacao').value || '-',
@@ -1104,7 +811,6 @@ async function salvarUnidade() {
         
         bootstrap.Modal.getInstance(document.getElementById('modalUnidade')).hide();
         atualizarInterface();
-        
         alert(`Unidade ${document.getElementById('unidade-id').value ? 'atualizada' : 'criada'} com sucesso!`);
     } catch (error) {
         console.error('Erro ao salvar unidade:', error);
@@ -1127,13 +833,10 @@ async function salvarCategoria() {
     }
     
     categorias.push(categoria);
-    
     bootstrap.Modal.getInstance(document.getElementById('modalCategoria')).hide();
     document.getElementById('form-categoria').reset();
-    
     atualizarTabelaCategorias();
     preencherFiltros();
-    
     alert('Categoria salva com sucesso!');
 }
 
@@ -1142,42 +845,35 @@ function atualizarTabelaCategorias() {
     const tbody = document.getElementById('tabela-categorias');
     if (!tbody) return;
     
-    tbody.innerHTML = '';
-    
-    categorias.forEach(cat => {
+    tbody.innerHTML = categorias.map(cat => {
         const totalProdutos = produtos.filter(p => p.categoria === cat.nome).length;
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${cat.nome}</td>
-            <td>${cat.tipo}</td>
-            <td>${cat.descricao || ''}</td>
-            <td>${totalProdutos}</td>
-            <td>
-                <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
-                <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
-            </td>
+        return `
+            <tr>
+                <td>${cat.nome}</td>
+                <td>${cat.tipo}</td>
+                <td>${cat.descricao || ''}</td>
+                <td>${totalProdutos}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
         `;
-        tbody.appendChild(tr);
-    });
+    }).join('');
 }
 
 // Gerar ID único
 function gerarIdUnico() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let id = 'UN-';
-    for (let i = 0; i < 8; i++) {
-        id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (let i = 0; i < 8; i++) id += chars.charAt(Math.floor(Math.random() * chars.length));
     id += '-';
-    for (let i = 0; i < 4; i++) {
-        id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (let i = 0; i < 4; i++) id += chars.charAt(Math.floor(Math.random() * chars.length));
     return id;
 }
 
 // ============================================
-// VER UNIDADE - Função principal
+// VER UNIDADE
 // ============================================
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
@@ -1187,7 +883,6 @@ function verUnidade(id) {
     const unidadeBase = produto?.unidadeBase || 'UN';
     const qtdPorEmbalagem = produto?.qtdPorEmbalagem || 1;
     
-    // Preencher dados do modal
     document.getElementById('detalhe-id').textContent = unidadeAtual.id;
     document.getElementById('detalhe-produto').textContent = produto ? produto.nome : 'Produto não encontrado';
     document.getElementById('detalhe-categoria').textContent = produto ? produto.categoria : '-';
@@ -1202,64 +897,35 @@ function verUnidade(id) {
     document.getElementById('detalhe-localizacao').textContent = unidadeAtual.localizacao;
     document.getElementById('detalhe-destino').textContent = unidadeAtual.destino || '-';
     
-    // ============================================
-    // GERAR QR CODE com URL completa para qr-view.html
-    // ============================================
     const qrContainer = document.getElementById('unidade-qr-code');
-    qrContainer.innerHTML = ''; // Limpar
+    qrContainer.innerHTML = '';
     
-    // Construir URL completa para o qr-view.html
     const qrViewUrl = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
     
-    // Pequeno delay para garantir que o container está pronto
     setTimeout(() => {
         try {
-            // Verificar se a biblioteca está disponível
             if (typeof QRCode !== 'undefined') {
-                // Limpar o container novamente
                 qrContainer.innerHTML = '';
-                
-                // Criar novo QR Code com a URL completa
                 new QRCode(qrContainer, {
-                    text: qrViewUrl,  // <--- AGORA É A URL COMPLETA
+                    text: qrViewUrl,
                     width: 150,
                     height: 150,
                     colorDark: '#000000',
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.H
                 });
-                console.log('✅ QR Code gerado com URL completa!');
             } else {
-                console.error('❌ Biblioteca QRCode não encontrada');
-                // Fallback para API externa com a URL completa
-                qrContainer.innerHTML = `
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrViewUrl)}" 
-                         alt="QR Code" 
-                         style="width: 150px; height: 150px; border-radius: 8px; border: 2px solid #fbbf24;">
-                `;
+                qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrViewUrl)}" alt="QR Code" style="width:150px;height:150px;border-radius:8px;border:2px solid #fbbf24;">`;
             }
         } catch (e) {
-            console.error('❌ Erro ao gerar QR Code:', e);
-            // Fallback de emergência
-            qrContainer.innerHTML = `
-                <div class="alert alert-warning p-2 text-center">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    <p class="mb-1">Clique para ver o QR Code</p>
-                    <button class="btn btn-sm btn-primary" onclick="verQRCodeCompleto()">
-                        <i class="bi bi-qr-code"></i> Ver QR Code
-                    </button>
-                </div>
-            `;
+            qrContainer.innerHTML = `<div class="alert alert-warning p-2 text-center"><button class="btn btn-sm btn-primary" onclick="verQRCodeCompleto()"><i class="bi bi-qr-code"></i> Ver QR Code</button></div>`;
         }
     }, 100);
     
-    const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('modalDetalhesUnidade')).show();
 }
 
-// ============================================
-// VER QR CODE COMPLETO - Abre o qr-view.html
-// ============================================
+// Ver QR Code completo
 function verQRCodeCompleto() {
     if (!unidadeAtual) return;
     
@@ -1267,50 +933,9 @@ function verQRCodeCompleto() {
     const unidadeBase = produto?.unidadeBase || 'UN';
     const qtdPorEmbalagem = produto?.qtdPorEmbalagem || 1;
     
-    // Construir URL com TODOS os parâmetros
     const url = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
     
     window.open(url, '_blank', 'width=600,height=700');
-}
-
-// ============================================
-// BAIXAR QR CODE - Para download da imagem
-// ============================================
-function baixarQRCode() {
-    if (!unidadeAtual) return;
-    
-    const qrContainer = document.getElementById('unidade-qr-code');
-    const canvas = qrContainer.querySelector('canvas');
-    
-    if (canvas) {
-        const link = document.createElement('a');
-        link.download = `qrcode-${unidadeAtual.id}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    } else {
-        // Se não tiver canvas, abrir o qr-view
-        verQRCodeCompleto();
-    }
-}
-
-// ============================================
-// GERAR QR CODE EXTERNO - Fallback com API
-// ============================================
-function gerarQRCodeExterno() {
-    if (!unidadeAtual) return;
-    
-    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
-    const unidadeBase = produto?.unidadeBase || 'UN';
-    const qtdPorEmbalagem = produto?.qtdPorEmbalagem || 1;
-    
-    const url = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
-    
-    const qrContainer = document.getElementById('unidade-qr-code');
-    qrContainer.innerHTML = `
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}" 
-             alt="QR Code" 
-             style="width: 150px; height: 150px; border-radius: 8px; border: 2px solid #fbbf24;">
-    `;
 }
 
 // Filtrar unidades
@@ -1322,40 +947,25 @@ function filtrarUnidades() {
     
     let unidadesFiltradas = unidades.filter(u => u.quantidade > 0);
     
-    // Filtrar por termo de busca (nome do produto ou ID)
     if (termoBusca) {
         unidadesFiltradas = unidadesFiltradas.filter(u => {
             const produto = produtos.find(p => p.sku === u.sku);
             const nomeProduto = produto ? produto.nome.toLowerCase() : '';
-            const idUnidade = u.id.toLowerCase();
-            
-            return nomeProduto.includes(termoBusca) || idUnidade.includes(termoBusca);
+            return nomeProduto.includes(termoBusca) || u.id.toLowerCase().includes(termoBusca);
         });
     }
     
-    // Filtrar por status
     if (statusFiltro) {
         if (statusFiltro === 'Vencido') {
             const hoje = new Date();
-            unidadesFiltradas = unidadesFiltradas.filter(u => {
-                if (!u.validade) return false;
-                const validade = new Date(u.validade);
-                return validade < hoje;
-            });
+            unidadesFiltradas = unidadesFiltradas.filter(u => u.validade && new Date(u.validade) < hoje);
         } else {
             unidadesFiltradas = unidadesFiltradas.filter(u => u.status === statusFiltro);
         }
     }
     
-    // Filtrar por destino
-    if (destinoFiltro) {
-        unidadesFiltradas = unidadesFiltradas.filter(u => u.destino === destinoFiltro);
-    }
-    
-    // Filtrar por embalagem
-    if (embalagemFiltro) {
-        unidadesFiltradas = unidadesFiltradas.filter(u => u.unidadeEmbalagem === embalagemFiltro);
-    }
+    if (destinoFiltro) unidadesFiltradas = unidadesFiltradas.filter(u => u.destino === destinoFiltro);
+    if (embalagemFiltro) unidadesFiltradas = unidadesFiltradas.filter(u => u.unidadeEmbalagem === embalagemFiltro);
     
     atualizarTabelaUnidades(unidadesFiltradas);
 }
@@ -1368,62 +978,33 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
     const dados = unidadesFiltradas || unidades.filter(u => u.quantidade > 0);
     const hoje = new Date();
     
-    tbody.innerHTML = '';
-    
-    if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="text-center">Nenhuma unidade ativa encontrada</td></tr>';
-        return;
-    }
-    
-    dados.forEach(u => {
-        const produto = produtos.find(p => p.sku === u.sku);
-        const validadeDate = new Date(u.validade);
-        const vencido = validadeDate < hoje;
-        
-        // Formatar quantidade com 2 casas decimais
-        const quantidadeFormatada = u.quantidade.toFixed(2).replace('.', ',');
-        
-        const tr = document.createElement('tr');
-        
-        // ORDEM CORRETA DAS COLUNAS NO SITE:
-        // 1. ID
-        // 2. Produto
-        // 3. Categoria
-        // 4. Embalagem
-        // 5. Lote
-        // 6. Validade
-        // 7. Volume
-        // 8. Quantidade
-        // 9. STATUS (deve vir de u.status)
-        // 10. DESTINO (deve vir de u.destino)
-        // 11. TIPO DE ENTRADA (deve vir de u.tipoEntrada)
-        // 12. Ações
-        
-        tr.innerHTML = `
-            <td><small>${u.id}</small></td>
-            <td>${produto ? produto.nome : u.sku}</td>
-            <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
-            <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
-            <td>${u.lote}</td>
-            <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
-            <td>${u.volume}</td>
-            <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
-            <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
-            <td>${u.destino || '-'}</td>
-            <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">${u.tipoEntrada || 'Manual'}</span></td>
-            <td>
-                <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
-                    <i class="bi bi-eye"></i>
-                </button>
-                ${u.status === 'Disponível' && u.quantidade > 0 ? `
-                    <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
-                        <i class="bi bi-arrow-right"></i>
-                    </button>
-                ` : ''}
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
+    tbody.innerHTML = dados.length === 0
+        ? '<tr><td colspan="12" class="text-center">Nenhuma unidade ativa encontrada</td></tr>'
+        : dados.map(u => {
+            const produto = produtos.find(p => p.sku === u.sku);
+            const vencido = new Date(u.validade) < hoje;
+            const quantidadeFormatada = u.quantidade.toFixed(2).replace('.', ',');
+            
+            return `
+                <tr>
+                    <td><small>${u.id}</small></td>
+                    <td>${produto ? produto.nome : u.sku}</td>
+                    <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
+                    <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
+                    <td>${u.lote}</td>
+                    <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
+                    <td>${u.volume}</td>
+                    <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
+                    <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
+                    <td>${u.destino || '-'}</td>
+                    <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">${u.tipoEntrada || 'Manual'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')"><i class="bi bi-eye"></i></button>
+                        ${u.status === 'Disponível' && u.quantidade > 0 ? `<button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')"><i class="bi bi-arrow-right"></i></button>` : ''}
+                    </td>
+                </tr>
+            `;
+        }).join('');
 }
 
 // Abrir modal de transferência
@@ -1432,8 +1013,7 @@ function abrirModalTransferencia(id) {
     if (!unidade) return;
     
     const produto = produtos.find(p => p.sku === unidade.sku);
-    
-    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidadeEmbalagem}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
+    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidadeEmbalagem}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
     
     window.open(url, '_blank', 'width=700,height=800');
 }
@@ -1450,28 +1030,22 @@ function setupQRCode() {
     
     Html5Qrcode.getCameras().then(devices => {
         if (devices && devices.length) {
-            const html5QrCode = new Html5Qrcode("qr-reader");
-            
-            const qrCodeSuccessCallback = (decodedText) => {
+            const html5QrCode = new Html5Qrcode('qr-reader');
+            html5QrCode.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 250, height: 250 } }, (decodedText) => {
                 const unidade = unidades.find(u => u.id === decodedText);
                 if (unidade && unidade.quantidade > 0) {
                     const produto = produtos.find(p => p.sku === unidade.sku);
-                    
-                    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidadeEmbalagem}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
-                    
+                    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidadeEmbalagem}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
                     window.open(url, '_blank', 'width=700,height=800');
-                    
                     document.getElementById('qr-resultado').innerHTML = '<div class="alert alert-success">Redirecionando...</div>';
                 } else {
-                    document.getElementById('qr-resultado').innerHTML = `<div class="alert alert-danger">Unidade não encontrada ou sem estoque: ${decodedText}</div>`;
+                    document.getElementById('qr-resultado').innerHTML = `<div class="alert alert-danger">Unidade não encontrada: ${decodedText}</div>`;
                 }
-            };
-            
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, qrCodeSuccessCallback);
+            });
         } else {
             qrReaderElement.innerHTML = '<div class="alert alert-warning">Nenhuma câmera encontrada.</div>';
         }
-    }).catch(err => {
+    }).catch(() => {
         qrReaderElement.innerHTML = '<div class="alert alert-warning">Erro ao acessar câmera.</div>';
     });
 }
@@ -1483,28 +1057,24 @@ function atualizarTabelaMovimentacoes(movFiltradas = null) {
     
     const dados = movFiltradas || movimentacoes;
     
-    tbody.innerHTML = '';
-    
-    if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhuma movimentação registrada</td></tr>';
-        return;
-    }
-    
-    dados.slice(-50).reverse().forEach(mov => {
-        const produto = produtos.find(p => p.sku === mov.sku);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${formatarData(mov.data)}</td>
-            <td><span class="badge ${mov.tipo === 'Entrada' ? 'bg-success' : mov.tipo === 'Saída' ? 'bg-warning' : 'bg-info'}">${mov.tipo}</span></td>
-            <td><small>${mov.idUnidade}</small></td>
-            <td>${produto ? produto.nome : mov.sku}</td>
-            <td>${mov.volume} ${mov.unidadeEmbalagem}</td>
-            <td>${mov.quantidade}</td>
-            <td>${mov.destino || '-'}</td>
-            <td>${mov.responsavel}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+    tbody.innerHTML = dados.length === 0
+        ? '<tr><td colspan="9" class="text-center">Nenhuma movimentação registrada</td></tr>'
+        : dados.slice(-50).reverse().map(mov => {
+            const produto = produtos.find(p => p.sku === mov.sku);
+            const badgeClass = mov.tipo === 'Entrada' ? 'bg-success' : mov.tipo === 'Saída' ? 'bg-warning' : 'bg-info';
+            return `
+                <tr>
+                    <td>${formatarData(mov.data)}</td>
+                    <td><span class="badge ${badgeClass}">${mov.tipo}</span></td>
+                    <td><small>${mov.idUnidade}</small></td>
+                    <td>${produto ? produto.nome : mov.sku}</td>
+                    <td>${mov.volume} ${mov.unidadeEmbalagem}</td>
+                    <td>${mov.quantidade}</td>
+                    <td>${mov.destino || '-'}</td>
+                    <td>${mov.responsavel}</td>
+                </tr>
+            `;
+        }).join('');
 }
 
 // Filtrar movimentações
@@ -1529,27 +1099,22 @@ function atualizarUltimasMovimentacoes() {
     const container = document.getElementById('ultimas-movimentacoes');
     if (!container) return;
     
-    container.innerHTML = '';
-    
-    if (movimentacoes.length === 0) {
-        container.innerHTML = '<p class="text-muted">Nenhuma movimentação recente</p>';
-        return;
-    }
-    
-    movimentacoes.slice(-10).reverse().forEach(mov => {
-        const produto = produtos.find(p => p.sku === mov.sku);
-        const div = document.createElement('div');
-        div.className = `alert ${mov.tipo === 'Entrada' ? 'alert-success' : mov.tipo === 'Saída' ? 'alert-warning' : 'alert-info'} mb-2`;
-        div.innerHTML = `
-            <div class="d-flex justify-content-between">
-                <span><strong>${formatarData(mov.data)}</strong> - ${mov.tipo}</span>
-                <span>${mov.volume} ${mov.unidadeEmbalagem}</span>
-            </div>
-            <small>${produto ? produto.nome : mov.sku} - ${mov.idUnidade}</small>
-            ${mov.destino ? `<br><small>Destino: ${mov.destino}</small>` : ''}
-        `;
-        container.appendChild(div);
-    });
+    container.innerHTML = movimentacoes.length === 0
+        ? '<p class="text-muted">Nenhuma movimentação recente</p>'
+        : movimentacoes.slice(-10).reverse().map(mov => {
+            const produto = produtos.find(p => p.sku === mov.sku);
+            const alertClass = mov.tipo === 'Entrada' ? 'alert-success' : mov.tipo === 'Saída' ? 'alert-warning' : 'alert-info';
+            return `
+                <div class="alert ${alertClass} mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span><strong>${formatarData(mov.data)}</strong> - ${mov.tipo}</span>
+                        <span>${mov.volume} ${mov.unidadeEmbalagem}</span>
+                    </div>
+                    <small>${produto ? produto.nome : mov.sku} - ${mov.idUnidade}</small>
+                    ${mov.destino ? `<br><small>Destino: ${mov.destino}</small>` : ''}
+                </div>
+            `;
+        }).join('');
 }
 
 // Atualizar gráficos do painel
@@ -1558,10 +1123,7 @@ function atualizarGraficosPainel() {
     if (ctxCategorias) {
         if (graficoCategorias) graficoCategorias.destroy();
         
-        const categoriasData = categorias.map(cat => {
-            const produtosCat = produtos.filter(p => p.categoria === cat.nome);
-            return produtosCat.length;
-        });
+        const categoriasData = categorias.map(cat => produtos.filter(p => p.categoria === cat.nome).length);
         
         graficoCategorias = new Chart(ctxCategorias, {
             type: 'doughnut',
@@ -1582,18 +1144,13 @@ function gerarRelatorios() {
     
     const ctxCategorias = document.getElementById('grafico-relatorio-categorias');
     if (ctxCategorias) {
-        const categoriasData = categorias.map(cat => {
-            const produtosCat = produtos.filter(p => p.categoria === cat.nome);
-            return produtosCat.length;
-        });
-        
         new Chart(ctxCategorias, {
             type: 'bar',
             data: {
                 labels: categorias.map(c => c.nome),
                 datasets: [{
                     label: 'Produtos por Categoria',
-                    data: categoriasData,
+                    data: categorias.map(cat => produtos.filter(p => p.categoria === cat.nome).length),
                     backgroundColor: '#3b82f6'
                 }]
             }
@@ -1602,16 +1159,16 @@ function gerarRelatorios() {
     
     const ctxStatus = document.getElementById('grafico-status');
     if (ctxStatus) {
-        const disponiveis = unidadesAtivas.filter(u => u.status === 'Disponível').length;
-        const bloqueados = unidadesAtivas.filter(u => u.status === 'Bloqueado').length;
-        const transferidos = unidadesAtivas.filter(u => u.destino).length;
-        
         new Chart(ctxStatus, {
             type: 'pie',
             data: {
                 labels: ['Disponíveis', 'Bloqueados', 'Transferidos'],
                 datasets: [{
-                    data: [disponiveis, bloqueados, transferidos],
+                    data: [
+                        unidadesAtivas.filter(u => u.status === 'Disponível').length,
+                        unidadesAtivas.filter(u => u.status === 'Bloqueado').length,
+                        unidadesAtivas.filter(u => u.destino).length
+                    ],
                     backgroundColor: ['#10b981', '#ef4444', '#f59e0b']
                 }]
             }
@@ -1620,17 +1177,13 @@ function gerarRelatorios() {
     
     const ctxDestinos = document.getElementById('grafico-destinos');
     if (ctxDestinos) {
-        const destinosData = destinos.map(d => {
-            return unidadesAtivas.filter(u => u.destino === d).length;
-        });
-        
         new Chart(ctxDestinos, {
             type: 'bar',
             data: {
                 labels: destinos,
                 datasets: [{
                     label: 'Unidades por Destino',
-                    data: destinosData,
+                    data: destinos.map(d => unidadesAtivas.filter(u => u.destino === d).length),
                     backgroundColor: '#f59e0b'
                 }]
             }
@@ -1640,29 +1193,16 @@ function gerarRelatorios() {
     const containerEstoque = document.getElementById('lista-estoque-baixo');
     if (containerEstoque) {
         const estoqueBaixo = produtos.filter(p => {
-            const total = unidadesAtivas
-                .filter(u => u.sku === p.sku)
-                .reduce((sum, u) => sum + u.quantidade, 0);
+            const total = unidadesAtivas.filter(u => u.sku === p.sku).reduce((sum, u) => sum + u.quantidade, 0);
             return total < 10;
         });
         
-        if (estoqueBaixo.length === 0) {
-            containerEstoque.innerHTML = '<p class="text-success">✅ Todos os produtos têm estoque adequado</p>';
-        } else {
-            containerEstoque.innerHTML = '<ul class="list-group">';
-            estoqueBaixo.forEach(p => {
-                const total = unidadesAtivas
-                    .filter(u => u.sku === p.sku)
-                    .reduce((sum, u) => sum + u.quantidade, 0);
-                containerEstoque.innerHTML += `
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        ${p.nome} (${p.sku})
-                        <span class="badge bg-danger rounded-pill">${total} UN</span>
-                    </li>
-                `;
-            });
-            containerEstoque.innerHTML += '</ul>';
-        }
+        containerEstoque.innerHTML = estoqueBaixo.length === 0
+            ? '<p class="text-success">✅ Todos os produtos têm estoque adequado</p>'
+            : '<ul class="list-group">' + estoqueBaixo.map(p => {
+                const total = unidadesAtivas.filter(u => u.sku === p.sku).reduce((sum, u) => sum + u.quantidade, 0);
+                return `<li class="list-group-item d-flex justify-content-between align-items-center">${p.nome} (${p.sku}) <span class="badge bg-danger rounded-pill">${total} UN</span></li>`;
+            }).join('') + '</ul>';
     }
     
     const containerValidades = document.getElementById('lista-validades');
@@ -1670,82 +1210,44 @@ function gerarRelatorios() {
         const hoje = new Date();
         const validades = unidadesAtivas
             .filter(u => u.validade)
-            .map(u => {
-                const dias = Math.ceil((new Date(u.validade) - hoje) / (1000 * 60 * 60 * 24));
-                return { ...u, dias };
-            })
+            .map(u => ({ ...u, dias: Math.ceil((new Date(u.validade) - hoje) / (1000 * 60 * 60 * 24)) }))
             .filter(u => u.dias <= 30)
             .sort((a, b) => a.dias - b.dias);
         
-        if (validades.length === 0) {
-            containerValidades.innerHTML = '<p class="text-success">✅ Nenhum produto próximo ao vencimento</p>';
-        } else {
-            containerValidades.innerHTML = '<ul class="list-group">';
-            validades.slice(0, 10).forEach(u => {
+        containerValidades.innerHTML = validades.length === 0
+            ? '<p class="text-success">✅ Nenhum produto próximo ao vencimento</p>'
+            : '<ul class="list-group">' + validades.slice(0, 10).map(u => {
                 const produto = produtos.find(p => p.sku === u.sku);
-                containerValidades.innerHTML += `
-                    <li class="list-group-item d-flex justify-content-between align-items-center ${u.dias <= 7 ? 'list-group-item-danger' : u.dias <= 15 ? 'list-group-item-warning' : ''}">
-                        ${produto ? produto.nome : u.sku} - ${u.unidadeEmbalagem} ${u.volume}
-                        <span class="badge ${u.dias <= 7 ? 'bg-danger' : 'bg-warning'} rounded-pill">${u.dias} dias</span>
-                    </li>
-                `;
-            });
-            containerValidades.innerHTML += '</ul>';
-        }
+                const badgeClass = u.dias <= 7 ? 'bg-danger' : 'bg-warning';
+                const itemClass = u.dias <= 7 ? 'list-group-item-danger' : u.dias <= 15 ? 'list-group-item-warning' : '';
+                return `<li class="list-group-item d-flex justify-content-between align-items-center ${itemClass}">${produto ? produto.nome : u.sku} - ${u.unidadeEmbalagem} ${u.volume} <span class="badge ${badgeClass} rounded-pill">${u.dias} dias</span></li>`;
+            }).join('') + '</ul>';
     }
 }
 
 // Funções auxiliares
 function getCategoriaClass(categoria) {
-    const classes = {
-        'Insumos': 'border-primary',
-        'Embalagem Papelão': 'border-warning',
-        'Embalagem Filme': 'border-info',
-        'Embalagem Sacaria': 'border-success'
-    };
+    const classes = { 'Insumos': 'border-primary', 'Embalagem Papelão': 'border-warning', 'Embalagem Filme': 'border-info', 'Embalagem Sacaria': 'border-success' };
     return classes[categoria] || 'border-secondary';
 }
 
 function getCategoriaBadgeClass(categoria) {
-    const classes = {
-        'Insumos': 'bg-primary',
-        'Embalagem Papelão': 'bg-warning text-dark',
-        'Embalagem Filme': 'bg-info',
-        'Embalagem Sacaria': 'bg-success'
-    };
+    const classes = { 'Insumos': 'bg-primary', 'Embalagem Papelão': 'bg-warning text-dark', 'Embalagem Filme': 'bg-info', 'Embalagem Sacaria': 'bg-success' };
     return classes[categoria] || 'bg-secondary';
 }
 
-// Formatar data sem problemas de fuso horário
+// Formatar data
 function formatarData(data) {
     if (!data) return '';
-    
-    // Se for string no formato YYYY-MM-DD (padrão do Google Sheets)
     if (typeof data === 'string' && data.includes('-')) {
-        const partes = data.split('-');
-        if (partes.length === 3) {
-            // Criar data considerando o fuso local
-            const ano = parseInt(partes[0]);
-            const mes = parseInt(partes[1]);
-            const dia = parseInt(partes[2]);
-            
-            // Formatar manualmente para evitar problemas de fuso
-            return `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano}`;
-        }
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
     }
-    
-    // Fallback para outros formatos
     try {
         const d = new Date(data);
         if (isNaN(d.getTime())) return data;
-        
-        // Extrair partes manualmente para evitar fuso
-        const dia = d.getDate().toString().padStart(2, '0');
-        const mes = (d.getMonth() + 1).toString().padStart(2, '0');
-        const ano = d.getFullYear();
-        
-        return `${dia}/${mes}/${ano}`;
-    } catch (e) {
+        return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+    } catch {
         return data;
     }
 }
@@ -1754,52 +1256,37 @@ function formatarData(data) {
 // FUNÇÕES DE BUSCA DE PRODUTOS NO MODAL
 // ============================================
 
-// Preencher a lista de produtos
+// Preencher lista de produtos
 function preencherListaProdutos() {
     const container = document.getElementById('lista-produtos');
     if (!container) return;
     
-    container.innerHTML = '';
-    
-    produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
-        const item = document.createElement('a');
-        item.href = '#';
-        item.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary';
-        item.setAttribute('data-sku', p.sku);
-        item.innerHTML = `
+    container.innerHTML = produtos.sort((a, b) => a.nome.localeCompare(b.nome)).map(p => `
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white border-secondary" data-sku="${p.sku}" onclick="selecionarProduto('${p.sku}', '${p.nome}', '${p.tipoEmbalagem}', ${p.qtdPorEmbalagem}, '${p.unidadeBase}'); return false;">
             <div class="d-flex justify-content-between align-items-center">
                 <span>${p.nome}</span>
                 <small class="text-muted">${p.sku} - ${p.tipoEmbalagem}</small>
             </div>
             <small class="text-info">${p.categoria}</small>
-        `;
-        
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            selecionarProduto(p.sku, p.nome, p.tipoEmbalagem, p.qtdPorEmbalagem, p.unidadeBase);
-        });
-        
-        container.appendChild(item);
-    });
+        </a>
+    `).join('');
 }
 
-// Selecionar um produto
+// Selecionar produto
 function selecionarProduto(sku, nome, tipoEmbalagem, qtdPorEmbalagem, unidadeBase) {
     document.getElementById('unidade-sku').value = sku;
     document.getElementById('busca-produto').value = nome;
     document.getElementById('lista-produtos-container').style.display = 'none';
     
-    // Atualizar informações da embalagem
     document.getElementById('volume-label').textContent = `Volume (${tipoEmbalagem})`;
     document.getElementById('volume-descricao').textContent = `Número de ${tipoEmbalagem}`;
     document.getElementById('quantidade-unidade').textContent = `(${unidadeBase})`;
     document.getElementById('quantidade-descricao').textContent = `Total em ${unidadeBase}`;
     
-    // Recalcular quantidade
     calcularQuantidadeAutomatica();
 }
 
-// Filtrar produtos conforme digitação
+// Filtrar produtos na lista
 function filtrarProdutosLista() {
     const termo = document.getElementById('busca-produto').value.toLowerCase();
     const container = document.getElementById('lista-produtos');
@@ -1819,77 +1306,29 @@ function filtrarProdutosLista() {
     document.getElementById('lista-produtos-container').style.display = hasVisible ? 'block' : 'none';
 }
 
-// Abrir modal unidade (modificada)
-function abrirModalUnidade(sku) {
-    preencherListaProdutos();
-    document.getElementById('form-unidade').reset();
-    document.getElementById('unidade-id').value = '';
-    document.getElementById('unidade-sku').value = sku || '';
-    document.getElementById('unidade-volume').value = '1';
-    document.getElementById('unidade-status').value = 'Disponível';
-    document.getElementById('campo-quantidade-real').style.display = 'none';
-    document.getElementById('lista-produtos-container').style.display = 'none';
-    
-    if (sku) {
-        const produto = produtos.find(p => p.sku === sku);
-        if (produto) {
-            document.getElementById('busca-produto').value = produto.nome;
-            selecionarProduto(produto.sku, produto.nome, produto.tipoEmbalagem, produto.qtdPorEmbalagem, produto.unidadeBase);
-        }
-    } else {
-        document.getElementById('busca-produto').value = '';
-        document.getElementById('quantidade-unidade').textContent = '(UN)';
-        document.getElementById('quantidade-descricao').textContent = 'Total em UN';
-    }
-    
-    const modal = new bootstrap.Modal(document.getElementById('modalUnidade'));
-    modal.show();
-}
-
-// Event listener para o campo de busca
-document.getElementById('busca-produto')?.addEventListener('keyup', filtrarProdutosLista);
-document.getElementById('busca-produto')?.addEventListener('focus', () => {
-    if (document.getElementById('busca-produto').value) {
-        filtrarProdutosLista();
-    }
-});
-
 // ============================================
 // FUNÇÕES DE BUSCA DE PRODUTOS NO RECEBIMENTO
 // ============================================
 
-// Preencher a lista de produtos no recebimento
+// Preencher lista de produtos no recebimento
 function preencherListaProdutosRecebimento() {
     const container = document.getElementById('lista-recebimento-produtos');
     if (!container) return;
     
-    container.innerHTML = '';
-    
-    produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
-        const item = document.createElement('a');
-        item.href = '#';
-        item.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary';
-        item.setAttribute('data-sku', p.sku);
-        item.setAttribute('data-tipo', p.tipoEmbalagem);
-        item.setAttribute('data-qtd', p.qtdPorEmbalagem);
-        item.innerHTML = `
+    container.innerHTML = produtos.sort((a, b) => a.nome.localeCompare(b.nome)).map(p => `
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white border-secondary" 
+           data-sku="${p.sku}" data-tipo="${p.tipoEmbalagem}" data-qtd="${p.qtdPorEmbalagem}"
+           onclick="selecionarProdutoRecebimento('${p.sku}', '${p.nome}', '${p.tipoEmbalagem}', ${p.qtdPorEmbalagem}); return false;">
             <div class="d-flex justify-content-between align-items-center">
                 <span>${p.nome}</span>
                 <small class="text-muted">${p.sku}</small>
             </div>
             <small class="text-info">${p.categoria} - ${p.tipoEmbalagem}</small>
-        `;
-        
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            selecionarProdutoRecebimento(p.sku, p.nome, p.tipoEmbalagem, p.qtdPorEmbalagem);
-        });
-        
-        container.appendChild(item);
-    });
+        </a>
+    `).join('');
 }
 
-// Selecionar um produto no recebimento
+// Selecionar produto no recebimento
 function selecionarProdutoRecebimento(sku, nome, tipoEmbalagem, qtdPorEmbalagem) {
     document.getElementById('recebimento-sku').value = sku;
     document.getElementById('busca-recebimento-produto').value = nome;
@@ -1924,29 +1363,12 @@ function filtrarProdutosRecebimento() {
     document.getElementById('lista-recebimento-container').style.display = hasVisible ? 'block' : 'none';
 }
 
-// Modificar a função preencherSelectProdutosRecebimento
-function preencherSelectProdutosRecebimento() {
-    preencherListaProdutosRecebimento();
-}
-
-// Modificar a função que abre o modal de recebimento (se houver)
-// Adicione esta linha no início da função que abre o modal:
-// preencherListaProdutosRecebimento();
-
-// Event listeners para o campo de busca
-document.getElementById('busca-recebimento-produto')?.addEventListener('keyup', filtrarProdutosRecebimento);
-document.getElementById('busca-rebimento-produto')?.addEventListener('focus', () => {
-    if (document.getElementById('busca-recebimento-produto').value) {
-        filtrarProdutosRecebimento();
-    }
-});
-
 // ============================================
 // FUNÇÕES DE RECEBIMENTO COM MÚLTIPLOS PRODUTOS
 // ============================================
 
 let contadorItens = 0;
-let produtosPorItem = {}; // Armazenar produtos por índice
+let produtosPorItem = {};
 
 // Adicionar novo item ao recebimento
 function adicionarItemRecebimento() {
@@ -1957,85 +1379,79 @@ function adicionarItemRecebimento() {
     novoItem.id = `item-recebimento-${contadorItens}`;
     
     novoItem.innerHTML = `
-        <div class="d-flex justify-content-between mb-2">
-            <h6 class="text-info">Produto ${contadorItens + 1}</h6>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="text-info mb-0">Produto ${contadorItens + 1}</h5>
             <button type="button" class="btn btn-sm btn-danger" onclick="removerItemRecebimento(${contadorItens})">
-                <i class="bi bi-trash"></i>
+                <i class="bi bi-trash"></i> Remover
             </button>
         </div>
-        <div class="row">
-            <div class="col-md-3 mb-2">
+        
+        <div class="row mb-3">
+            <div class="col-md-8">
                 <label class="form-label">Buscar Produto</label>
                 <input type="text" class="form-control busca-produto-recebimento" 
                        placeholder="Digite para buscar..." data-index="${contadorItens}">
                 <input type="hidden" class="item-sku" id="item-sku-${contadorItens}" required>
             </div>
-            <div class="col-md-2 mb-2">
+            <div class="col-md-4">
+                <label class="form-label">Unidade</label>
+                <input type="text" class="form-control item-unidade-medida" id="item-unidade-medida-${contadorItens}" readonly>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-3">
                 <label class="form-label">Lote</label>
                 <input type="text" class="form-control item-lote" id="item-lote-${contadorItens}" required>
             </div>
-            <div class="col-md-2 mb-2">
+            <div class="col-md-3">
                 <label class="form-label">Validade</label>
                 <input type="date" class="form-control item-validade" id="item-validade-${contadorItens}" required>
             </div>
-            <div class="col-md-2 mb-2">
-                <label class="form-label">Volume</label>
+            <div class="col-md-3">
+                <label class="form-label">Volume (embalagens)</label>
                 <input type="number" class="form-control item-volume" id="item-volume-${contadorItens}" min="1" value="1" step="any" required>
-                <small class="text-muted">Qtd de embalagens</small>
             </div>
-            <div class="col-md-3 mb-2">
-                <label class="form-label">Quantidade</label>
+            <div class="col-md-3">
+                <label class="form-label">Quantidade Total</label>
                 <input type="number" class="form-control item-quantidade" id="item-quantidade-${contadorItens}" step="any" required>
                 <small class="text-muted item-unidade" id="item-unidade-${contadorItens}">UN</small>
             </div>
         </div>
+        
         <div class="row">
-            <div class="col-md-3 mb-2">
+            <div class="col-md-3">
+                <div class="form-check mt-2">
+                    <input type="checkbox" class="form-check-input item-fora-padrao" id="item-fora-padrao-${contadorItens}" data-index="${contadorItens}">
+                    <label class="form-check-label" for="item-fora-padrao-${contadorItens}">Fora do padrão</label>
+                </div>
+            </div>
+            <div class="col-md-3 campo-qtd-real" id="campo-qtd-real-${contadorItens}" style="display: none;">
+                <label class="form-label">Qtd Real por Embalagem</label>
+                <input type="number" class="form-control item-qtd-real" id="item-qtd-real-${contadorItens}" step="any" min="1">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Localização</label>
+                <input type="text" class="form-control item-localizacao" id="item-localizacao-${contadorItens}">
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-12">
                 <div class="lista-produtos-recebimento" id="lista-produtos-${contadorItens}" 
                      style="max-height: 150px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
                 </div>
-            </div>
-            <div class="col-md-2 mb-2">
-                <label class="form-label">Unidade</label>
-                <input type="text" class="form-control item-unidade-medida" id="item-unidade-medida-${contadorItens}" readonly>
-            </div>
-            <div class="col-md-2 mb-2">
-                <div class="form-check mt-4">
-                    <input type="checkbox" class="form-check-input item-fora-padrao" id="item-fora-padrao-${contadorItens}" data-index="${contadorItens}">
-                    <label class="form-check-label" for="item-fora-padrao-${contadorItens}">
-                        Fora do padrão
-                    </label>
-                </div>
-            </div>
-            <div class="col-md-2 mb-2 campo-qtd-real" id="campo-qtd-real-${contadorItens}" style="display: none;">
-                <label class="form-label">Qtd Real</label>
-                <input type="number" class="form-control item-qtd-real" id="item-qtd-real-${contadorItens}" step="any" min="1">
-            </div>
-            <div class="col-md-3 mb-2">
-                <label class="form-label">Localização</label>
-                <input type="text" class="form-control item-localizacao" id="item-localizacao-${contadorItens}">
             </div>
         </div>
     `;
     
     container.appendChild(novoItem);
-    
-    // Adicionar event listeners para o novo item
     configurarBuscaProduto(contadorItens);
     configurarCalculoQuantidade(contadorItens);
     configurarForaPadrao(contadorItens);
 }
 
-// Remover item do recebimento
-function removerItemRecebimento(index) {
-    const item = document.getElementById(`item-recebimento-${index}`);
-    if (item) {
-        item.remove();
-        delete produtosPorItem[index];
-    }
-}
-
-// Configurar busca de produto para um item específico
+// Configurar busca de produto
 function configurarBuscaProduto(index) {
     const inputBusca = document.querySelector(`.busca-produto-recebimento[data-index="${index}"]`);
     const listaContainer = document.getElementById(`lista-produtos-${index}`);
@@ -2046,34 +1462,20 @@ function configurarBuscaProduto(index) {
         const termo = this.value.toLowerCase();
         const lista = document.getElementById(`lista-produtos-${index}`);
         
-        // Preencher lista se estiver vazia
         if (lista.children.length === 0) {
-            produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
-                const item = document.createElement('a');
-                item.href = '#';
-                item.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary';
-                item.setAttribute('data-sku', p.sku);
-                item.setAttribute('data-tipo', p.tipoEmbalagem);
-                item.setAttribute('data-qtd', p.qtdPorEmbalagem);
-                item.setAttribute('data-unidade', p.unidadeBase);
-                item.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
+            lista.innerHTML = produtos.sort((a, b) => a.nome.localeCompare(b.nome)).map(p => `
+                <a href="#" class="list-group-item list-group-item-action bg-dark text-white border-secondary" 
+                   data-sku="${p.sku}" data-tipo="${p.tipoEmbalagem}" data-qtd="${p.qtdPorEmbalagem}" data-unidade="${p.unidadeBase}"
+                   onclick="selecionarProdutoItem(${index}, '${p.sku}', '${p.nome}', '${p.tipoEmbalagem}', ${p.qtdPorEmbalagem}, '${p.unidadeBase}'); return false;">
+                    <div class="d-flex justify-content-between">
                         <span>${p.nome}</span>
                         <small class="text-muted">${p.sku}</small>
                     </div>
                     <small class="text-info">${p.categoria} - ${p.tipoEmbalagem}</small>
-                `;
-                
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    selecionarProdutoItem(index, p.sku, p.nome, p.tipoEmbalagem, p.qtdPorEmbalagem, p.unidadeBase);
-                });
-                
-                lista.appendChild(item);
-            });
+                </a>
+            `).join('');
         }
         
-        // Filtrar
         const items = lista.getElementsByClassName('list-group-item');
         let hasVisible = false;
         
@@ -2094,7 +1496,6 @@ function configurarBuscaProduto(index) {
         if (this.value) {
             const lista = document.getElementById(`lista-produtos-${index}`);
             if (lista.children.length === 0) {
-                // Forçar preenchimento
                 const event = new Event('keyup');
                 inputBusca.dispatchEvent(event);
             } else {
@@ -2104,15 +1505,13 @@ function configurarBuscaProduto(index) {
     });
 }
 
-// Selecionar produto em um item específico
+// Selecionar produto no item
 function selecionarProdutoItem(index, sku, nome, tipoEmbalagem, qtdPorEmbalagem, unidadeBase) {
     document.getElementById(`item-sku-${index}`).value = sku;
     document.querySelector(`.busca-produto-recebimento[data-index="${index}"]`).value = nome;
     document.getElementById(`lista-produtos-${index}`).style.display = 'none';
-    
     document.getElementById(`item-unidade-medida-${index}`).value = tipoEmbalagem;
     
-    // Armazenar dados do produto
     produtosPorItem[index] = {
         sku: sku,
         nome: nome,
@@ -2123,40 +1522,102 @@ function selecionarProdutoItem(index, sku, nome, tipoEmbalagem, qtdPorEmbalagem,
         qtdRealPorEmbalagem: null
     };
     
-    // Atualizar unidade
     document.getElementById(`item-unidade-${index}`).textContent = unidadeBase;
-    
-    // Calcular quantidade
-    calcularQuantidadeItemForaPadrao(index);
+    calcularQuantidadeItem(index);
 }
 
 // Configurar cálculo de quantidade
 function configurarCalculoQuantidade(index) {
     const volumeInput = document.getElementById(`item-volume-${index}`);
-    
     if (volumeInput) {
-        volumeInput.addEventListener('input', function() {
-            calcularQuantidadeItemForaPadrao(index);
-        });
+        volumeInput.addEventListener('input', () => calcularQuantidadeItem(index));
     }
 }
 
-// Calcular quantidade para um item
+// Calcular quantidade do item
 function calcularQuantidadeItem(index) {
     const produto = produtosPorItem[index];
     if (!produto) return;
     
     const volume = parseFloat(document.getElementById(`item-volume-${index}`)?.value) || 1;
-    const quantidade = volume * (produto.qtdPorEmbalagem || 1);
-    
+    const checkbox = document.getElementById(`item-fora-padrao-${index}`);
+    const inputQtdReal = document.getElementById(`item-qtd-real-${index}`);
     const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
-    if (quantidadeInput) {
-        quantidadeInput.value = quantidade.toFixed(2);
+    
+    let quantidade;
+    if (checkbox?.checked && inputQtdReal?.value) {
+        const qtdReal = parseFloat(inputQtdReal.value) || 0;
+        quantidade = volume * qtdReal;
+        produtosPorItem[index].qtdRealPorEmbalagem = qtdReal;
+        produtosPorItem[index].foraPadrao = true;
+    } else {
+        quantidade = volume * (produto.qtdPorEmbalagem || 1);
+        produtosPorItem[index].qtdRealPorEmbalagem = null;
+        produtosPorItem[index].foraPadrao = false;
+    }
+    
+    if (quantidadeInput) quantidadeInput.value = quantidade.toFixed(2);
+}
+
+// Configurar checkbox fora do padrão
+function configurarForaPadrao(index) {
+    const checkbox = document.getElementById(`item-fora-padrao-${index}`);
+    const campoQtdReal = document.getElementById(`campo-qtd-real-${index}`);
+    const inputQtdReal = document.getElementById(`item-qtd-real-${index}`);
+    const volumeInput = document.getElementById(`item-volume-${index}`);
+    const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
+    
+    if (!checkbox) return;
+    
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            campoQtdReal.style.display = 'block';
+            quantidadeInput.readOnly = false;
+            quantidadeInput.value = '';
+        } else {
+            campoQtdReal.style.display = 'none';
+            inputQtdReal.value = '';
+            quantidadeInput.readOnly = true;
+            calcularQuantidadeItem(index);
+        }
+    });
+    
+    if (inputQtdReal) {
+        inputQtdReal.addEventListener('input', function() {
+            if (checkbox.checked) {
+                const volume = parseFloat(volumeInput.value) || 1;
+                const qtdReal = parseFloat(this.value) || 0;
+                quantidadeInput.value = (volume * qtdReal).toFixed(2);
+                
+                produtosPorItem[index].foraPadrao = true;
+                produtosPorItem[index].qtdRealPorEmbalagem = qtdReal;
+            }
+        });
+    }
+    
+    if (volumeInput) {
+        volumeInput.addEventListener('input', function() {
+            if (checkbox.checked && inputQtdReal.value) {
+                const volume = parseFloat(this.value) || 1;
+                const qtdReal = parseFloat(inputQtdReal.value) || 0;
+                quantidadeInput.value = (volume * qtdReal).toFixed(2);
+            } else {
+                calcularQuantidadeItem(index);
+            }
+        });
     }
 }
 
-// Modificar a função salvarRecebimento para processar múltiplos itens
-// Salvar recebimento
+// Remover item do recebimento
+function removerItemRecebimento(index) {
+    const item = document.getElementById(`item-recebimento-${index}`);
+    if (item) {
+        item.remove();
+        delete produtosPorItem[index];
+    }
+}
+
+// Salvar recebimento (VERSÃO COMPLETA)
 async function salvarRecebimento() {
     const dataRecebimento = document.getElementById('recebimento-data').value;
     const numeroNF = document.getElementById('recebimento-nf').value;
@@ -2168,7 +1629,6 @@ async function salvarRecebimento() {
         return;
     }
     
-    // Coletar todos os itens
     const itens = [];
     for (let i = 0; i <= contadorItens; i++) {
         const item = document.getElementById(`item-recebimento-${i}`);
@@ -2184,8 +1644,8 @@ async function salvarRecebimento() {
         const checkboxForaPadrao = document.getElementById(`item-fora-padrao-${i}`);
         const inputQtdReal = document.getElementById(`item-qtd-real-${i}`);
         
-        const foraPadrao = checkboxForaPadrao ? checkboxForaPadrao.checked : false;
-        const qtdRealPorEmbalagem = (foraPadrao && inputQtdReal) ? parseFloat(inputQtdReal.value) || null : null;
+        const foraPadrao = checkboxForaPadrao?.checked || false;
+        const qtdRealPorEmbalagem = foraPadrao && inputQtdReal ? parseFloat(inputQtdReal.value) || null : null;
         
         if (!sku || !lote || !validade || !quantidade) {
             alert(`Preencha todos os campos do item ${i + 1}`);
@@ -2215,13 +1675,10 @@ async function salvarRecebimento() {
     }
     
     try {
-        let sucessos = 0;
-        let erros = 0;
+        let sucessos = 0, erros = 0;
         
-        // Salvar cada item como um recebimento separado
         for (const item of itens) {
             try {
-                // 1. SALVAR RECEBIMENTO
                 const recebimento = {
                     tipo: 'recebimento',
                     dataRecebimento: dataRecebimento,
@@ -2240,14 +1697,8 @@ async function salvarRecebimento() {
                     observacoes: observacoes
                 };
                 
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(recebimento)
-                });
+                await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(recebimento) });
                 
-                // 2. CRIAR UNIDADE COM TIPO DE ENTRADA = RECEBIMENTO
                 const idUnidade = gerarIdUnico();
                 const unidade = {
                     tipo: 'unidade',
@@ -2266,14 +1717,7 @@ async function salvarRecebimento() {
                     tipoEntrada: 'Recebimento'
                 };
                 
-                console.log('📤 Enviando unidade:', unidade);
-                
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(unidade)
-                });
+                await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(unidade) });
                 
                 sucessos++;
             } catch (itemError) {
@@ -2282,184 +1726,50 @@ async function salvarRecebimento() {
             }
         }
         
-        // Limpar formulário
         document.getElementById('form-recebimento').reset();
-        
-        // Remover itens extras (manter apenas o primeiro)
         const container = document.getElementById('itens-recebimento-container');
-        while (container.children.length > 1) {
-            container.lastChild.remove();
-        }
-        
-        // Resetar contador
+        while (container.children.length > 1) container.lastChild.remove();
         contadorItens = 0;
         
         bootstrap.Modal.getInstance(document.getElementById('modalRecebimento')).hide();
-        
-        // Recarregar dados
         await carregarDados();
         
-        alert(`${sucessos} produto(s) recebido(s) com sucesso! ${erros > 0 ? erros + ' erro(s).' : ''}`);
-        
+        alert(`${sucessos} produto(s) recebido(s) com sucesso!${erros > 0 ? ' ' + erros + ' erro(s).' : ''}`);
     } catch (error) {
         console.error('Erro geral:', error);
-        alert('Erro ao registrar recebimento. Verifique o console (F12).');
+        alert('Erro ao registrar recebimento.');
     }
 }
 
 // ============================================
-// NOVAS FUNÇÕES PARA FILTROS
+// FUNÇÕES DE FILTROS
 // ============================================
 
-// Configurar event listeners para os filtros
 function setupFiltrosUnidades() {
     const buscaInput = document.getElementById('busca-unidades');
     const statusFilter = document.getElementById('filtro-status-unidades');
     const destinoFilter = document.getElementById('filtro-destino-unidades');
     const embalagemFilter = document.getElementById('filtro-embalagem-unidades');
     
-    if (buscaInput) {
-        buscaInput.addEventListener('keyup', function() {
-            filtrarUnidades();
-        });
-    }
-    
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function() {
-            filtrarUnidades();
-        });
-    }
-    
-    if (destinoFilter) {
-        destinoFilter.addEventListener('change', function() {
-            filtrarUnidades();
-        });
-    }
-    
-    if (embalagemFilter) {
-        embalagemFilter.addEventListener('change', function() {
-            filtrarUnidades();
-        });
-    }
+    if (buscaInput) buscaInput.addEventListener('keyup', filtrarUnidades);
+    if (statusFilter) statusFilter.addEventListener('change', filtrarUnidades);
+    if (destinoFilter) destinoFilter.addEventListener('change', filtrarUnidades);
+    if (embalagemFilter) embalagemFilter.addEventListener('change', filtrarUnidades);
 }
 
-// ============================================
-// FUNÇÕES PARA FORA DO PADRÃO NO RECEBIMENTO
-// ============================================
-
-// Configurar checkbox "Fora do padrão"
-function configurarForaPadrao(index) {
-    const checkbox = document.getElementById(`item-fora-padrao-${index}`);
-    const campoQtdReal = document.getElementById(`campo-qtd-real-${index}`);
-    const inputQtdReal = document.getElementById(`item-qtd-real-${index}`);
-    const volumeInput = document.getElementById(`item-volume-${index}`);
-    const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
-    
-    if (!checkbox) return;
-    
-    checkbox.addEventListener('change', function() {
-        if (this.checked) {
-            campoQtdReal.style.display = 'block';
-            // Quando marcar, libera para digitar quantidade manualmente
-            quantidadeInput.readOnly = false;
-            quantidadeInput.value = '';
-        } else {
-            campoQtdReal.style.display = 'none';
-            inputQtdReal.value = '';
-            // Volta ao cálculo automático
-            quantidadeInput.readOnly = true;
-            calcularQuantidadeItemForaPadrao(index);
-        }
-    });
-    
-    // Quando digitar a quantidade real, recalcular total
-    if (inputQtdReal) {
-        inputQtdReal.addEventListener('input', function() {
-            const volume = parseFloat(volumeInput.value) || 1;
-            const qtdReal = parseFloat(this.value) || 0;
-            const quantidadeTotal = volume * qtdReal;
-            quantidadeInput.value = quantidadeTotal.toFixed(2);
-            
-            // Guardar informação que está fora do padrão
-            if (!produtosPorItem[index]) produtosPorItem[index] = {};
-            produtosPorItem[index].foraPadrao = true;
-            produtosPorItem[index].qtdRealPorEmbalagem = qtdReal;
-        });
-    }
-    
-    // Quando mudar o volume, recalcular se estiver fora do padrão
-    if (volumeInput) {
-        volumeInput.addEventListener('input', function() {
-            if (checkbox.checked && inputQtdReal.value) {
-                const volume = parseFloat(this.value) || 1;
-                const qtdReal = parseFloat(inputQtdReal.value) || 0;
-                const quantidadeTotal = volume * qtdReal;
-                quantidadeInput.value = quantidadeTotal.toFixed(2);
-            } else {
-                calcularQuantidadeItemForaPadrao(index);
-            }
-        });
-    }
-}
-
-// Calcular quantidade para um item (considerando fora do padrão)
-function calcularQuantidadeItemForaPadrao(index) {
-    const produto = produtosPorItem[index];
-    if (!produto) return;
-    
-    const volume = parseFloat(document.getElementById(`item-volume-${index}`)?.value) || 1;
-    const checkbox = document.getElementById(`item-fora-padrao-${index}`);
-    const inputQtdReal = document.getElementById(`item-qtd-real-${index}`);
-    const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
-    
-    let quantidade;
-    
-    // Se estiver fora do padrão e tiver quantidade real
-    if (checkbox?.checked && inputQtdReal?.value) {
-        const qtdReal = parseFloat(inputQtdReal.value) || 0;
-        quantidade = volume * qtdReal;
-        produtosPorItem[index].qtdRealPorEmbalagem = qtdReal;
-        produtosPorItem[index].foraPadrao = true;
-    } else {
-        // Padrão: usa qtdPorEmbalagem do produto
-        quantidade = volume * (produto.qtdPorEmbalagem || 1);
-        produtosPorItem[index].qtdRealPorEmbalagem = null;
-        produtosPorItem[index].foraPadrao = false;
-    }
-    
-    if (quantidadeInput) {
-        quantidadeInput.value = quantidade.toFixed(2);
-    }
-}
-
-// Função para limpar todos os filtros
 function limparFiltrosUnidades() {
     document.getElementById('busca-unidades').value = '';
     document.getElementById('filtro-status-unidades').value = '';
     document.getElementById('filtro-destino-unidades').value = '';
     document.getElementById('filtro-embalagem-unidades').value = '';
-    
-    // Recarregar todas as unidades
     atualizarTabelaUnidades();
 }
 
-// Inicializar o primeiro item
+// Inicializar primeiro item
 document.addEventListener('DOMContentLoaded', function() {
-    // Configurar busca para o primeiro item
-    configurarBuscaProduto(0);
-    configurarCalculoQuantidade(0);
+    if (document.getElementById('item-recebimento-0')) {
+        configurarBuscaProduto(0);
+        configurarCalculoQuantidade(0);
+        configurarForaPadrao(0);
+    }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
