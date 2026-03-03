@@ -735,8 +735,9 @@ function selecionarProdutoRecebimentoMultiplo(produtoIndex, sku, nome, tipoEmbal
 }
 
 // ============================================
-// FUNÇÃO PRINCIPAL: SALVAR RECEBIMENTO COMO UMA ÚNICA UNIDADE
+// FUNÇÃO SALVAR RECEBIMENTO MÚLTIPLO - CORRIGIDA
 // ============================================
+
 async function salvarRecebimentoMultiplo() {
     const dataRecebimento = document.getElementById('recebimento-multiplo-data').value;
     const numeroNF = document.getElementById('recebimento-multiplo-nf').value;
@@ -754,6 +755,7 @@ async function salvarRecebimentoMultiplo() {
     const produtosArray = [];
     let totalVolumes = 0;
     let totalUN = 0;
+    let resumoProdutos = [];
     
     // Coletar dados de cada produto
     for (let produtoIndex = 0; produtoIndex < contadorProdutosRecebimento; produtoIndex++) {
@@ -815,6 +817,7 @@ async function salvarRecebimentoMultiplo() {
         
         totalVolumes += volumesArray.reduce((sum, v) => sum + v.qtdVolumes, 0);
         totalUN += totalProdutoUN;
+        resumoProdutos.push(`${produto?.nome?.substring(0, 20)}... (${volumesArray.length} vols)`);
     }
     
     if (produtosArray.length === 0) {
@@ -843,10 +846,9 @@ async function salvarRecebimentoMultiplo() {
         // ============================================
         console.log('📤 Enviando unidade para o Google Sheets...', unidadeUnica);
         
-        // PRIMEIRA TENTATIVA: Enviar como JSON stringificado
-        const response1 = await fetch(WEB_APP_URL, {
+        await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors', // Isso impede ver a resposta, mas vamos tentar mesmo assim
+            mode: 'no-cors',
             headers: { 
                 'Content-Type': 'application/json'
             },
@@ -858,48 +860,8 @@ async function salvarRecebimentoMultiplo() {
             })
         });
         
-        console.log('✅ Envio 1 concluído');
-        
         // ============================================
-        // ENVIO 2: Também salvar na planilha de Unidades no formato tradicional
-        // ============================================
-        // Para cada volume, criar uma linha na planilha (formato compatível)
-        for (let p = 0; p < produtosArray.length; p++) {
-            const produto = produtosArray[p];
-            for (let v = 0; v < produto.volumes.length; v++) {
-                const volume = produto.volumes[v];
-                
-                const unidadeTradicional = {
-                    tipo: 'unidade',
-                    id: `${idUnidade}-P${p+1}V${v+1}`,
-                    sku: produto.sku,
-                    lote: volume.lote,
-                    validade: volume.validade,
-                    volume: volume.qtdVolumes,
-                    quantidade: volume.totalUN,
-                    unidadeEmbalagem: produto.tipoEmbalagem,
-                    status: status,
-                    localizacao: volume.localizacao || '-',
-                    destino: '',
-                    foraPadrao: volume.tipo === 'fora-padrao',
-                    qtdRealPorEmbalagem: volume.tipo === 'fora-padrao' ? volume.unPorEmbalagem : null,
-                    tipoEntrada: 'Recebimento',
-                    numeroNF: numeroNF,
-                    fornecedor: fornecedor,
-                    dataRecebimento: dataRecebimento
-                };
-                
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(unidadeTradicional)
-                });
-            }
-        }
-        
-        // ============================================
-        // ENVIO 3: Salvar como recebimento
+        // ENVIO 2: Salvar como recebimento (FORMATO CORRETO)
         // ============================================
         const recebimentoRegistro = {
             tipo: 'recebimento',
@@ -910,8 +872,7 @@ async function salvarRecebimentoMultiplo() {
             produtos: produtosArray.length,
             volumes: totalVolumes,
             totalUN: totalUN,
-            resumo: produtosArray.map(p => `${p.volumes.length} vol`).join(' | '),
-            observacoes: observacoes
+            resumo: resumoProdutos.join(' | ')
         };
         
         await fetch(WEB_APP_URL, {
@@ -922,28 +883,11 @@ async function salvarRecebimentoMultiplo() {
         });
         
         // ============================================
-        // ADICIONAR À LISTA LOCAL
+        // ADICIONAR À LISTA LOCAL (FORMATO CORRETO)
         // ============================================
         unidades.push(unidadeUnica);
-        recebimentos.push(recebimentoRegistro);
         
-        // Fechar modal
-        const modalElement = document.getElementById('modalRecebimentoMultiplo');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) modal.hide();
-        
-        // Atualizar interface
-        atualizarTabelaUnidades();
-        atualizarTabelaRecebimentos();
-        
-        alert(`✅ Recebimento concluído! Unidade criada: ${idUnidade}\n\nDados salvos no Google Sheets.`);
-        
-    } catch (error) {
-        console.error('❌ Erro detalhado:', error);
-        alert(`Erro ao salvar no Google Sheets: ${error.message}\n\nOs dados foram salvos apenas localmente e podem ser perdidos ao atualizar a página.`);
-        
-        // Mesmo com erro, adicionar localmente
-        unidades.push(unidadeUnica);
+        // CORREÇÃO: Adicionar recebimento com a estrutura correta
         recebimentos.push({
             idUnidade: idUnidade,
             data: dataRecebimento,
@@ -952,7 +896,7 @@ async function salvarRecebimentoMultiplo() {
             produtos: produtosArray.length,
             volumes: totalVolumes,
             totalUN: totalUN,
-            resumo: produtosArray.map(p => `${p.volumes.length} vol`).join(' | ')
+            resumo: resumoProdutos.join(' | ')
         });
         
         // Fechar modal
@@ -963,7 +907,57 @@ async function salvarRecebimentoMultiplo() {
         // Atualizar interface
         atualizarTabelaUnidades();
         atualizarTabelaRecebimentos();
+        
+        alert(`✅ Recebimento concluído! Unidade criada: ${idUnidade}`);
+        
+    } catch (error) {
+        console.error('❌ Erro detalhado:', error);
+        alert(`Erro ao salvar: ${error.message}`);
     }
+}
+
+// ============================================
+// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA
+// ============================================
+
+function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
+    const tbody = document.getElementById('tabela-recebimentos');
+    if (!tbody) return;
+    
+    const dados = recebimentosFiltrados || recebimentos;
+    
+    tbody.innerHTML = '';
+    
+    if (dados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum recebimento encontrado</td></tr>';
+        return;
+    }
+    
+    dados.slice().reverse().forEach(r => {
+        const tr = document.createElement('tr');
+        
+        // CORREÇÃO: Usar r.produtos (plural) em vez de r.produto (singular)
+        const produtosText = r.produtos ? `${r.produtos} produto(s)` : (r.resumo || '-');
+        
+        tr.innerHTML = `
+            <td><small class="text-warning">${r.idUnidade || '-'}</small></td>
+            <td>${formatarData(r.data)}</td>
+            <td>${r.nf || '-'}</td>
+            <td>${r.fornecedor || '-'}</td>
+            <td>${produtosText}</td>
+            <td>${r.volumes || '-'}</td>
+            <td><strong class="text-warning">${(r.totalUN || 0).toFixed(2)}</strong> UN</td>
+            <td>
+                ${r.idUnidade ? 
+                    `<button class="btn btn-sm btn-info" onclick="verUnidade('${r.idUnidade}')">
+                        <i class="bi bi-eye"></i> Ver
+                    </button>` : 
+                    '-'
+                }
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 // ============================================
@@ -3062,5 +3056,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
