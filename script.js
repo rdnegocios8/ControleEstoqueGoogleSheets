@@ -83,42 +83,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Configurar event listeners
 function setupEventListeners() {
-    document.getElementById('menu-painel').addEventListener('click', () => mostrarView('painel'));
-    document.getElementById('menu-produtos').addEventListener('click', () => mostrarView('produtos'));
-    document.getElementById('menu-unidades').addEventListener('click', () => mostrarView('unidades'));
-    document.getElementById('menu-scanner').addEventListener('click', () => mostrarView('scanner'));
-    document.getElementById('menu-recebimentos').addEventListener('click', () => mostrarView('recebimentos'));
-    document.getElementById('menu-movimentacoes').addEventListener('click', () => mostrarView('movimentacoes'));
-    document.getElementById('menu-relatorios').addEventListener('click', () => mostrarView('relatorios'));
-    document.getElementById('menu-categorias').addEventListener('click', () => mostrarView('categorias'));
+    // Elementos que SEMPRE existem
+    document.getElementById('menu-painel')?.addEventListener('click', () => mostrarView('painel'));
+    document.getElementById('menu-produtos')?.addEventListener('click', () => mostrarView('produtos'));
+    document.getElementById('menu-unidades')?.addEventListener('click', () => mostrarView('unidades'));
+    document.getElementById('menu-scanner')?.addEventListener('click', () => mostrarView('scanner'));
+    document.getElementById('menu-recebimentos')?.addEventListener('click', () => mostrarView('recebimentos'));
+    document.getElementById('menu-movimentacoes')?.addEventListener('click', () => mostrarView('movimentacoes'));
+    document.getElementById('menu-relatorios')?.addEventListener('click', () => mostrarView('relatorios'));
+    document.getElementById('menu-categorias')?.addEventListener('click', () => mostrarView('categorias'));
     
-    document.getElementById('salvar-produto').addEventListener('click', salvarProduto);
-    document.getElementById('salvar-unidade').addEventListener('click', salvarUnidade);
-    document.getElementById('salvar-categoria').addEventListener('click', salvarCategoria);
-    document.getElementById('salvar-recebimento').addEventListener('click', salvarRecebimento);
-    document.getElementById('salvar-unidade-multipla').addEventListener('click', salvarUnidadeMultipla);
-    document.getElementById('salvar-recebimento-multiplo').addEventListener('click', salvarRecebimentoMultiplo);
+    document.getElementById('salvar-produto')?.addEventListener('click', salvarProduto);
+    document.getElementById('salvar-unidade')?.addEventListener('click', salvarUnidade);
+    document.getElementById('salvar-categoria')?.addEventListener('click', salvarCategoria);
+    document.getElementById('salvar-recebimento')?.addEventListener('click', salvarRecebimento);
+    document.getElementById('salvar-unidade-multipla')?.addEventListener('click', salvarUnidadeMultipla);
+    document.getElementById('salvar-recebimento-multiplo')?.addEventListener('click', salvarRecebimentoMultiplo);
     
-    document.getElementById('search-produto').addEventListener('keyup', filtrarProdutos);
-    document.getElementById('filtro-categoria-produto').addEventListener('change', filtrarProdutos);
-    document.getElementById('filtro-embalagem-produto').addEventListener('change', filtrarProdutos);
+    document.getElementById('search-produto')?.addEventListener('keyup', filtrarProdutos);
+    document.getElementById('filtro-categoria-produto')?.addEventListener('change', filtrarProdutos);
+    document.getElementById('filtro-embalagem-produto')?.addEventListener('change', filtrarProdutos);
     
-    document.getElementById('filtro-produto-unidades').addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-status-unidades').addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-destino-unidades').addEventListener('change', filtrarUnidades);
-    document.getElementById('filtro-embalagem-unidades').addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-produto-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-status-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-destino-unidades')?.addEventListener('change', filtrarUnidades);
+    document.getElementById('filtro-embalagem-unidades')?.addEventListener('change', filtrarUnidades);
     
-    document.getElementById('produto-tipo-embalagem').addEventListener('change', toggleCampoQtdEmbalagem);
-    document.getElementById('unidade-sku').addEventListener('change', atualizarInfoEmbalagem);
-    document.getElementById('unidade-volume').addEventListener('input', calcularQuantidadeAutomatica);
-    document.getElementById('unidade-fora-padrao').addEventListener('change', toggleCampoQuantidadeReal);
+    document.getElementById('produto-tipo-embalagem')?.addEventListener('change', toggleCampoQtdEmbalagem);
+    document.getElementById('unidade-sku')?.addEventListener('change', atualizarInfoEmbalagem);
+    document.getElementById('unidade-volume')?.addEventListener('input', calcularQuantidadeAutomatica);
+    document.getElementById('unidade-fora-padrao')?.addEventListener('change', toggleCampoQuantidadeReal);
     
-    document.getElementById('recebimento-sku').addEventListener('change', atualizarInfoRecebimento);
-    document.getElementById('recebimento-volume').addEventListener('input', calcularQuantidadeRecebimento);
+    document.getElementById('recebimento-sku')?.addEventListener('change', atualizarInfoRecebimento);
+    document.getElementById('recebimento-volume')?.addEventListener('input', calcularQuantidadeRecebimento);
     
-    // Busca de produtos para múltiplos volumes
-    document.getElementById('busca-produto-unidade')?.addEventListener('keyup', filtrarProdutosUnidade);
-    document.getElementById('busca-produto-recebimento-principal')?.addEventListener('keyup', filtrarProdutosRecebimentoPrincipal);
+    // Busca de produtos para múltiplos volumes (verificar se existem)
+    const buscaUnidade = document.getElementById('busca-produto-unidade');
+    if (buscaUnidade) buscaUnidade.addEventListener('keyup', filtrarProdutosUnidade);
+    
+    const buscaRecebimento = document.getElementById('busca-produto-recebimento-principal');
+    if (buscaRecebimento) buscaRecebimento.addEventListener('keyup', filtrarProdutosRecebimentoPrincipal);
     
     // Event listener para o filtro de período
     const periodoFilter = document.getElementById('filtro-recebimento-periodo');
@@ -150,6 +154,7 @@ function setupEventListeners() {
     if (filtroDescricao) filtroDescricao.addEventListener('keyup', filtrarEstoqueGeral);
     if (filtroStatus) filtroStatus.addEventListener('change', filtrarEstoqueGeral);
     if (filtroUnidade) filtroUnidade.addEventListener('change', filtrarEstoqueGeral);
+    
 }
 
 // Mostrar/esconder campo de quantidade por embalagem
@@ -539,33 +544,31 @@ function atualizarTotalProduto(produtoIndex) {
 
 // Atualizar totais gerais do recebimento
 function atualizarTotaisRecebimento() {
+    const totalProdEl = document.getElementById('total-produtos-recebimento');
+    const totalVolEl = document.getElementById('total-volumes-recebimento');
+    const totalGeralEl = document.getElementById('total-geral-un-recebimento');
+    
+    if (!totalProdEl || !totalVolEl || !totalGeralEl) return; // Sai se os elementos não existirem
+    
     let totalProdutos = 0;
     let totalVolumes = 0;
     let totalGeralUN = 0;
     
-    // Para cada produto
     for (let i = 0; i < contadorProdutosRecebimento; i++) {
         const produto = document.getElementById(`produto-recebimento-${i}`);
         if (produto) {
             totalProdutos++;
-            
-            // Contar volumes deste produto
             const volumes = produto.querySelectorAll('.volume-row');
             totalVolumes += volumes.length;
             
-            // Somar total UN deste produto
             const totalProduto = parseFloat(document.getElementById(`produto-total-un-${i}`)?.textContent) || 0;
             totalGeralUN += totalProduto;
         }
     }
     
-    const totalProdEl = document.getElementById('total-produtos-recebimento');
-    const totalVolEl = document.getElementById('total-volumes-recebimento');
-    const totalGeralEl = document.getElementById('total-geral-un-recebimento');
-    
-    if (totalProdEl) totalProdEl.textContent = totalProdutos;
-    if (totalVolEl) totalVolEl.textContent = totalVolumes;
-    if (totalGeralEl) totalGeralEl.textContent = totalGeralUN.toFixed(2);
+    totalProdEl.textContent = totalProdutos;
+    totalVolEl.textContent = totalVolumes;
+    totalGeralEl.textContent = totalGeralUN.toFixed(2);
 }
 
 // Atualizar contagem de produtos no recebimento (para reindexação)
@@ -2930,8 +2933,22 @@ function calcularQuantidadeItem(index) {
 
 // Inicializar o primeiro item
 document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('item-recebimento-0')) {
-        configurarBuscaProduto(0);
-        configurarCalculoQuantidade(0);
+    // Inicializar apenas se os elementos principais existirem
+    carregarDados();
+    setupEventListeners();
+    preencherFiltros();
+    
+    // Inicializar volumes APENAS se o elemento existir
+    const volumeRow0 = document.getElementById('volume-row-0');
+    if (volumeRow0) {
+        volumesData[0] = {
+            tipo: 'padrao',
+            qtd: 10,
+            unPorEmbalagem: 250,
+            lote: '',
+            validade: '',
+            localizacao: ''
+        };
     }
 });
+
