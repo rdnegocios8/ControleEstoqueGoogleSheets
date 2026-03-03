@@ -1964,7 +1964,7 @@ function adicionarItemRecebimento() {
             </button>
         </div>
         <div class="row">
-            <div class="col-md-4 mb-2">
+            <div class="col-md-3 mb-2">
                 <label class="form-label">Buscar Produto</label>
                 <input type="text" class="form-control busca-produto-recebimento" 
                        placeholder="Digite para buscar..." data-index="${contadorItens}">
@@ -1983,24 +1983,35 @@ function adicionarItemRecebimento() {
                 <input type="number" class="form-control item-volume" id="item-volume-${contadorItens}" min="1" value="1" step="any" required>
                 <small class="text-muted">Qtd de embalagens</small>
             </div>
-            <div class="col-md-2 mb-2">
+            <div class="col-md-3 mb-2">
                 <label class="form-label">Quantidade</label>
                 <input type="number" class="form-control item-quantidade" id="item-quantidade-${contadorItens}" step="any" required>
                 <small class="text-muted item-unidade" id="item-unidade-${contadorItens}">UN</small>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-4 mb-2">
+            <div class="col-md-3 mb-2">
                 <div class="lista-produtos-recebimento" id="lista-produtos-${contadorItens}" 
                      style="max-height: 150px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
-                    <!-- Lista de produtos será inserida aqui -->
                 </div>
             </div>
-            <div class="col-md-4 mb-2">
-                <label class="form-label">Unidade de Medida</label>
+            <div class="col-md-2 mb-2">
+                <label class="form-label">Unidade</label>
                 <input type="text" class="form-control item-unidade-medida" id="item-unidade-medida-${contadorItens}" readonly>
             </div>
-            <div class="col-md-4 mb-2">
+            <div class="col-md-2 mb-2">
+                <div class="form-check mt-4">
+                    <input type="checkbox" class="form-check-input item-fora-padrao" id="item-fora-padrao-${contadorItens}" data-index="${contadorItens}">
+                    <label class="form-check-label" for="item-fora-padrao-${contadorItens}">
+                        Fora do padrão
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2 campo-qtd-real" id="campo-qtd-real-${contadorItens}" style="display: none;">
+                <label class="form-label">Qtd Real</label>
+                <input type="number" class="form-control item-qtd-real" id="item-qtd-real-${contadorItens}" step="any" min="1">
+            </div>
+            <div class="col-md-3 mb-2">
                 <label class="form-label">Localização</label>
                 <input type="text" class="form-control item-localizacao" id="item-localizacao-${contadorItens}">
             </div>
@@ -2012,6 +2023,7 @@ function adicionarItemRecebimento() {
     // Adicionar event listeners para o novo item
     configurarBuscaProduto(contadorItens);
     configurarCalculoQuantidade(contadorItens);
+    configurarForaPadrao(contadorItens);
 }
 
 // Remover item do recebimento
@@ -2106,24 +2118,25 @@ function selecionarProdutoItem(index, sku, nome, tipoEmbalagem, qtdPorEmbalagem,
         nome: nome,
         tipoEmbalagem: tipoEmbalagem,
         qtdPorEmbalagem: qtdPorEmbalagem,
-        unidadeBase: unidadeBase
+        unidadeBase: unidadeBase,
+        foraPadrao: false,
+        qtdRealPorEmbalagem: null
     };
     
     // Atualizar unidade
     document.getElementById(`item-unidade-${index}`).textContent = unidadeBase;
     
     // Calcular quantidade
-    calcularQuantidadeItem(index);
+    calcularQuantidadeItemForaPadrao(index);
 }
 
 // Configurar cálculo de quantidade
 function configurarCalculoQuantidade(index) {
     const volumeInput = document.getElementById(`item-volume-${index}`);
-    const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
     
     if (volumeInput) {
         volumeInput.addEventListener('input', function() {
-            calcularQuantidadeItem(index);
+            calcularQuantidadeItemForaPadrao(index);
         });
     }
 }
@@ -2143,6 +2156,7 @@ function calcularQuantidadeItem(index) {
 }
 
 // Modificar a função salvarRecebimento para processar múltiplos itens
+// Salvar recebimento
 async function salvarRecebimento() {
     const dataRecebimento = document.getElementById('recebimento-data').value;
     const numeroNF = document.getElementById('recebimento-nf').value;
@@ -2167,6 +2181,11 @@ async function salvarRecebimento() {
         const quantidade = parseFloat(document.getElementById(`item-quantidade-${i}`)?.value) || 0;
         const unidadeMedida = document.getElementById(`item-unidade-medida-${i}`)?.value;
         const localizacao = document.getElementById(`item-localizacao-${i}`)?.value || '';
+        const checkboxForaPadrao = document.getElementById(`item-fora-padrao-${i}`);
+        const inputQtdReal = document.getElementById(`item-qtd-real-${i}`);
+        
+        const foraPadrao = checkboxForaPadrao ? checkboxForaPadrao.checked : false;
+        const qtdRealPorEmbalagem = (foraPadrao && inputQtdReal) ? parseFloat(inputQtdReal.value) || null : null;
         
         if (!sku || !lote || !validade || !quantidade) {
             alert(`Preencha todos os campos do item ${i + 1}`);
@@ -2184,7 +2203,9 @@ async function salvarRecebimento() {
             quantidade: quantidade,
             unidadeMedida: unidadeMedida,
             localizacao: localizacao,
-            qtdPorEmbalagem: produto?.qtdPorEmbalagem || 1
+            qtdPorEmbalagem: produto?.qtdPorEmbalagem || 1,
+            foraPadrao: foraPadrao,
+            qtdRealPorEmbalagem: qtdRealPorEmbalagem
         });
     }
     
@@ -2240,12 +2261,12 @@ async function salvarRecebimento() {
                     status: 'Disponível',
                     localizacao: item.localizacao || '-',
                     destino: '',
-                    foraPadrao: false,
-                    qtdRealPorEmbalagem: null,
-                    tipoEntrada: 'Recebimento'  // <--- CAMPO OBRIGATÓRIO
+                    foraPadrao: item.foraPadrao,
+                    qtdRealPorEmbalagem: item.qtdRealPorEmbalagem,
+                    tipoEntrada: 'Recebimento'
                 };
                 
-                console.log('📤 Enviando unidade com tipoEntrada:', unidade.tipoEntrada);
+                console.log('📤 Enviando unidade:', unidade);
                 
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
@@ -2322,6 +2343,95 @@ function setupFiltrosUnidades() {
     }
 }
 
+// ============================================
+// FUNÇÕES PARA FORA DO PADRÃO NO RECEBIMENTO
+// ============================================
+
+// Configurar checkbox "Fora do padrão"
+function configurarForaPadrao(index) {
+    const checkbox = document.getElementById(`item-fora-padrao-${index}`);
+    const campoQtdReal = document.getElementById(`campo-qtd-real-${index}`);
+    const inputQtdReal = document.getElementById(`item-qtd-real-${index}`);
+    const volumeInput = document.getElementById(`item-volume-${index}`);
+    const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
+    
+    if (!checkbox) return;
+    
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            campoQtdReal.style.display = 'block';
+            // Quando marcar, libera para digitar quantidade manualmente
+            quantidadeInput.readOnly = false;
+            quantidadeInput.value = '';
+        } else {
+            campoQtdReal.style.display = 'none';
+            inputQtdReal.value = '';
+            // Volta ao cálculo automático
+            quantidadeInput.readOnly = true;
+            calcularQuantidadeItemForaPadrao(index);
+        }
+    });
+    
+    // Quando digitar a quantidade real, recalcular total
+    if (inputQtdReal) {
+        inputQtdReal.addEventListener('input', function() {
+            const volume = parseFloat(volumeInput.value) || 1;
+            const qtdReal = parseFloat(this.value) || 0;
+            const quantidadeTotal = volume * qtdReal;
+            quantidadeInput.value = quantidadeTotal.toFixed(2);
+            
+            // Guardar informação que está fora do padrão
+            if (!produtosPorItem[index]) produtosPorItem[index] = {};
+            produtosPorItem[index].foraPadrao = true;
+            produtosPorItem[index].qtdRealPorEmbalagem = qtdReal;
+        });
+    }
+    
+    // Quando mudar o volume, recalcular se estiver fora do padrão
+    if (volumeInput) {
+        volumeInput.addEventListener('input', function() {
+            if (checkbox.checked && inputQtdReal.value) {
+                const volume = parseFloat(this.value) || 1;
+                const qtdReal = parseFloat(inputQtdReal.value) || 0;
+                const quantidadeTotal = volume * qtdReal;
+                quantidadeInput.value = quantidadeTotal.toFixed(2);
+            } else {
+                calcularQuantidadeItemForaPadrao(index);
+            }
+        });
+    }
+}
+
+// Calcular quantidade para um item (considerando fora do padrão)
+function calcularQuantidadeItemForaPadrao(index) {
+    const produto = produtosPorItem[index];
+    if (!produto) return;
+    
+    const volume = parseFloat(document.getElementById(`item-volume-${index}`)?.value) || 1;
+    const checkbox = document.getElementById(`item-fora-padrao-${index}`);
+    const inputQtdReal = document.getElementById(`item-qtd-real-${index}`);
+    const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
+    
+    let quantidade;
+    
+    // Se estiver fora do padrão e tiver quantidade real
+    if (checkbox?.checked && inputQtdReal?.value) {
+        const qtdReal = parseFloat(inputQtdReal.value) || 0;
+        quantidade = volume * qtdReal;
+        produtosPorItem[index].qtdRealPorEmbalagem = qtdReal;
+        produtosPorItem[index].foraPadrao = true;
+    } else {
+        // Padrão: usa qtdPorEmbalagem do produto
+        quantidade = volume * (produto.qtdPorEmbalagem || 1);
+        produtosPorItem[index].qtdRealPorEmbalagem = null;
+        produtosPorItem[index].foraPadrao = false;
+    }
+    
+    if (quantidadeInput) {
+        quantidadeInput.value = quantidade.toFixed(2);
+    }
+}
+
 // Função para limpar todos os filtros
 function limparFiltrosUnidades() {
     document.getElementById('busca-unidades').value = '';
@@ -2339,6 +2449,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBuscaProduto(0);
     configurarCalculoQuantidade(0);
 });
+
 
 
 
