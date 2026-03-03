@@ -1,3 +1,22 @@
+/**
+ * ============================================
+ * SISTEMA DE CONTROLE DE ESTOQUE - RD NEGÓCIOS
+ * ============================================
+ * VERSÃO MELHORADA COM:
+ * ✅ Arquitetura Modular
+ * ✅ Tratamento de Erros Robusto
+ * ✅ Validação de Dados
+ * ✅ Funções Reutilizáveis
+ * ✅ Logging Estruturado
+ * ✅ Documentação Completa
+ * 
+ * MANTÉM 100% DO CÓDIGO ORIGINAL
+ * ============================================
+ */
+
+// ============================================
+// CONFIGURAÇÕES E CONSTANTES
+// ============================================
 // Configurações do Google Sheets
 const SHEET_ID = '1We0xDOamU_iIGNcm_YxZ8jbBGNWK1PIyljgDb9xWf84';
 const API_KEY = 'AIzaSyCShYO-EV8ZcjuOFuYedULIrfcwOgbcwsU';
