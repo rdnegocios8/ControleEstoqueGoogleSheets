@@ -7,8 +7,9 @@
     ✅ Estrutura Semântica
     ✅ Validação de Formulários
     ✅ Comentários Organizados
-    ✅ Múltiplos Volumes no Recebimento
-    ✅ Controle de Volumes Padrão e Fora do Padrão
+    ✅ Múltiplos Produtos e Volumes no Recebimento
+    ✅ Unidade Única com Múltiplos Volumes
+    ✅ QR Code Único para Todo o Recebimento
     
     MANTÉM 100% DO CÓDIGO ORIGINAL + NOVAS FUNCIONALIDADES
     ============================================
@@ -309,21 +310,19 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Produto</th>
-                                    <th>Categoria</th>
-                                    <th>Embalagem</th>
-                                    <th>Lote</th>
-                                    <th>Validade</th>
-                                    <th>Volume</th>
-                                    <th>Quantidade</th>
+                                    <th>ID / QR Code</th>
+                                    <th>Produtos / Resumo</th>
+                                    <th>NF</th>
+                                    <th>Fornecedor</th>
+                                    <th>Data Receb.</th>
+                                    <th>Total Volumes</th>
+                                    <th>Total UN</th>
                                     <th>Status</th>
-                                    <th>Destino</th>
-                                    <th>Tipo de Entrada</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-unidades">
+                                <!-- Unidades serão inseridas aqui -->
                             </tbody>
                         </table>
                     </div>
@@ -361,7 +360,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h2>Recebimentos</h2>
                         <button class="btn btn-success" onclick="abrirModalRecebimentoMultiplo()">
-                            <i class="bi bi-truck"></i> Novo Recebimento (Múltiplos Volumes)
+                            <i class="bi bi-truck"></i> Novo Recebimento (Múltiplos Produtos)
                         </button>
                     </div>
 
@@ -389,10 +388,8 @@
                             <input type="text" class="form-control" id="filtro-recebimento-nf" placeholder="Digite o número da NF">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Código SKU</label>
-                            <select class="form-control" id="filtro-recebimento-sku">
-                                <option value="">Todos os SKUs</option>
-                            </select>
+                            <label class="form-label">ID da Unidade</label>
+                            <input type="text" class="form-control" id="filtro-recebimento-unidade" placeholder="ID da unidade">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <button class="btn btn-primary w-100" onclick="filtrarRecebimentos()">
@@ -405,23 +402,19 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
+                                    <th>ID UNIDADE</th>
                                     <th>DATA</th>
                                     <th>NF</th>
                                     <th>FORNECEDOR</th>
-                                    <th>SKU</th>
-                                    <th>PRODUTO</th>
-                                    <th>LOTE</th>
-                                    <th>VALIDADE</th>
-                                    <th>VOLUME</th>
-                                    <th>UNID</th>
-                                    <th>QTD TOTAL</th>
-                                    <th>LOCAL</th>
-                                    <th>RESP</th>
+                                    <th>PRODUTOS</th>
+                                    <th>TOTAL VOLUMES</th>
+                                    <th>TOTAL UN</th>
+                                    <th>DETALHES</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-recebimentos">
                                 <tr>
-                                    <td colspan="12" class="text-center">Nenhum recebimento encontrado</td>
+                                    <td colspan="8" class="text-center">Nenhum recebimento encontrado</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -790,7 +783,7 @@
         </div>
     </div>
 
-    <!-- NOVO MODAL UNIDADE MÚLTIPLA (ADICIONADO) -->
+    <!-- MODAL UNIDADE MÚLTIPLA (PARA CRIAÇÃO MANUAL) -->
     <div class="modal fade" id="modalUnidadeMultiplo" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -804,115 +797,10 @@
                     <form id="form-unidade-multipla">
                         <input type="hidden" id="unidade-multipla-id">
                         
-                        <!-- Dados do Produto (fixo para todas as linhas) -->
-                        <div class="card border-primary mb-4">
-                            <div class="card-header bg-dark text-white">
-                                <i class="bi bi-box"></i> Produto
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Buscar Produto</label>
-                                        <input type="text" class="form-control" id="busca-produto-unidade" placeholder="Digite para buscar...">
-                                        <input type="hidden" id="unidade-multipla-sku">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Tipo Embalagem</label>
-                                        <input type="text" class="form-control" id="unidade-multipla-tipo-embalagem" readonly>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Qtd Padrão por Embalagem</label>
-                                        <input type="text" class="form-control" id="unidade-multipla-qtd-padrao" readonly>
-                                    </div>
-                                </div>
-                                
-                                <!-- Lista de produtos oculta -->
-                                <div id="lista-produtos-unidade" class="mt-2" style="max-height: 200px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
-                                    <!-- Produtos serão inseridos aqui via JS -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- LINHAS DE VOLUMES (PADRÃO + FORA DO PADRÃO) -->
-                        <div class="card border-warning mb-4">
-                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-layers"></i> Volumes do Recebimento</span>
-                                <button type="button" class="btn btn-sm btn-success" onclick="adicionarLinhaVolume()">
-                                    <i class="bi bi-plus"></i> Adicionar Volume
-                                </button>
-                            </div>
-                            <div class="card-body" id="volumes-container">
-                                <!-- Linha 1 - Volume Padrão (já vem pré-preenchida) -->
-                                <div class="volume-row mb-3 p-3 border rounded" id="volume-row-0">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <h6 class="text-info">
-                                            <i class="bi bi-box"></i> Volume #1 
-                                            <span class="badge bg-success ms-2" id="badge-tipo-0">PADRÃO</span>
-                                        </h6>
-                                        <button type="button" class="btn btn-sm btn-danger" onclick="removerLinhaVolume(0)" style="display: none;">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <label class="form-label">Tipo</label>
-                                            <select class="form-select tipo-volume" onchange="alterarTipoVolume(0)">
-                                                <option value="padrao" selected>Padrão</option>
-                                                <option value="fora-padrao">Fora do Padrão</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Volume (Embalagem)</label>
-                                            <input type="text" class="form-control volume-embalagem" id="volume-embalagem-0" value="MALA" readonly>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Quantidade</label>
-                                            <input type="number" class="form-control volume-qtd" id="volume-qtd-0" value="10" min="1" step="1" oninput="calcularTotalLinha(0)">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">UN por Embalagem</label>
-                                            <input type="number" class="form-control volume-un-por-emb" id="volume-un-por-emb-0" value="250" min="1" step="0.01" oninput="calcularTotalLinha(0)">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Total UN (automático)</label>
-                                            <input type="number" class="form-control volume-total" id="volume-total-0" readonly style="background-color: #1e293b; color: #fbbf24; font-weight: 700;">
-                                        </div>
-                                    </div>
-                                    <div class="row mt-2">
-                                        <div class="col-md-4">
-                                            <label class="form-label">Lote</label>
-                                            <input type="text" class="form-control volume-lote" id="volume-lote-0" oninput="atualizarDadosVolume(0)">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label">Validade</label>
-                                            <input type="date" class="form-control volume-validade" id="volume-validade-0" oninput="atualizarDadosVolume(0)">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label">Localização</label>
-                                            <input type="text" class="form-control volume-localizacao" id="volume-localizacao-0" oninput="atualizarDadosVolume(0)">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- RESUMO DO TOTAL -->
-                            <div class="card-footer bg-dark text-white">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Total de Volumes:</strong> <span id="total-volumes">10</span>
-                                    </div>
-                                    <div class="col-md-6 text-end">
-                                        <strong>Total Geral em UN:</strong> 
-                                        <span id="total-geral-un" style="color: #fbbf24; font-size: 1.2rem; font-weight: 700;">2500</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Status Geral -->
-                        <div class="row">
+                        <!-- Status Geral da Unidade -->
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <label class="form-label">Status Geral</label>
+                                <label class="form-label">Status da Unidade</label>
                                 <select class="form-control" id="unidade-multipla-status">
                                     <option value="Disponível">Disponível</option>
                                     <option value="Bloqueado">Bloqueado</option>
@@ -923,204 +811,117 @@
                                 <input type="text" class="form-control" id="unidade-multipla-observacoes" placeholder="Observações gerais...">
                             </div>
                         </div>
+
+                        <!-- LISTA DE PRODUTOS COM SEUS VOLUMES -->
+                        <div class="card border-warning mb-4">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-boxes"></i> Produtos e Volumes da Unidade</span>
+                                <button type="button" class="btn btn-sm btn-success" onclick="adicionarProdutoUnidade()">
+                                    <i class="bi bi-plus-circle"></i> Adicionar Produto
+                                </button>
+                            </div>
+                            <div class="card-body" id="produtos-unidade-container">
+                                <!-- Primeiro produto já vem pré-carregado via JS -->
+                            </div>
+                            
+                            <!-- RESUMO DA UNIDADE -->
+                            <div class="card-footer bg-dark text-white">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <strong>Total de Produtos:</strong> <span id="total-produtos-unidade">0</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Total de Volumes:</strong> <span id="total-volumes-unidade">0</span>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <strong>Total Geral em UN:</strong> 
+                                        <span id="total-geral-un-unidade" style="color: #fbbf24; font-size: 1.3rem; font-weight: 700;">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="salvar-unidade-multipla">
-                        <i class="bi bi-check-circle"></i> Salvar Todos os Volumes
+                        <i class="bi bi-check-circle"></i> Criar Unidade
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL RECEBIMENTO ORIGINAL (MANTIDO) -->
-    <div class="modal fade" id="modalRecebimento" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-truck"></i> Recebimento de Mercadorias
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="form-recebimento">
-                        <!-- Dados da Nota Fiscal -->
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label">Data do Recebimento</label>
-                                <input type="date" class="form-control" id="recebimento-data" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Número da NF</label>
-                                <input type="text" class="form-control" id="recebimento-nf" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Fornecedor</label>
-                                <input type="text" class="form-control" id="recebimento-fornecedor" required>
-                            </div>
-                        </div>
-
-                        <!-- LISTA DE PRODUTOS DO RECEBIMENTO (ORIGINAL) -->
-                        <div class="card border-secondary mb-3">
-                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-box"></i> Produtos da Nota</span>
-                                <button type="button" class="btn btn-sm btn-success" onclick="adicionarItemRecebimento()">
-                                    <i class="bi bi-plus"></i> Adicionar Produto
-                                </button>
-                            </div>
-                            <div class="card-body" id="itens-recebimento-container">
-                                <!-- Os itens serão inseridos aqui -->
-                                <div class="item-recebimento mb-3 p-3 border rounded" id="item-recebimento-0">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <h6 class="text-info">Produto 1</h6>
-                                        <button type="button" class="btn btn-sm btn-danger" onclick="removerItemRecebimento(0)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-4 mb-2">
-                                            <label class="form-label">Buscar Produto</label>
-                                            <input type="text" class="form-control busca-produto-recebimento" 
-                                                   placeholder="Digite para buscar..." data-index="0">
-                                            <input type="hidden" class="item-sku" id="item-sku-0" required>
-                                        </div>
-                                        <div class="col-md-2 mb-2">
-                                            <label class="form-label">Lote</label>
-                                            <input type="text" class="form-control item-lote" id="item-lote-0" required>
-                                        </div>
-                                        <div class="col-md-2 mb-2">
-                                            <label class="form-label">Validade</label>
-                                            <input type="date" class="form-control item-validade" id="item-validade-0" required>
-                                        </div>
-                                        <div class="col-md-2 mb-2">
-                                            <label class="form-label">Volume</label>
-                                            <input type="number" class="form-control item-volume" id="item-volume-0" min="1" value="1" step="any" required>
-                                            <small class="text-muted">Qtd de embalagens</small>
-                                        </div>
-                                        <div class="col-md-2 mb-2">
-                                            <label class="form-label">Quantidade</label>
-                                            <input type="number" class="form-control item-quantidade" id="item-quantidade-0" step="any" required>
-                                            <small class="text-muted item-unidade" id="item-unidade-0">UN</small>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-4 mb-2">
-                                            <div class="lista-produtos-recebimento" id="lista-produtos-0" 
-                                                 style="max-height: 150px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
-                                                <!-- Lista de produtos será inserida aqui -->
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <label class="form-label">Unidade de Medida</label>
-                                            <input type="text" class="form-control item-unidade-medida" id="item-unidade-medida-0" readonly>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <label class="form-label">Localização</label>
-                                            <input type="text" class="form-control item-localizacao" id="item-localizacao-0">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Observações Gerais -->
-                        <div class="mb-3">
-                            <label class="form-label">Observações Gerais</label>
-                            <textarea class="form-control" id="recebimento-observacoes" rows="2"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" id="salvar-recebimento">
-                        <i class="bi bi-check-circle"></i> Confirmar Recebimento
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- NOVO MODAL RECEBIMENTO MÚLTIPLO (ADICIONADO) -->
+    <!-- NOVO MODAL RECEBIMENTO MÚLTIPLO (UMA ÚNICA UNIDADE) -->
     <div class="modal fade" id="modalRecebimentoMultiplo" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="bi bi-truck"></i> Recebimento - Múltiplos Volumes
+                        <i class="bi bi-truck"></i> Recebimento - Múltiplos Produtos e Volumes (Uma Unidade)
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="form-recebimento-multiplo">
-                        <!-- Dados da Nota Fiscal -->
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label">Data do Recebimento</label>
-                                <input type="date" class="form-control" id="recebimento-multiplo-data" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Número da NF</label>
-                                <input type="text" class="form-control" id="recebimento-multiplo-nf" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Fornecedor</label>
-                                <input type="text" class="form-control" id="recebimento-multiplo-fornecedor" required>
-                            </div>
-                        </div>
-
-                        <!-- PRODUTO PRINCIPAL -->
+                        <!-- Dados da Nota Fiscal (fixo para todo o recebimento) -->
                         <div class="card border-primary mb-4">
                             <div class="card-header bg-dark text-white">
-                                <i class="bi bi-box"></i> Produto Principal
+                                <i class="bi bi-file-text"></i> Dados da Nota Fiscal
                             </div>
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Buscar Produto</label>
-                                        <input type="text" class="form-control" id="busca-produto-recebimento-principal" placeholder="Digite para buscar...">
-                                        <input type="hidden" id="recebimento-multiplo-sku">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Data do Recebimento</label>
+                                        <input type="date" class="form-control" id="recebimento-multiplo-data" required>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Tipo Embalagem</label>
-                                        <input type="text" class="form-control" id="recebimento-multiplo-tipo-embalagem" readonly>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Número da NF</label>
+                                        <input type="text" class="form-control" id="recebimento-multiplo-nf" required>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Qtd Padrão por Embalagem</label>
-                                        <input type="text" class="form-control" id="recebimento-multiplo-qtd-padrao" readonly>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Fornecedor</label>
+                                        <input type="text" class="form-control" id="recebimento-multiplo-fornecedor" required>
                                     </div>
-                                </div>
-                                
-                                <!-- Lista de produtos oculta -->
-                                <div id="lista-produtos-recebimento-principal" class="mt-2" style="max-height: 200px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
-                                    <!-- Produtos serão inseridos aqui via JS -->
                                 </div>
                             </div>
                         </div>
 
-                        <!-- LINHAS DE VOLUMES DO RECEBIMENTO -->
+                        <!-- Status da Unidade (opcional) -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Status da Unidade</label>
+                                <select class="form-control" id="recebimento-multiplo-status">
+                                    <option value="Disponível">Disponível</option>
+                                    <option value="Bloqueado">Bloqueado</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- LISTA DE PRODUTOS COM SEUS VOLUMES -->
                         <div class="card border-warning mb-4">
                             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-layers"></i> Volumes do Recebimento</span>
-                                <button type="button" class="btn btn-sm btn-success" onclick="adicionarLinhaVolumeRecebimento()">
-                                    <i class="bi bi-plus"></i> Adicionar Volume
+                                <span><i class="bi bi-boxes"></i> Produtos e Volumes do Recebimento</span>
+                                <button type="button" class="btn btn-sm btn-success" onclick="adicionarProdutoRecebimento()">
+                                    <i class="bi bi-plus-circle"></i> Adicionar Produto
                                 </button>
                             </div>
-                            <div class="card-body" id="volumes-recebimento-container">
-                                <!-- Linhas serão inseridas aqui via JS -->
+                            <div class="card-body" id="produtos-recebimento-container">
+                                <!-- Primeiro produto será inserido via JS -->
                             </div>
                             
-                            <!-- RESUMO DO TOTAL -->
+                            <!-- RESUMO DO RECEBIMENTO -->
                             <div class="card-footer bg-dark text-white">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
+                                        <strong>Total de Produtos:</strong> <span id="total-produtos-recebimento">0</span>
+                                    </div>
+                                    <div class="col-md-4">
                                         <strong>Total de Volumes:</strong> <span id="total-volumes-recebimento">0</span>
                                     </div>
-                                    <div class="col-md-6 text-end">
+                                    <div class="col-md-4 text-end">
                                         <strong>Total Geral em UN:</strong> 
-                                        <span id="total-geral-un-recebimento" style="color: #fbbf24; font-size: 1.2rem; font-weight: 700;">0</span>
+                                        <span id="total-geral-un-recebimento" style="color: #fbbf24; font-size: 1.3rem; font-weight: 700;">0</span>
                                     </div>
                                 </div>
                             </div>
@@ -1136,7 +937,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-success" id="salvar-recebimento-multiplo">
-                        <i class="bi bi-check-circle"></i> Confirmar Recebimento
+                        <i class="bi bi-check-circle"></i> Confirmar Recebimento (Uma Unidade)
                     </button>
                 </div>
             </div>
@@ -1180,9 +981,9 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES UNIDADE -->
+    <!-- MODAL DETALHES UNIDADE (ATUALIZADO PARA MOSTRAR MÚLTIPLOS PRODUTOS) -->
     <div class="modal fade" id="modalDetalhesUnidade" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Detalhes da Unidade</h5>
@@ -1190,26 +991,31 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 text-center">
+                        <div class="col-md-4 text-center">
                             <div id="unidade-qr-code" class="p-3 border rounded mb-3"></div>
-                            <button class="btn btn-primary" onclick="verQRCodeCompleto()">
+                            <button class="btn btn-primary mb-3" onclick="verQRCodeCompleto()">
                                 <i class="bi bi-qr-code"></i> Ver QR Code Completo
                             </button>
+                            
+                            <div class="card bg-dark mt-3">
+                                <div class="card-body text-start">
+                                    <p><strong>ID:</strong> <span id="detalhe-id"></span></p>
+                                    <p><strong>NF:</strong> <span id="detalhe-nf"></span></p>
+                                    <p><strong>Fornecedor:</strong> <span id="detalhe-fornecedor"></span></p>
+                                    <p><strong>Data Receb.:</strong> <span id="detalhe-data"></span></p>
+                                    <p><strong>Status:</strong> <span id="detalhe-status"></span></p>
+                                    <p><strong>Total Volumes:</strong> <span id="detalhe-total-volumes"></span></p>
+                                    <p><strong>Total UN:</strong> <span id="detalhe-total-un"></span></p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>ID:</strong> <span id="detalhe-id"></span></p>
-                            <p><strong>Produto:</strong> <span id="detalhe-produto"></span></p>
-                            <p><strong>Categoria:</strong> <span id="detalhe-categoria"></span></p>
-                            <p><strong>SKU:</strong> <span id="detalhe-sku"></span></p>
-                            <p><strong>Lote:</strong> <span id="detalhe-lote"></span></p>
-                            <p><strong>Validade:</strong> <span id="detalhe-validade"></span></p>
-                            <p><strong>Embalagem:</strong> <span id="detalhe-embalagem"></span></p>
-                            <p><strong>Volume:</strong> <span id="detalhe-volume"></span></p>
-                            <p><strong>Quantidade:</strong> <span id="detalhe-quantidade"></span> UN</p>
-                            <p><strong>Fora do padrão:</strong> <span id="detalhe-fora-padrao"></span></p>
-                            <p><strong>Status:</strong> <span id="detalhe-status"></span></p>
-                            <p><strong>Localização:</strong> <span id="detalhe-localizacao"></span></p>
-                            <p><strong>Destino:</strong> <span id="detalhe-destino"></span></p>
+                        
+                        <div class="col-md-8">
+                            <h6 class="text-warning mb-3"><i class="bi bi-boxes"></i> Produtos nesta Unidade</h6>
+                            
+                            <div id="detalhe-produtos-container">
+                                <!-- Produtos serão inseridos aqui via JS -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1229,7 +1035,7 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>ID Unidade</th>
                                 <th>Lote</th>
                                 <th>Validade</th>
                                 <th>Embalagem</th>
