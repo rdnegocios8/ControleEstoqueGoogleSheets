@@ -9,8 +9,10 @@
  * ✅ Funções Reutilizáveis
  * ✅ Logging Estruturado
  * ✅ Documentação Completa
+ * ✅ Múltiplos Volumes no Recebimento
+ * ✅ Controle de Volumes Padrão e Fora do Padrão
  * 
- * MANTÉM 100% DO CÓDIGO ORIGINAL
+ * MANTÉM 100% DO CÓDIGO ORIGINAL + NOVAS FUNCIONALIDADES
  * ============================================
  */
 
@@ -63,11 +65,29 @@ const destinos = [
 // Tipos de embalagem
 const tiposEmbalagem = ['UN', 'MALA', 'PCT', 'CX', 'FD', 'PLT'];
 
+// ============================================
+// VARIÁVEIS PARA MÚLTIPLOS VOLUMES
+// ============================================
+let contadorVolumes = 0;
+let contadorVolumesRecebimento = 0;
+let volumesData = [];
+let volumesRecebimentoData = [];
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     carregarDados();
     setupEventListeners();
     preencherFiltros();
+    
+    // Inicializar volumes
+    volumesData[0] = {
+        tipo: 'padrao',
+        qtd: 10,
+        unPorEmbalagem: 250,
+        lote: '',
+        validade: '',
+        localizacao: ''
+    };
 });
 
 // Configurar event listeners
@@ -85,6 +105,8 @@ function setupEventListeners() {
     document.getElementById('salvar-unidade').addEventListener('click', salvarUnidade);
     document.getElementById('salvar-categoria').addEventListener('click', salvarCategoria);
     document.getElementById('salvar-recebimento').addEventListener('click', salvarRecebimento);
+    document.getElementById('salvar-unidade-multipla').addEventListener('click', salvarUnidadeMultipla);
+    document.getElementById('salvar-recebimento-multiplo').addEventListener('click', salvarRecebimentoMultiplo);
     
     document.getElementById('search-produto').addEventListener('keyup', filtrarProdutos);
     document.getElementById('filtro-categoria-produto').addEventListener('change', filtrarProdutos);
@@ -100,8 +122,9 @@ function setupEventListeners() {
     document.getElementById('unidade-volume').addEventListener('input', calcularQuantidadeAutomatica);
     document.getElementById('unidade-fora-padrao').addEventListener('change', toggleCampoQuantidadeReal);
     
-    document.getElementById('recebimento-sku').addEventListener('change', atualizarInfoRecebimento);
-    document.getElementById('recebimento-volume').addEventListener('input', calcularQuantidadeRecebimento);
+    // Busca de produtos para múltiplos volumes
+    document.getElementById('busca-produto-unidade')?.addEventListener('keyup', filtrarProdutosUnidade);
+    document.getElementById('busca-produto-recebimento-principal')?.addEventListener('keyup', filtrarProdutosRecebimentoPrincipal);
     
     // Event listener para o filtro de período
     const periodoFilter = document.getElementById('filtro-recebimento-periodo');
@@ -134,6 +157,752 @@ function setupEventListeners() {
     if (filtroStatus) filtroStatus.addEventListener('change', filtrarEstoqueGeral);
     if (filtroUnidade) filtroUnidade.addEventListener('change', filtrarEstoqueGeral);
 }
+
+// ============================================
+// FUNÇÕES PARA MÚLTIPLOS VOLUMES
+// ============================================
+
+// Abrir modal de unidade múltipla
+function abrirModalUnidadeMultiplo() {
+    // Resetar contadores
+    contadorVolumes = 0;
+    volumesData = [];
+    
+    // Limpar container
+    const container = document.getElementById('volumes-container');
+    container.innerHTML = '';
+    
+    // Adicionar primeira linha
+    const novaLinha = criarLinhaVolume(0, 'padrao', 10, 250);
+    container.appendChild(novaLinha);
+    
+    // Inicializar dados
+    volumesData[0] = {
+        tipo: 'padrao',
+        qtd: 10,
+        unPorEmbalagem: 250,
+        lote: '',
+        validade: '',
+        localizacao: ''
+    };
+    
+    // Calcular totais
+    calcularTotalGeral();
+    
+    // Abrir modal
+    const modal = new bootstrap.Modal(document.getElementById('modalUnidadeMultiplo'));
+    modal.show();
+}
+
+// Criar linha de volume
+function criarLinhaVolume(index, tipo, qtd, unPorEmbalagem) {
+    const div = document.createElement('div');
+    div.className = 'volume-row mb-3 p-3 border rounded';
+    div.id = `volume-row-${index}`;
+    
+    const badgeClass = tipo === 'padrao' ? 'bg-success' : 'bg-warning';
+    const badgeText = tipo === 'padrao' ? 'PADRÃO' : 'FORA DO PADRÃO';
+    const unPorEmbReadonly = tipo === 'padrao' ? 'readonly' : '';
+    const deleteBtnDisplay = index === 0 ? 'style="display: none;"' : '';
+    
+    div.innerHTML = `
+        <div class="d-flex justify-content-between mb-2">
+            <h6 class="text-info">
+                <i class="bi bi-box"></i> Volume #${index + 1}
+                <span class="badge ${badgeClass} ms-2" id="badge-tipo-${index}">${badgeText}</span>
+            </h6>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removerLinhaVolume(${index})" ${deleteBtnDisplay}>
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">Tipo</label>
+                <select class="form-select tipo-volume" onchange="alterarTipoVolume(${index})">
+                    <option value="padrao" ${tipo === 'padrao' ? 'selected' : ''}>Padrão</option>
+                    <option value="fora-padrao" ${tipo === 'fora-padrao' ? 'selected' : ''}>Fora do Padrão</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Volume (Embalagem)</label>
+                <input type="text" class="form-control volume-embalagem" id="volume-embalagem-${index}" value="MALA" readonly>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Quantidade</label>
+                <input type="number" class="form-control volume-qtd" id="volume-qtd-${index}" value="${qtd}" min="1" step="1" oninput="calcularTotalLinha(${index})">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">UN por Embalagem</label>
+                <input type="number" class="form-control volume-un-por-emb" id="volume-un-por-emb-${index}" value="${unPorEmbalagem}" min="1" step="0.01" oninput="calcularTotalLinha(${index})" ${unPorEmbReadonly}>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Total UN (automático)</label>
+                <input type="number" class="form-control volume-total" id="volume-total-${index}" readonly style="background-color: #1e293b; color: #fbbf24; font-weight: 700;">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <label class="form-label">Lote</label>
+                <input type="text" class="form-control volume-lote" id="volume-lote-${index}" oninput="atualizarDadosVolume(${index})">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Validade</label>
+                <input type="date" class="form-control volume-validade" id="volume-validade-${index}" oninput="atualizarDadosVolume(${index})">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Localização</label>
+                <input type="text" class="form-control volume-localizacao" id="volume-localizacao-${index}" oninput="atualizarDadosVolume(${index})">
+            </div>
+        </div>
+    `;
+    
+    return div;
+}
+
+// Adicionar nova linha de volume
+function adicionarLinhaVolume() {
+    contadorVolumes++;
+    
+    // Pegar valores padrão do produto
+    const qtdPadrao = parseInt(document.getElementById('unidade-multipla-qtd-padrao').value) || 250;
+    
+    const novaLinha = criarLinhaVolume(contadorVolumes, 'fora-padrao', 1, 168);
+    document.getElementById('volumes-container').appendChild(novaLinha);
+    
+    // Inicializar dados
+    volumesData[contadorVolumes] = {
+        tipo: 'fora-padrao',
+        qtd: 1,
+        unPorEmbalagem: 168,
+        lote: '',
+        validade: '',
+        localizacao: ''
+    };
+    
+    calcularTotalLinha(contadorVolumes);
+    calcularTotalGeral();
+}
+
+// Remover linha de volume
+function removerLinhaVolume(index) {
+    const linha = document.getElementById(`volume-row-${index}`);
+    if (linha) {
+        linha.remove();
+        delete volumesData[index];
+        calcularTotalGeral();
+    }
+}
+
+// Alterar tipo de volume (padrão/fora do padrão)
+function alterarTipoVolume(index) {
+    const select = document.querySelector(`#volume-row-${index} .tipo-volume`);
+    const badge = document.getElementById(`badge-tipo-${index}`);
+    const unPorEmbInput = document.getElementById(`volume-un-por-emb-${index}`);
+    const qtdPadrao = parseInt(document.getElementById('unidade-multipla-qtd-padrao').value) || 250;
+    
+    if (select.value === 'padrao') {
+        badge.textContent = 'PADRÃO';
+        badge.className = 'badge bg-success ms-2';
+        unPorEmbInput.value = qtdPadrao;
+        unPorEmbInput.readOnly = true;
+    } else {
+        badge.textContent = 'FORA DO PADRÃO';
+        badge.className = 'badge bg-warning ms-2';
+        unPorEmbInput.readOnly = false;
+    }
+    
+    // Atualizar dados
+    if (!volumesData[index]) volumesData[index] = {};
+    volumesData[index].tipo = select.value;
+    if (select.value === 'padrao') {
+        volumesData[index].unPorEmbalagem = qtdPadrao;
+    }
+    
+    calcularTotalLinha(index);
+}
+
+// Calcular total de uma linha
+function calcularTotalLinha(index) {
+    const qtd = parseFloat(document.getElementById(`volume-qtd-${index}`).value) || 0;
+    const unPorEmb = parseFloat(document.getElementById(`volume-un-por-emb-${index}`).value) || 0;
+    const total = qtd * unPorEmb;
+    
+    document.getElementById(`volume-total-${index}`).value = total.toFixed(2);
+    
+    // Atualizar dados
+    if (!volumesData[index]) volumesData[index] = {};
+    volumesData[index].qtd = qtd;
+    volumesData[index].unPorEmbalagem = unPorEmb;
+    
+    calcularTotalGeral();
+}
+
+// Atualizar dados do volume (lote, validade, localização)
+function atualizarDadosVolume(index) {
+    if (!volumesData[index]) volumesData[index] = {};
+    
+    volumesData[index].lote = document.getElementById(`volume-lote-${index}`)?.value || '';
+    volumesData[index].validade = document.getElementById(`volume-validade-${index}`)?.value || '';
+    volumesData[index].localizacao = document.getElementById(`volume-localizacao-${index}`)?.value || '';
+}
+
+// Calcular total geral de todas as linhas
+function calcularTotalGeral() {
+    let totalVolumes = 0;
+    let totalGeralUN = 0;
+    
+    for (let i = 0; i <= contadorVolumes; i++) {
+        const linha = document.getElementById(`volume-row-${i}`);
+        if (linha) {
+            const qtd = parseFloat(document.getElementById(`volume-qtd-${i}`).value) || 0;
+            totalVolumes += qtd;
+            
+            const totalUN = parseFloat(document.getElementById(`volume-total-${i}`).value) || 0;
+            totalGeralUN += totalUN;
+        }
+    }
+    
+    const totalVolumesEl = document.getElementById('total-volumes');
+    const totalGeralEl = document.getElementById('total-geral-un');
+    
+    if (totalVolumesEl) totalVolumesEl.textContent = totalVolumes;
+    if (totalGeralEl) totalGeralEl.textContent = totalGeralUN.toFixed(2);
+}
+
+// Filtrar produtos na busca da unidade múltipla
+function filtrarProdutosUnidade() {
+    const termo = document.getElementById('busca-produto-unidade').value.toLowerCase();
+    const container = document.getElementById('lista-produtos-unidade');
+    
+    if (!container) return;
+    
+    // Se a lista estiver vazia, preencher
+    if (container.children.length === 0) {
+        produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
+            const item = document.createElement('a');
+            item.href = '#';
+            item.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary';
+            item.setAttribute('data-sku', p.sku);
+            item.setAttribute('data-tipo', p.tipoEmbalagem);
+            item.setAttribute('data-qtd', p.qtdPorEmbalagem);
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${p.nome}</span>
+                    <small class="text-muted">${p.sku}</small>
+                </div>
+                <small class="text-info">${p.categoria} - ${p.tipoEmbalagem} (${p.qtdPorEmbalagem} UN)</small>
+            `;
+            
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                selecionarProdutoUnidade(p.sku, p.nome, p.tipoEmbalagem, p.qtdPorEmbalagem);
+            });
+            
+            container.appendChild(item);
+        });
+    }
+    
+    // Filtrar
+    const items = container.getElementsByClassName('list-group-item');
+    let hasVisible = false;
+    
+    Array.from(items).forEach(item => {
+        const texto = item.textContent.toLowerCase();
+        if (texto.includes(termo)) {
+            item.style.display = 'block';
+            hasVisible = true;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    container.style.display = hasVisible ? 'block' : 'none';
+}
+
+// Selecionar produto na unidade múltipla
+function selecionarProdutoUnidade(sku, nome, tipoEmbalagem, qtdPorEmbalagem) {
+    document.getElementById('busca-produto-unidade').value = nome;
+    document.getElementById('unidade-multipla-sku').value = sku;
+    document.getElementById('unidade-multipla-tipo-embalagem').value = tipoEmbalagem;
+    document.getElementById('unidade-multipla-qtd-padrao').value = qtdPorEmbalagem;
+    document.getElementById('lista-produtos-unidade').style.display = 'none';
+    
+    // Atualizar todas as linhas existentes com o novo tipo de embalagem
+    for (let i = 0; i <= contadorVolumes; i++) {
+        const embalagemInput = document.getElementById(`volume-embalagem-${i}`);
+        if (embalagemInput) {
+            embalagemInput.value = tipoEmbalagem;
+        }
+    }
+    
+    // Atualizar a primeira linha com o valor padrão
+    const unPorEmb0 = document.getElementById(`volume-un-por-emb-0`);
+    if (unPorEmb0) {
+        unPorEmb0.value = qtdPorEmbalagem;
+        calcularTotalLinha(0);
+    }
+}
+
+// ============================================
+// FUNÇÕES PARA RECEBIMENTO MÚLTIPLO
+// ============================================
+
+// Abrir modal de recebimento múltiplo
+function abrirModalRecebimentoMultiplo() {
+    // Resetar contadores
+    contadorVolumesRecebimento = -1;
+    volumesRecebimentoData = [];
+    
+    // Limpar container
+    const container = document.getElementById('volumes-recebimento-container');
+    container.innerHTML = '';
+    
+    // Adicionar primeira linha
+    adicionarLinhaVolumeRecebimento();
+    
+    // Abrir modal
+    const modal = new bootstrap.Modal(document.getElementById('modalRecebimentoMultiplo'));
+    modal.show();
+}
+
+// Adicionar linha de volume no recebimento
+function adicionarLinhaVolumeRecebimento() {
+    contadorVolumesRecebimento++;
+    const container = document.getElementById('volumes-recebimento-container');
+    
+    const div = document.createElement('div');
+    div.className = 'volume-row mb-3 p-3 border rounded';
+    div.id = `volume-recebimento-row-${contadorVolumesRecebimento}`;
+    
+    const tipo = contadorVolumesRecebimento === 0 ? 'padrao' : 'fora-padrao';
+    const badgeClass = tipo === 'padrao' ? 'bg-success' : 'bg-warning';
+    const badgeText = tipo === 'padrao' ? 'PADRÃO' : 'FORA DO PADRÃO';
+    const qtdPadrao = parseInt(document.getElementById('recebimento-multiplo-qtd-padrao').value) || 250;
+    const qtdInicial = tipo === 'padrao' ? 10 : 1;
+    const unPorEmbInicial = tipo === 'padrao' ? qtdPadrao : 168;
+    
+    div.innerHTML = `
+        <div class="d-flex justify-content-between mb-2">
+            <h6 class="text-info">
+                <i class="bi bi-box"></i> Volume #${contadorVolumesRecebimento + 1}
+                <span class="badge ${badgeClass} ms-2" id="badge-recebimento-tipo-${contadorVolumesRecebimento}">${badgeText}</span>
+            </h6>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removerLinhaVolumeRecebimento(${contadorVolumesRecebimento})">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">Tipo</label>
+                <select class="form-select tipo-volume-recebimento" onchange="alterarTipoVolumeRecebimento(${contadorVolumesRecebimento})">
+                    <option value="padrao" ${tipo === 'padrao' ? 'selected' : ''}>Padrão</option>
+                    <option value="fora-padrao" ${tipo === 'fora-padrao' ? 'selected' : ''}>Fora do Padrão</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Volume (Embalagem)</label>
+                <input type="text" class="form-control volume-recebimento-embalagem" id="volume-recebimento-embalagem-${contadorVolumesRecebimento}" value="MALA" readonly>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Quantidade</label>
+                <input type="number" class="form-control volume-recebimento-qtd" id="volume-recebimento-qtd-${contadorVolumesRecebimento}" value="${qtdInicial}" min="1" step="1" oninput="calcularTotalLinhaRecebimento(${contadorVolumesRecebimento})">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">UN por Embalagem</label>
+                <input type="number" class="form-control volume-recebimento-un-por-emb" id="volume-recebimento-un-por-emb-${contadorVolumesRecebimento}" value="${unPorEmbInicial}" min="1" step="0.01" oninput="calcularTotalLinhaRecebimento(${contadorVolumesRecebimento})" ${tipo === 'padrao' ? 'readonly' : ''}>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Total UN (automático)</label>
+                <input type="number" class="form-control volume-recebimento-total" id="volume-recebimento-total-${contadorVolumesRecebimento}" readonly style="background-color: #1e293b; color: #fbbf24; font-weight: 700;">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <label class="form-label">Lote</label>
+                <input type="text" class="form-control volume-recebimento-lote" id="volume-recebimento-lote-${contadorVolumesRecebimento}" oninput="atualizarDadosVolumeRecebimento(${contadorVolumesRecebimento})">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Validade</label>
+                <input type="date" class="form-control volume-recebimento-validade" id="volume-recebimento-validade-${contadorVolumesRecebimento}" oninput="atualizarDadosVolumeRecebimento(${contadorVolumesRecebimento})">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Localização</label>
+                <input type="text" class="form-control volume-recebimento-localizacao" id="volume-recebimento-localizacao-${contadorVolumesRecebimento}" oninput="atualizarDadosVolumeRecebimento(${contadorVolumesRecebimento})">
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(div);
+    
+    // Inicializar dados
+    volumesRecebimentoData[contadorVolumesRecebimento] = {
+        tipo: tipo,
+        qtd: qtdInicial,
+        unPorEmbalagem: unPorEmbInicial,
+        lote: '',
+        validade: '',
+        localizacao: ''
+    };
+    
+    calcularTotalLinhaRecebimento(contadorVolumesRecebimento);
+    calcularTotalGeralRecebimento();
+}
+
+// Remover linha de volume no recebimento
+function removerLinhaVolumeRecebimento(index) {
+    const linha = document.getElementById(`volume-recebimento-row-${index}`);
+    if (linha) {
+        linha.remove();
+        delete volumesRecebimentoData[index];
+        calcularTotalGeralRecebimento();
+    }
+}
+
+// Alterar tipo de volume no recebimento
+function alterarTipoVolumeRecebimento(index) {
+    const select = document.querySelector(`#volume-recebimento-row-${index} .tipo-volume-recebimento`);
+    const badge = document.getElementById(`badge-recebimento-tipo-${index}`);
+    const unPorEmbInput = document.getElementById(`volume-recebimento-un-por-emb-${index}`);
+    const qtdPadrao = parseInt(document.getElementById('recebimento-multiplo-qtd-padrao').value) || 250;
+    
+    if (select.value === 'padrao') {
+        badge.textContent = 'PADRÃO';
+        badge.className = 'badge bg-success ms-2';
+        unPorEmbInput.value = qtdPadrao;
+        unPorEmbInput.readOnly = true;
+    } else {
+        badge.textContent = 'FORA DO PADRÃO';
+        badge.className = 'badge bg-warning ms-2';
+        unPorEmbInput.readOnly = false;
+    }
+    
+    // Atualizar dados
+    if (!volumesRecebimentoData[index]) volumesRecebimentoData[index] = {};
+    volumesRecebimentoData[index].tipo = select.value;
+    if (select.value === 'padrao') {
+        volumesRecebimentoData[index].unPorEmbalagem = qtdPadrao;
+    }
+    
+    calcularTotalLinhaRecebimento(index);
+}
+
+// Calcular total de uma linha no recebimento
+function calcularTotalLinhaRecebimento(index) {
+    const qtd = parseFloat(document.getElementById(`volume-recebimento-qtd-${index}`).value) || 0;
+    const unPorEmb = parseFloat(document.getElementById(`volume-recebimento-un-por-emb-${index}`).value) || 0;
+    const total = qtd * unPorEmb;
+    
+    document.getElementById(`volume-recebimento-total-${index}`).value = total.toFixed(2);
+    
+    // Atualizar dados
+    if (!volumesRecebimentoData[index]) volumesRecebimentoData[index] = {};
+    volumesRecebimentoData[index].qtd = qtd;
+    volumesRecebimentoData[index].unPorEmbalagem = unPorEmb;
+    
+    calcularTotalGeralRecebimento();
+}
+
+// Atualizar dados do volume no recebimento
+function atualizarDadosVolumeRecebimento(index) {
+    if (!volumesRecebimentoData[index]) volumesRecebimentoData[index] = {};
+    
+    volumesRecebimentoData[index].lote = document.getElementById(`volume-recebimento-lote-${index}`)?.value || '';
+    volumesRecebimentoData[index].validade = document.getElementById(`volume-recebimento-validade-${index}`)?.value || '';
+    volumesRecebimentoData[index].localizacao = document.getElementById(`volume-recebimento-localizacao-${index}`)?.value || '';
+}
+
+// Calcular total geral do recebimento
+function calcularTotalGeralRecebimento() {
+    let totalVolumes = 0;
+    let totalGeralUN = 0;
+    
+    for (let i = 0; i <= contadorVolumesRecebimento; i++) {
+        const linha = document.getElementById(`volume-recebimento-row-${i}`);
+        if (linha) {
+            const qtd = parseFloat(document.getElementById(`volume-recebimento-qtd-${i}`).value) || 0;
+            totalVolumes += qtd;
+            
+            const totalUN = parseFloat(document.getElementById(`volume-recebimento-total-${i}`).value) || 0;
+            totalGeralUN += totalUN;
+        }
+    }
+    
+    document.getElementById('total-volumes-recebimento').textContent = totalVolumes;
+    document.getElementById('total-geral-un-recebimento').textContent = totalGeralUN.toFixed(2);
+}
+
+// Filtrar produtos na busca do recebimento principal
+function filtrarProdutosRecebimentoPrincipal() {
+    const termo = document.getElementById('busca-produto-recebimento-principal').value.toLowerCase();
+    const container = document.getElementById('lista-produtos-recebimento-principal');
+    
+    if (!container) return;
+    
+    // Se a lista estiver vazia, preencher
+    if (container.children.length === 0) {
+        produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
+            const item = document.createElement('a');
+            item.href = '#';
+            item.className = 'list-group-item list-group-item-action bg-dark text-white border-secondary';
+            item.setAttribute('data-sku', p.sku);
+            item.setAttribute('data-tipo', p.tipoEmbalagem);
+            item.setAttribute('data-qtd', p.qtdPorEmbalagem);
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${p.nome}</span>
+                    <small class="text-muted">${p.sku}</small>
+                </div>
+                <small class="text-info">${p.categoria} - ${p.tipoEmbalagem} (${p.qtdPorEmbalagem} UN)</small>
+            `;
+            
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                selecionarProdutoRecebimentoPrincipal(p.sku, p.nome, p.tipoEmbalagem, p.qtdPorEmbalagem);
+            });
+            
+            container.appendChild(item);
+        });
+    }
+    
+    // Filtrar
+    const items = container.getElementsByClassName('list-group-item');
+    let hasVisible = false;
+    
+    Array.from(items).forEach(item => {
+        const texto = item.textContent.toLowerCase();
+        if (texto.includes(termo)) {
+            item.style.display = 'block';
+            hasVisible = true;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    container.style.display = hasVisible ? 'block' : 'none';
+}
+
+// Selecionar produto no recebimento principal
+function selecionarProdutoRecebimentoPrincipal(sku, nome, tipoEmbalagem, qtdPorEmbalagem) {
+    document.getElementById('busca-produto-recebimento-principal').value = nome;
+    document.getElementById('recebimento-multiplo-sku').value = sku;
+    document.getElementById('recebimento-multiplo-tipo-embalagem').value = tipoEmbalagem;
+    document.getElementById('recebimento-multiplo-qtd-padrao').value = qtdPorEmbalagem;
+    document.getElementById('lista-produtos-recebimento-principal').style.display = 'none';
+    
+    // Atualizar todas as linhas existentes com o novo tipo de embalagem
+    for (let i = 0; i <= contadorVolumesRecebimento; i++) {
+        const embalagemInput = document.getElementById(`volume-recebimento-embalagem-${i}`);
+        if (embalagemInput) {
+            embalagemInput.value = tipoEmbalagem;
+        }
+    }
+    
+    // Atualizar a primeira linha com o valor padrão se ela for do tipo padrão
+    const unPorEmb0 = document.getElementById(`volume-recebimento-un-por-emb-0`);
+    if (unPorEmb0 && volumesRecebimentoData[0]?.tipo === 'padrao') {
+        unPorEmb0.value = qtdPorEmbalagem;
+        calcularTotalLinhaRecebimento(0);
+    }
+}
+
+// Salvar unidade múltipla
+async function salvarUnidadeMultipla() {
+    const sku = document.getElementById('unidade-multipla-sku').value;
+    const status = document.getElementById('unidade-multipla-status').value;
+    const observacoes = document.getElementById('unidade-multipla-observacoes').value;
+    
+    if (!sku) {
+        alert('Selecione um produto!');
+        return;
+    }
+    
+    // Coletar todos os volumes
+    const volumes = [];
+    for (let i = 0; i <= contadorVolumes; i++) {
+        const linha = document.getElementById(`volume-row-${i}`);
+        if (linha && volumesData[i]) {
+            const qtd = volumesData[i].qtd || 0;
+            const unPorEmb = volumesData[i].unPorEmbalagem || 0;
+            
+            if (qtd > 0 && unPorEmb > 0) {
+                volumes.push({
+                    tipo: volumesData[i].tipo,
+                    qtd: qtd,
+                    unPorEmbalagem: unPorEmb,
+                    totalUN: qtd * unPorEmb,
+                    lote: volumesData[i].lote || '',
+                    validade: volumesData[i].validade || '',
+                    localizacao: volumesData[i].localizacao || ''
+                });
+            }
+        }
+    }
+    
+    if (volumes.length === 0) {
+        alert('Adicione pelo menos um volume!');
+        return;
+    }
+    
+    try {
+        // Salvar cada volume como uma unidade separada
+        for (const volume of volumes) {
+            const idUnidade = gerarIdUnico();
+            const unidade = {
+                tipo: 'unidade',
+                id: idUnidade,
+                sku: sku,
+                lote: volume.lote,
+                validade: volume.validade,
+                volume: volume.qtd,
+                quantidade: volume.totalUN,
+                unidadeEmbalagem: document.getElementById('unidade-multipla-tipo-embalagem').value || 'MALA',
+                status: status,
+                localizacao: volume.localizacao || '-',
+                destino: '',
+                foraPadrao: volume.tipo === 'fora-padrao',
+                qtdRealPorEmbalagem: volume.tipo === 'fora-padrao' ? volume.unPorEmbalagem : null,
+                tipoEntrada: 'Manual'
+            };
+            
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(unidade)
+            });
+            
+            unidades.push(unidade);
+        }
+        
+        // Fechar modal
+        bootstrap.Modal.getInstance(document.getElementById('modalUnidadeMultiplo')).hide();
+        
+        // Atualizar interface
+        atualizarInterface();
+        
+        alert(`${volumes.length} volume(s) criado(s) com sucesso!`);
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao salvar unidades.');
+    }
+}
+
+// Salvar recebimento múltiplo
+async function salvarRecebimentoMultiplo() {
+    const dataRecebimento = document.getElementById('recebimento-multiplo-data').value;
+    const numeroNF = document.getElementById('recebimento-multiplo-nf').value;
+    const fornecedor = document.getElementById('recebimento-multiplo-fornecedor').value;
+    const sku = document.getElementById('recebimento-multiplo-sku').value;
+    const observacoes = document.getElementById('recebimento-multiplo-observacoes').value;
+    
+    if (!dataRecebimento || !numeroNF || !fornecedor || !sku) {
+        alert('Data, NF, Fornecedor e Produto são obrigatórios!');
+        return;
+    }
+    
+    const produto = produtos.find(p => p.sku === sku);
+    
+    // Coletar todos os volumes
+    const volumes = [];
+    for (let i = 0; i <= contadorVolumesRecebimento; i++) {
+        const linha = document.getElementById(`volume-recebimento-row-${i}`);
+        if (linha && volumesRecebimentoData[i]) {
+            const qtd = volumesRecebimentoData[i].qtd || 0;
+            const unPorEmb = volumesRecebimentoData[i].unPorEmbalagem || 0;
+            
+            if (qtd > 0 && unPorEmb > 0) {
+                volumes.push({
+                    tipo: volumesRecebimentoData[i].tipo,
+                    qtd: qtd,
+                    unPorEmbalagem: unPorEmb,
+                    totalUN: qtd * unPorEmb,
+                    lote: volumesRecebimentoData[i].lote || '',
+                    validade: volumesRecebimentoData[i].validade || '',
+                    localizacao: volumesRecebimentoData[i].localizacao || ''
+                });
+            }
+        }
+    }
+    
+    if (volumes.length === 0) {
+        alert('Adicione pelo menos um volume!');
+        return;
+    }
+    
+    try {
+        // Salvar cada volume como um recebimento e uma unidade
+        for (const volume of volumes) {
+            // Salvar recebimento
+            const recebimento = {
+                tipo: 'recebimento',
+                dataRecebimento: dataRecebimento,
+                numeroNF: numeroNF,
+                fornecedor: fornecedor,
+                codigoSKU: sku,
+                nomeProduto: produto?.nome || '',
+                lote: volume.lote,
+                validade: volume.validade,
+                quantidade: volume.totalUN,
+                volume: volume.qtd,
+                unidadeMedida: document.getElementById('recebimento-multiplo-tipo-embalagem').value || 'MALA',
+                qtdPorEmbalagem: volume.unPorEmbalagem,
+                localizacao: volume.localizacao,
+                responsavel: 'Sistema',
+                observacoes: observacoes
+            };
+            
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(recebimento)
+            });
+            
+            // Criar unidade automaticamente
+            const idUnidade = gerarIdUnico();
+            const unidade = {
+                tipo: 'unidade',
+                id: idUnidade,
+                sku: sku,
+                lote: volume.lote,
+                validade: volume.validade,
+                volume: volume.qtd,
+                quantidade: volume.totalUN,
+                unidadeEmbalagem: document.getElementById('recebimento-multiplo-tipo-embalagem').value || 'MALA',
+                status: 'Disponível',
+                localizacao: volume.localizacao || '-',
+                destino: '',
+                foraPadrao: volume.tipo === 'fora-padrao',
+                qtdRealPorEmbalagem: volume.tipo === 'fora-padrao' ? volume.unPorEmbalagem : null,
+                tipoEntrada: 'Recebimento'
+            };
+            
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(unidade)
+            });
+            
+            unidades.push(unidade);
+        }
+        
+        // Fechar modal
+        bootstrap.Modal.getInstance(document.getElementById('modalRecebimentoMultiplo')).hide();
+        
+        // Recarregar dados
+        await carregarDados();
+        
+        alert(`${volumes.length} volume(s) recebido(s) com sucesso!`);
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao registrar recebimento.');
+    }
+}
+
+// ============================================
+// FUNÇÕES ORIGINAIS (MANTIDAS)
+// ============================================
 
 // Mostrar/esconder campo de quantidade por embalagem
 function toggleCampoQtdEmbalagem() {
@@ -199,7 +968,7 @@ function atualizarInfoEmbalagem() {
 }
 
 // ============================================
-// FUNÇÕES DE RECEBIMENTO
+// FUNÇÕES DE RECEBIMENTO (ORIGINAIS)
 // ============================================
 
 // Preencher select de SKUs nos filtros
@@ -320,7 +1089,7 @@ function calcularQuantidadeRecebimento() {
     document.getElementById('recebimento-quantidade').value = quantidadeTotal;
 }
 
-// Salvar recebimento
+// Salvar recebimento (original)
 async function salvarRecebimento() {
     const dataRecebimento = document.getElementById('recebimento-data').value;
     const sku = document.getElementById('recebimento-sku').value;
@@ -811,7 +1580,7 @@ function atualizarInterface() {
 }
 
 // ============================================
-// FUNÇÕES DE UNIDADES
+// FUNÇÕES DE UNIDADES (ORIGINAIS)
 // ============================================
 
 // Atualizar painel
@@ -1034,7 +1803,8 @@ async function salvarProduto() {
         alert('Erro ao salvar produto.');
     }
 }
-// Salvar unidade
+
+// Salvar unidade (original)
 async function salvarUnidade() {
     const id = document.getElementById('unidade-id').value || gerarIdUnico();
     const sku = document.getElementById('unidade-sku').value;
@@ -1246,17 +2016,6 @@ function verQRCodeCompleto() {
     window.open(url, '_blank');
 }
 
-// Ver QR Code completo
-function verQRCodeCompleto() {
-    if (!unidadeAtual) return;
-    
-    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
-    
-    const url = `qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote}&validade=${unidadeAtual.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume}&quantidade=${unidadeAtual.quantidade}&unidade=${unidadeAtual.unidadeEmbalagem}`;
-    
-    window.open(url, '_blank', 'width=600,height=700');
-}
-
 // Filtrar unidades
 function filtrarUnidades() {
     const skuFiltro = document.getElementById('filtro-produto-unidades')?.value;
@@ -1319,29 +2078,29 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
-    <td><small>${u.id}</small></td>
-    <td>${produto ? produto.nome : u.sku}</td>
-    <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
-    <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
-    <td>${u.lote}</td>
-    <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
-    <td>${u.volume}</td>
-    <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
-    <!-- NOVA LINHA: Tipo de Entrada -->
-    <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">${u.tipoEntrada || 'Manual'}</span></td>
-    <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
-    <td>${u.destino || '-'}</td>
-    <td>
-        <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
-            <i class="bi bi-eye"></i>
-        </button>
-        ${u.status === 'Disponível' && u.quantidade > 0 ? `
-            <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
-                <i class="bi bi-arrow-right"></i>
-            </button>
-        ` : ''}
-    </td>
-`;
+            <td><small>${u.id}</small></td>
+            <td>${produto ? produto.nome : u.sku}</td>
+            <td><span class="badge ${getCategoriaBadgeClass(produto?.categoria)}">${produto?.categoria || '-'}</span></td>
+            <td><span class="badge bg-info">${u.unidadeEmbalagem}</span></td>
+            <td>${u.lote}</td>
+            <td class="${vencido ? 'text-danger fw-bold' : ''}">${formatarData(u.validade)}</td>
+            <td>${u.volume}</td>
+            <td>${quantidadeFormatada} ${produto?.unidadeBase || 'UN'}</td>
+            <!-- NOVA LINHA: Tipo de Entrada -->
+            <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">${u.tipoEntrada || 'Manual'}</span></td>
+            <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
+            <td>${u.destino || '-'}</td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
+                    <i class="bi bi-eye"></i>
+                </button>
+                ${u.status === 'Disponível' && u.quantidade > 0 ? `
+                    <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                ` : ''}
+            </td>
+        `;
         tbody.appendChild(tr);
     });
 }
@@ -1671,7 +2430,7 @@ function formatarData(data) {
 }
 
 // ============================================
-// FUNÇÕES DE BUSCA DE PRODUTOS NO MODAL
+// FUNÇÕES DE BUSCA DE PRODUTOS NO MODAL (ORIGINAIS)
 // ============================================
 
 // Preencher a lista de produtos
@@ -1739,33 +2498,6 @@ function filtrarProdutosLista() {
     document.getElementById('lista-produtos-container').style.display = hasVisible ? 'block' : 'none';
 }
 
-// Abrir modal unidade (modificada)
-function abrirModalUnidade(sku) {
-    preencherListaProdutos();
-    document.getElementById('form-unidade').reset();
-    document.getElementById('unidade-id').value = '';
-    document.getElementById('unidade-sku').value = sku || '';
-    document.getElementById('unidade-volume').value = '1';
-    document.getElementById('unidade-status').value = 'Disponível';
-    document.getElementById('campo-quantidade-real').style.display = 'none';
-    document.getElementById('lista-produtos-container').style.display = 'none';
-    
-    if (sku) {
-        const produto = produtos.find(p => p.sku === sku);
-        if (produto) {
-            document.getElementById('busca-produto').value = produto.nome;
-            selecionarProduto(produto.sku, produto.nome, produto.tipoEmbalagem, produto.qtdPorEmbalagem, produto.unidadeBase);
-        }
-    } else {
-        document.getElementById('busca-produto').value = '';
-        document.getElementById('quantidade-unidade').textContent = '(UN)';
-        document.getElementById('quantidade-descricao').textContent = 'Total em UN';
-    }
-    
-    const modal = new bootstrap.Modal(document.getElementById('modalUnidade'));
-    modal.show();
-}
-
 // Event listener para o campo de busca
 document.getElementById('busca-produto')?.addEventListener('keyup', filtrarProdutosLista);
 document.getElementById('busca-produto')?.addEventListener('focus', () => {
@@ -1775,7 +2507,7 @@ document.getElementById('busca-produto')?.addEventListener('focus', () => {
 });
 
 // ============================================
-// FUNÇÕES DE BUSCA DE PRODUTOS NO RECEBIMENTO
+// FUNÇÕES DE BUSCA DE PRODUTOS NO RECEBIMENTO (ORIGINAIS)
 // ============================================
 
 // Preencher a lista de produtos no recebimento
@@ -1844,25 +2576,16 @@ function filtrarProdutosRecebimento() {
     document.getElementById('lista-recebimento-container').style.display = hasVisible ? 'block' : 'none';
 }
 
-// Modificar a função preencherSelectProdutosRecebimento
-function preencherSelectProdutosRecebimento() {
-    preencherListaProdutosRecebimento();
-}
-
-// Modificar a função que abre o modal de recebimento (se houver)
-// Adicione esta linha no início da função que abre o modal:
-// preencherListaProdutosRecebimento();
-
 // Event listeners para o campo de busca
 document.getElementById('busca-recebimento-produto')?.addEventListener('keyup', filtrarProdutosRecebimento);
-document.getElementById('busca-rebimento-produto')?.addEventListener('focus', () => {
+document.getElementById('busca-recebimento-produto')?.addEventListener('focus', () => {
     if (document.getElementById('busca-recebimento-produto').value) {
         filtrarProdutosRecebimento();
     }
 });
 
 // ============================================
-// FUNÇÕES DE RECEBIMENTO COM MÚLTIPLOS PRODUTOS
+// FUNÇÕES DE RECEBIMENTO COM MÚLTIPLOS PRODUTOS (ORIGINAIS)
 // ============================================
 
 let contadorItens = 0;
@@ -2059,132 +2782,6 @@ function calcularQuantidadeItem(index) {
     const quantidadeInput = document.getElementById(`item-quantidade-${index}`);
     if (quantidadeInput) {
         quantidadeInput.value = quantidade.toFixed(2);
-    }
-}
-
-// Modificar a função salvarRecebimento para processar múltiplos itens
-async function salvarRecebimento() {
-    const dataRecebimento = document.getElementById('recebimento-data').value;
-    const numeroNF = document.getElementById('recebimento-nf').value;
-    const fornecedor = document.getElementById('recebimento-fornecedor').value;
-    const observacoes = document.getElementById('recebimento-observacoes').value;
-    
-    if (!dataRecebimento || !numeroNF || !fornecedor) {
-        alert('Data, NF e Fornecedor são obrigatórios!');
-        return;
-    }
-    
-    // Coletar todos os itens
-    const itens = [];
-    for (let i = 0; i <= contadorItens; i++) {
-        const item = document.getElementById(`item-recebimento-${i}`);
-        if (!item) continue;
-        
-        const sku = document.getElementById(`item-sku-${i}`)?.value;
-        const lote = document.getElementById(`item-lote-${i}`)?.value;
-        const validade = document.getElementById(`item-validade-${i}`)?.value;
-        const volume = parseFloat(document.getElementById(`item-volume-${i}`)?.value) || 1;
-        const quantidade = parseFloat(document.getElementById(`item-quantidade-${i}`)?.value) || 0;
-        const unidadeMedida = document.getElementById(`item-unidade-medida-${i}`)?.value;
-        const localizacao = document.getElementById(`item-localizacao-${i}`)?.value || '';
-        
-        if (!sku || !lote || !validade || !quantidade) {
-            alert(`Preencha todos os campos do item ${i + 1}`);
-            return;
-        }
-        
-        const produto = produtos.find(p => p.sku === sku);
-        
-        itens.push({
-            sku: sku,
-            nomeProduto: produto?.nome || '',
-            lote: lote,
-            validade: validade,
-            volume: volume,
-            quantidade: quantidade,
-            unidadeMedida: unidadeMedida,
-            localizacao: localizacao
-        });
-    }
-    
-    if (itens.length === 0) {
-        alert('Adicione pelo menos um produto!');
-        return;
-    }
-    
-    try {
-        // Salvar cada item como um recebimento separado
-        for (const item of itens) {
-            const recebimento = {
-                tipo: 'recebimento',
-                dataRecebimento: dataRecebimento,
-                numeroNF: numeroNF,
-                fornecedor: fornecedor,
-                codigoSKU: item.sku,
-                nomeProduto: item.nomeProduto,
-                lote: item.lote,
-                validade: item.validade,
-                quantidade: item.quantidade,
-                volume: item.volume,
-                unidadeMedida: item.unidadeMedida,
-                qtdPorEmbalagem: 1, // Pode ajustar se necessário
-                localizacao: item.localizacao,
-                responsavel: 'Sistema',
-                observacoes: observacoes
-            };
-            
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(recebimento)
-            });
-            
-            // Criar unidade automaticamente
-            const idUnidade = gerarIdUnico();
-            const unidade = {
-                tipo: 'unidade',
-                id: idUnidade,
-                sku: item.sku,
-                lote: item.lote,
-                validade: item.validade,
-                volume: item.volume,
-                quantidade: item.quantidade,
-                unidadeEmbalagem: item.unidadeMedida,
-                status: 'Disponível',
-                localizacao: item.localizacao || '-',
-                destino: '',
-                foraPadrao: false,
-                qtdRealPorEmbalagem: null
-            };
-            
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(unidade)
-            });
-        }
-        
-        // Limpar formulário
-        document.getElementById('form-recebimento').reset();
-        
-        // Remover itens extras (manter apenas o primeiro)
-        const container = document.getElementById('itens-recebimento-container');
-        while (container.children.length > 1) {
-            container.lastChild.remove();
-        }
-        
-        // Resetar contador
-        contadorItens = 0;
-        
-        bootstrap.Modal.getInstance(document.getElementById('modalRecebimento')).hide();
-        await carregarDados();
-        
-        alert(`${itens.length} produto(s) recebido(s) com sucesso!`);
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao registrar recebimento.');
     }
 }
 
