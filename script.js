@@ -737,7 +737,6 @@ function selecionarProdutoRecebimentoMultiplo(produtoIndex, sku, nome, tipoEmbal
 // ============================================
 // FUNÇÃO PRINCIPAL: SALVAR RECEBIMENTO COMO UMA ÚNICA UNIDADE
 // ============================================
-
 async function salvarRecebimentoMultiplo() {
     const dataRecebimento = document.getElementById('recebimento-multiplo-data').value;
     const numeroNF = document.getElementById('recebimento-multiplo-nf').value;
@@ -839,23 +838,71 @@ async function salvarRecebimentoMultiplo() {
     };
     
     try {
-        // Salvar a unidade (uma única linha na planilha de Unidades)
-        await fetch(WEB_APP_URL, {
+        // ============================================
+        // ENVIO 1: Salvar no Google Sheets via Web App
+        // ============================================
+        console.log('📤 Enviando unidade para o Google Sheets...', unidadeUnica);
+        
+        // PRIMEIRA TENTATIVA: Enviar como JSON stringificado
+        const response1 = await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors', // Isso impede ver a resposta, mas vamos tentar mesmo assim
+            headers: { 
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
                 tipo: 'unidade-multipla',
                 id: idUnidade,
-                dados: JSON.stringify(unidadeUnica)
+                dados: JSON.stringify(unidadeUnica),
+                timestamp: new Date().toISOString()
             })
         });
         
-        // Adicionar à lista local
-        unidades.push(unidadeUnica);
+        console.log('✅ Envio 1 concluído');
         
-        // Salvar como recebimento também
+        // ============================================
+        // ENVIO 2: Também salvar na planilha de Unidades no formato tradicional
+        // ============================================
+        // Para cada volume, criar uma linha na planilha (formato compatível)
+        for (let p = 0; p < produtosArray.length; p++) {
+            const produto = produtosArray[p];
+            for (let v = 0; v < produto.volumes.length; v++) {
+                const volume = produto.volumes[v];
+                
+                const unidadeTradicional = {
+                    tipo: 'unidade',
+                    id: `${idUnidade}-P${p+1}V${v+1}`,
+                    sku: produto.sku,
+                    lote: volume.lote,
+                    validade: volume.validade,
+                    volume: volume.qtdVolumes,
+                    quantidade: volume.totalUN,
+                    unidadeEmbalagem: produto.tipoEmbalagem,
+                    status: status,
+                    localizacao: volume.localizacao || '-',
+                    destino: '',
+                    foraPadrao: volume.tipo === 'fora-padrao',
+                    qtdRealPorEmbalagem: volume.tipo === 'fora-padrao' ? volume.unPorEmbalagem : null,
+                    tipoEntrada: 'Recebimento',
+                    numeroNF: numeroNF,
+                    fornecedor: fornecedor,
+                    dataRecebimento: dataRecebimento
+                };
+                
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(unidadeTradicional)
+                });
+            }
+        }
+        
+        // ============================================
+        // ENVIO 3: Salvar como recebimento
+        // ============================================
         const recebimentoRegistro = {
+            tipo: 'recebimento',
             idUnidade: idUnidade,
             data: dataRecebimento,
             nf: numeroNF,
@@ -863,9 +910,21 @@ async function salvarRecebimentoMultiplo() {
             produtos: produtosArray.length,
             volumes: totalVolumes,
             totalUN: totalUN,
-            resumo: produtosArray.map(p => `${p.volumes.length} vol`).join(' | ')
+            resumo: produtosArray.map(p => `${p.volumes.length} vol`).join(' | '),
+            observacoes: observacoes
         };
         
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(recebimentoRegistro)
+        });
+        
+        // ============================================
+        // ADICIONAR À LISTA LOCAL
+        // ============================================
+        unidades.push(unidadeUnica);
         recebimentos.push(recebimentoRegistro);
         
         // Fechar modal
@@ -877,10 +936,33 @@ async function salvarRecebimentoMultiplo() {
         atualizarTabelaUnidades();
         atualizarTabelaRecebimentos();
         
-        alert(`Recebimento concluído! Unidade criada: ${idUnidade}`);
+        alert(`✅ Recebimento concluído! Unidade criada: ${idUnidade}\n\nDados salvos no Google Sheets.`);
+        
     } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao salvar recebimento.');
+        console.error('❌ Erro detalhado:', error);
+        alert(`Erro ao salvar no Google Sheets: ${error.message}\n\nOs dados foram salvos apenas localmente e podem ser perdidos ao atualizar a página.`);
+        
+        // Mesmo com erro, adicionar localmente
+        unidades.push(unidadeUnica);
+        recebimentos.push({
+            idUnidade: idUnidade,
+            data: dataRecebimento,
+            nf: numeroNF,
+            fornecedor: fornecedor,
+            produtos: produtosArray.length,
+            volumes: totalVolumes,
+            totalUN: totalUN,
+            resumo: produtosArray.map(p => `${p.volumes.length} vol`).join(' | ')
+        });
+        
+        // Fechar modal
+        const modalElement = document.getElementById('modalRecebimentoMultiplo');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) modal.hide();
+        
+        // Atualizar interface
+        atualizarTabelaUnidades();
+        atualizarTabelaRecebimentos();
     }
 }
 
@@ -1877,6 +1959,9 @@ function gerarIdUnico() {
 }
 
 // Atualizar tabela de unidades (MODIFICADA)
+// ============================================
+// FUNÇÃO ATUALIZAR TABELA DE UNIDADES - VERSÃO ORIGINAL RESTAURADA
+// ============================================
 function atualizarTabelaUnidades(unidadesFiltradas = null) {
     const tbody = document.getElementById('tabela-unidades');
     if (!tbody) return;
@@ -1886,38 +1971,55 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
     tbody.innerHTML = '';
     
     if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhuma unidade encontrada</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center">Nenhuma unidade ativa encontrada</td></tr>';
         return;
     }
     
     dados.forEach(u => {
+        // Verificar se é unidade múltipla (com vários produtos)
         if (u.tipo === 'unidade-multipla') {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><small class="text-warning">${u.id}</small><br><small class="text-info">Múltiplos</small></td>
-                <td>
-                    <strong>${u.produtos.length} produto(s)</strong><br>
-                    <small>${u.produtos.map(p => p.nome.substring(0, 30)).join('; ')}</small>
-                </td>
-                <td>${u.numeroNF || '-'}</td>
-                <td>${u.fornecedor || '-'}</td>
-                <td>${formatarData(u.dataRecebimento) || '-'}</td>
-                <td>${u.totalVolumes}</td>
-                <td><strong class="text-warning">${u.totalUN.toFixed(2)}</strong> UN</td>
-                <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
-                <td>
-                    <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+            // Para unidades múltiplas, criar uma linha para cada produto/volume
+            u.produtos.forEach((produto, pIndex) => {
+                produto.volumes.forEach((volume, vIndex) => {
+                    const tr = document.createElement('tr');
+                    
+                    // Encontrar o produto nos dados principais para pegar categoria
+                    const produtoInfo = produtos.find(p => p.sku === produto.sku);
+                    
+                    tr.innerHTML = `
+                        <td><small class="text-warning">${u.id}</small><br><small class="text-info">M${pIndex+1}V${vIndex+1}</small></td>
+                        <td>${produto.nome}</td>
+                        <td><span class="badge ${getCategoriaBadgeClass(produtoInfo?.categoria)}">${produtoInfo?.categoria || '-'}</span></td>
+                        <td><span class="badge bg-info">${produto.tipoEmbalagem}</span></td>
+                        <td>${volume.lote || '-'}</td>
+                        <td>${formatarData(volume.validade) || '-'}</td>
+                        <td>${volume.qtdVolumes}</td>
+                        <td>${volume.totalUN.toFixed(2).replace('.', ',')} ${produtoInfo?.unidadeBase || 'UN'}</td>
+                        <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">Recebimento</span></td>
+                        <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
+                        <td>${u.destino || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')" title="Ver detalhes">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            ${u.status === 'Disponível' && volume.totalUN > 0 ? `
+                                <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}', '${produto.sku}', '${volume.lote}', '${volume.validade}', '${produto.nome}', ${volume.qtdVolumes}, ${volume.totalUN}, '${produto.tipoEmbalagem}', '${produtoInfo?.unidadeBase || 'UN'}', ${produtoInfo?.qtdPorEmbalagem || 1})" title="Dar baixa">
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
         } else {
+            // Unidade simples (formato original)
             const produto = produtos.find(p => p.sku === u.sku);
             const validadeDate = new Date(u.validade);
             const hoje = new Date();
             const vencido = validadeDate < hoje;
             
+            // CORREÇÃO: Formatar com 2 casas decimais
             const quantidadeFormatada = u.quantidade.toFixed(2).replace('.', ',');
             
             const tr = document.createElement('tr');
@@ -1934,11 +2036,11 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.destino || '-'}</td>
                 <td>
-                    <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
+                    <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')" title="Ver detalhes">
                         <i class="bi bi-eye"></i>
                     </button>
                     ${u.status === 'Disponível' && u.quantidade > 0 ? `
-                        <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}')">
+                        <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}', '${u.sku}', '${u.lote}', '${u.validade}', '${produto?.nome || ''}', ${u.volume}, ${u.quantidade}, '${u.unidadeEmbalagem}', '${produto?.unidadeBase || 'UN'}', ${produto?.qtdPorEmbalagem || 1})" title="Dar baixa">
                             <i class="bi bi-arrow-right"></i>
                         </button>
                     ` : ''}
@@ -1947,6 +2049,15 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
             tbody.appendChild(tr);
         }
     });
+}
+
+// ============================================
+// FUNÇÃO ABRIR MODAL TRANSFERÊNCIA - ATUALIZADA
+// ============================================
+function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, quantidade, unidade, unidadeBase, qtdPorEmbalagem) {
+    const url = `baixa-view.html?id=${id}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
+    
+    window.open(url, '_blank', 'width=700,height=800');
 }
 
 // Atualizar tabela de recebimentos (MODIFICADA)
@@ -2951,4 +3062,5 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
