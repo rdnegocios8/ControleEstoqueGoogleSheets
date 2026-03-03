@@ -7,8 +7,10 @@
     ✅ Estrutura Semântica
     ✅ Validação de Formulários
     ✅ Comentários Organizados
+    ✅ Múltiplos Volumes no Recebimento
+    ✅ Controle de Volumes Padrão e Fora do Padrão
     
-    MANTÉM 100% DO CÓDIGO ORIGINAL
+    MANTÉM 100% DO CÓDIGO ORIGINAL + NOVAS FUNCIONALIDADES
     ============================================
 -->
 <!DOCTYPE html>
@@ -261,8 +263,8 @@
                 <div id="unidades-view" style="display: none;">
                     <div class="d-flex justify-content-between align-items-center">
                         <h2>Unidades</h2>
-                        <button class="btn btn-success" onclick="abrirModalUnidade('')">
-                            <i class="bi bi-plus"></i> Nova Unidade
+                        <button class="btn btn-success" onclick="abrirModalUnidadeMultiplo()">
+                            <i class="bi bi-plus"></i> Nova Unidade (Múltiplos Volumes)
                         </button>
                     </div>
                     
@@ -358,8 +360,8 @@
                 <div id="recebimentos-view" style="display: none;">
                     <div class="d-flex justify-content-between align-items-center">
                         <h2>Recebimentos</h2>
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRecebimento">
-                            <i class="bi bi-truck"></i> Novo Recebimento
+                        <button class="btn btn-success" onclick="abrirModalRecebimentoMultiplo()">
+                            <i class="bi bi-truck"></i> Novo Recebimento (Múltiplos Volumes)
                         </button>
                     </div>
 
@@ -619,7 +621,7 @@
         </div>
     </div>
 
-    <!-- MODAL PRODUTO -->
+    <!-- MODAL PRODUTO (ORIGINAL) -->
     <div class="modal fade" id="modalProduto" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -661,7 +663,7 @@
                                 <option value="CX">CX - Caixa</option>
                                 <option value="FD">FD - Fardo</option>
                                 <option value="PLT">PLT - Palete</option>
-                                <option value="PLT">TBR - TAMBOR</option>
+                                <option value="TBR">TBR - TAMBOR</option>
                             </select>
                         </div>
                         <div class="mb-3" id="campo-qtd-por-embalagem" style="display: none;">
@@ -694,207 +696,453 @@
         </div>
     </div>
 
-    <!-- Modal Unidade -->
-<div class="modal fade" id="modalUnidade" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nova Unidade</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="form-unidade">
-                    <input type="hidden" id="unidade-id">
-                    
-                    <!-- CAMPO DE BUSCA DE PRODUTOS -->
-                    <div class="mb-3">
-                        <label for="busca-produto" class="form-label">Buscar Produto</label>
-                        <input type="text" class="form-control" id="busca-produto" placeholder="Digite para buscar...">
-                    </div>
-                    
-                    <!-- SELECT OCULTO PARA ARMAZENAR O VALOR SELECIONADO -->
-                    <input type="hidden" id="unidade-sku" required>
-                    
-                    <!-- LISTA DE PRODUTOS -->
-                    <div class="mb-3" id="lista-produtos-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
-                        <div id="lista-produtos" class="list-group list-group-flush">
-                            <!-- Produtos serão inseridos aqui -->
+    <!-- MODAL UNIDADE ORIGINAL (MANTIDO) -->
+    <div class="modal fade" id="modalUnidade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Unidade</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-unidade">
+                        <input type="hidden" id="unidade-id">
+                        
+                        <!-- CAMPO DE BUSCA DE PRODUTOS -->
+                        <div class="mb-3">
+                            <label for="busca-produto" class="form-label">Buscar Produto</label>
+                            <input type="text" class="form-control" id="busca-produto" placeholder="Digite para buscar...">
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="unidade-lote" class="form-label">Lote</label>
-                        <input type="text" class="form-control" id="unidade-lote" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="unidade-validade" class="form-label">Validade</label>
-                        <input type="date" class="form-control" id="unidade-validade" required>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="unidade-volume" class="form-label">
-                                    <span id="volume-label">Volume</span>
-                                </label>
-                                <input type="number" class="form-control" id="unidade-volume" min="1" value="1" step="any" required>
-                                <small class="text-muted" id="volume-descricao">Número de embalagens</small>
+                        
+                        <!-- SELECT OCULTO PARA ARMAZENAR O VALOR SELECIONADO -->
+                        <input type="hidden" id="unidade-sku" required>
+                        
+                        <!-- LISTA DE PRODUTOS -->
+                        <div class="mb-3" id="lista-produtos-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
+                            <div id="lista-produtos" class="list-group list-group-flush">
+                                <!-- Produtos serão inseridos aqui -->
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="unidade-quantidade" class="form-label">
-                                    Quantidade Total <span id="quantidade-unidade">(UN)</span>
-                                </label>
-                                <input type="number" class="form-control" id="unidade-quantidade" min="1" step="any" required>
-                                <small class="text-muted" id="quantidade-descricao">Total em UN</small>
+                        
+                        <div class="mb-3">
+                            <label for="unidade-lote" class="form-label">Lote</label>
+                            <input type="text" class="form-control" id="unidade-lote" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="unidade-validade" class="form-label">Validade</label>
+                            <input type="date" class="form-control" id="unidade-validade" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="unidade-volume" class="form-label">
+                                        <span id="volume-label">Volume</span>
+                                    </label>
+                                    <input type="number" class="form-control" id="unidade-volume" min="1" value="1" step="any" required>
+                                    <small class="text-muted" id="volume-descricao">Número de embalagens</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="unidade-quantidade" class="form-label">
+                                        Quantidade Total <span id="quantidade-unidade">(UN)</span>
+                                    </label>
+                                    <input type="number" class="form-control" id="unidade-quantidade" min="1" step="any" required>
+                                    <small class="text-muted" id="quantidade-descricao">Total em UN</small>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="unidade-fora-padrao">
-                        <label class="form-check-label" for="unidade-fora-padrao">
-                            Embalagem fora do padrão (quantidade diferente)
-                        </label>
-                    </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="unidade-fora-padrao">
+                            <label class="form-check-label" for="unidade-fora-padrao">
+                                Embalagem fora do padrão (quantidade diferente)
+                            </label>
+                        </div>
 
-                    <div class="mb-3" id="campo-quantidade-real" style="display: none;">
-                        <label for="unidade-quantidade-real" class="form-label">Quantidade Real por Embalagem</label>
-                        <input type="number" class="form-control" id="unidade-quantidade-real" min="1" step="any">
-                        <small class="text-muted">Quantidade que realmente tem nesta embalagem</small>
-                    </div>
+                        <div class="mb-3" id="campo-quantidade-real" style="display: none;">
+                            <label for="unidade-quantidade-real" class="form-label">Quantidade Real por Embalagem</label>
+                            <input type="number" class="form-control" id="unidade-quantidade-real" min="1" step="any">
+                            <small class="text-muted">Quantidade que realmente tem nesta embalagem</small>
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="unidade-localizacao" class="form-label">Localização</label>
-                        <input type="text" class="form-control" id="unidade-localizacao">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="unidade-status" class="form-label">Status</label>
-                        <select class="form-control" id="unidade-status">
-                            <option value="Disponível">Disponível</option>
-                            <option value="Bloqueado">Bloqueado</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="salvar-unidade">Salvar</button>
+                        <div class="mb-3">
+                            <label for="unidade-localizacao" class="form-label">Localização</label>
+                            <input type="text" class="form-control" id="unidade-localizacao">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="unidade-status" class="form-label">Status</label>
+                            <select class="form-control" id="unidade-status">
+                                <option value="Disponível">Disponível</option>
+                                <option value="Bloqueado">Bloqueado</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="salvar-unidade">Salvar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-    <!-- Modal Recebimento -->
-<div class="modal fade" id="modalRecebimento" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-truck"></i> Recebimento de Mercadorias
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="form-recebimento">
-                    <!-- Dados da Nota Fiscal -->
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label">Data do Recebimento</label>
-                            <input type="date" class="form-control" id="recebimento-data" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Número da NF</label>
-                            <input type="text" class="form-control" id="recebimento-nf" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Fornecedor</label>
-                            <input type="text" class="form-control" id="recebimento-fornecedor" required>
-                        </div>
-                    </div>
-
-                    <!-- LISTA DE PRODUTOS DO RECEBIMENTO -->
-                    <div class="card border-secondary mb-3">
-                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-box"></i> Produtos da Nota</span>
-                            <button type="button" class="btn btn-sm btn-success" onclick="adicionarItemRecebimento()">
-                                <i class="bi bi-plus"></i> Adicionar Produto
-                            </button>
-                        </div>
-                        <div class="card-body" id="itens-recebimento-container">
-                            <!-- Os itens serão inseridos aqui -->
-                            <div class="item-recebimento mb-3 p-3 border rounded" id="item-recebimento-0">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <h6 class="text-info">Produto 1</h6>
-                                    <button type="button" class="btn btn-sm btn-danger" onclick="removerItemRecebimento(0)">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+    <!-- NOVO MODAL UNIDADE MÚLTIPLA (ADICIONADO) -->
+    <div class="modal fade" id="modalUnidadeMultiplo" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-boxes"></i> Nova Unidade - Múltiplos Volumes
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-unidade-multipla">
+                        <input type="hidden" id="unidade-multipla-id">
+                        
+                        <!-- Dados do Produto (fixo para todas as linhas) -->
+                        <div class="card border-primary mb-4">
+                            <div class="card-header bg-dark text-white">
+                                <i class="bi bi-box"></i> Produto
+                            </div>
+                            <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-4 mb-2">
+                                    <div class="col-md-6">
                                         <label class="form-label">Buscar Produto</label>
-                                        <input type="text" class="form-control busca-produto-recebimento" 
-                                               placeholder="Digite para buscar..." data-index="0">
-                                        <input type="hidden" class="item-sku" id="item-sku-0" required>
+                                        <input type="text" class="form-control" id="busca-produto-unidade" placeholder="Digite para buscar...">
+                                        <input type="hidden" id="unidade-multipla-sku">
                                     </div>
-                                    <div class="col-md-2 mb-2">
-                                        <label class="form-label">Lote</label>
-                                        <input type="text" class="form-control item-lote" id="item-lote-0" required>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Tipo Embalagem</label>
+                                        <input type="text" class="form-control" id="unidade-multipla-tipo-embalagem" readonly>
                                     </div>
-                                    <div class="col-md-2 mb-2">
-                                        <label class="form-label">Validade</label>
-                                        <input type="date" class="form-control item-validade" id="item-validade-0" required>
-                                    </div>
-                                    <div class="col-md-2 mb-2">
-                                        <label class="form-label">Volume</label>
-                                        <input type="number" class="form-control item-volume" id="item-volume-0" min="1" value="1" step="any" required>
-                                        <small class="text-muted">Qtd de embalagens</small>
-                                    </div>
-                                    <div class="col-md-2 mb-2">
-                                        <label class="form-label">Quantidade</label>
-                                        <input type="number" class="form-control item-quantidade" id="item-quantidade-0" step="any" required>
-                                        <small class="text-muted item-unidade" id="item-unidade-0">UN</small>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Qtd Padrão por Embalagem</label>
+                                        <input type="text" class="form-control" id="unidade-multipla-qtd-padrao" readonly>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-4 mb-2">
-                                        <div class="lista-produtos-recebimento" id="lista-produtos-0" 
-                                             style="max-height: 150px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
-                                            <!-- Lista de produtos será inserida aqui -->
+                                
+                                <!-- Lista de produtos oculta -->
+                                <div id="lista-produtos-unidade" class="mt-2" style="max-height: 200px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
+                                    <!-- Produtos serão inseridos aqui via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LINHAS DE VOLUMES (PADRÃO + FORA DO PADRÃO) -->
+                        <div class="card border-warning mb-4">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-layers"></i> Volumes do Recebimento</span>
+                                <button type="button" class="btn btn-sm btn-success" onclick="adicionarLinhaVolume()">
+                                    <i class="bi bi-plus"></i> Adicionar Volume
+                                </button>
+                            </div>
+                            <div class="card-body" id="volumes-container">
+                                <!-- Linha 1 - Volume Padrão (já vem pré-preenchida) -->
+                                <div class="volume-row mb-3 p-3 border rounded" id="volume-row-0">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <h6 class="text-info">
+                                            <i class="bi bi-box"></i> Volume #1 
+                                            <span class="badge bg-success ms-2" id="badge-tipo-0">PADRÃO</span>
+                                        </h6>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removerLinhaVolume(0)" style="display: none;">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Tipo</label>
+                                            <select class="form-select tipo-volume" onchange="alterarTipoVolume(0)">
+                                                <option value="padrao" selected>Padrão</option>
+                                                <option value="fora-padrao">Fora do Padrão</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Volume (Embalagem)</label>
+                                            <input type="text" class="form-control volume-embalagem" id="volume-embalagem-0" value="MALA" readonly>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Quantidade</label>
+                                            <input type="number" class="form-control volume-qtd" id="volume-qtd-0" value="10" min="1" step="1" oninput="calcularTotalLinha(0)">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">UN por Embalagem</label>
+                                            <input type="number" class="form-control volume-un-por-emb" id="volume-un-por-emb-0" value="250" min="1" step="0.01" oninput="calcularTotalLinha(0)">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Total UN (automático)</label>
+                                            <input type="number" class="form-control volume-total" id="volume-total-0" readonly style="background-color: #1e293b; color: #fbbf24; font-weight: 700;">
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-2">
-                                        <label class="form-label">Unidade de Medida</label>
-                                        <input type="text" class="form-control item-unidade-medida" id="item-unidade-medida-0" readonly>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Lote</label>
+                                            <input type="text" class="form-control volume-lote" id="volume-lote-0" oninput="atualizarDadosVolume(0)">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Validade</label>
+                                            <input type="date" class="form-control volume-validade" id="volume-validade-0" oninput="atualizarDadosVolume(0)">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Localização</label>
+                                            <input type="text" class="form-control volume-localizacao" id="volume-localizacao-0" oninput="atualizarDadosVolume(0)">
+                                        </div>
                                     </div>
-                                    <div class="col-md-4 mb-2">
-                                        <label class="form-label">Localização</label>
-                                        <input type="text" class="form-control item-localizacao" id="item-localizacao-0">
+                                </div>
+                            </div>
+                            
+                            <!-- RESUMO DO TOTAL -->
+                            <div class="card-footer bg-dark text-white">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Total de Volumes:</strong> <span id="total-volumes">10</span>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <strong>Total Geral em UN:</strong> 
+                                        <span id="total-geral-un" style="color: #fbbf24; font-size: 1.2rem; font-weight: 700;">2500</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Observações Gerais -->
-                    <div class="mb-3">
-                        <label class="form-label">Observações Gerais</label>
-                        <textarea class="form-control" id="recebimento-observacoes" rows="2"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="salvar-recebimento">
-                    <i class="bi bi-check-circle"></i> Confirmar Recebimento
-                </button>
+                        <!-- Status Geral -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Status Geral</label>
+                                <select class="form-control" id="unidade-multipla-status">
+                                    <option value="Disponível">Disponível</option>
+                                    <option value="Bloqueado">Bloqueado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Observações</label>
+                                <input type="text" class="form-control" id="unidade-multipla-observacoes" placeholder="Observações gerais...">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="salvar-unidade-multipla">
+                        <i class="bi bi-check-circle"></i> Salvar Todos os Volumes
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- MODAL RECEBIMENTO ORIGINAL (MANTIDO) -->
+    <div class="modal fade" id="modalRecebimento" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-truck"></i> Recebimento de Mercadorias
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-recebimento">
+                        <!-- Dados da Nota Fiscal -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">Data do Recebimento</label>
+                                <input type="date" class="form-control" id="recebimento-data" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Número da NF</label>
+                                <input type="text" class="form-control" id="recebimento-nf" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Fornecedor</label>
+                                <input type="text" class="form-control" id="recebimento-fornecedor" required>
+                            </div>
+                        </div>
+
+                        <!-- LISTA DE PRODUTOS DO RECEBIMENTO (ORIGINAL) -->
+                        <div class="card border-secondary mb-3">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-box"></i> Produtos da Nota</span>
+                                <button type="button" class="btn btn-sm btn-success" onclick="adicionarItemRecebimento()">
+                                    <i class="bi bi-plus"></i> Adicionar Produto
+                                </button>
+                            </div>
+                            <div class="card-body" id="itens-recebimento-container">
+                                <!-- Os itens serão inseridos aqui -->
+                                <div class="item-recebimento mb-3 p-3 border rounded" id="item-recebimento-0">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <h6 class="text-info">Produto 1</h6>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removerItemRecebimento(0)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label">Buscar Produto</label>
+                                            <input type="text" class="form-control busca-produto-recebimento" 
+                                                   placeholder="Digite para buscar..." data-index="0">
+                                            <input type="hidden" class="item-sku" id="item-sku-0" required>
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label">Lote</label>
+                                            <input type="text" class="form-control item-lote" id="item-lote-0" required>
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label">Validade</label>
+                                            <input type="date" class="form-control item-validade" id="item-validade-0" required>
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label">Volume</label>
+                                            <input type="number" class="form-control item-volume" id="item-volume-0" min="1" value="1" step="any" required>
+                                            <small class="text-muted">Qtd de embalagens</small>
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <label class="form-label">Quantidade</label>
+                                            <input type="number" class="form-control item-quantidade" id="item-quantidade-0" step="any" required>
+                                            <small class="text-muted item-unidade" id="item-unidade-0">UN</small>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-2">
+                                            <div class="lista-produtos-recebimento" id="lista-produtos-0" 
+                                                 style="max-height: 150px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
+                                                <!-- Lista de produtos será inserida aqui -->
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label">Unidade de Medida</label>
+                                            <input type="text" class="form-control item-unidade-medida" id="item-unidade-medida-0" readonly>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label">Localização</label>
+                                            <input type="text" class="form-control item-localizacao" id="item-localizacao-0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observações Gerais -->
+                        <div class="mb-3">
+                            <label class="form-label">Observações Gerais</label>
+                            <textarea class="form-control" id="recebimento-observacoes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="salvar-recebimento">
+                        <i class="bi bi-check-circle"></i> Confirmar Recebimento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVO MODAL RECEBIMENTO MÚLTIPLO (ADICIONADO) -->
+    <div class="modal fade" id="modalRecebimentoMultiplo" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-truck"></i> Recebimento - Múltiplos Volumes
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-recebimento-multiplo">
+                        <!-- Dados da Nota Fiscal -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">Data do Recebimento</label>
+                                <input type="date" class="form-control" id="recebimento-multiplo-data" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Número da NF</label>
+                                <input type="text" class="form-control" id="recebimento-multiplo-nf" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Fornecedor</label>
+                                <input type="text" class="form-control" id="recebimento-multiplo-fornecedor" required>
+                            </div>
+                        </div>
+
+                        <!-- PRODUTO PRINCIPAL -->
+                        <div class="card border-primary mb-4">
+                            <div class="card-header bg-dark text-white">
+                                <i class="bi bi-box"></i> Produto Principal
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Buscar Produto</label>
+                                        <input type="text" class="form-control" id="busca-produto-recebimento-principal" placeholder="Digite para buscar...">
+                                        <input type="hidden" id="recebimento-multiplo-sku">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Tipo Embalagem</label>
+                                        <input type="text" class="form-control" id="recebimento-multiplo-tipo-embalagem" readonly>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Qtd Padrão por Embalagem</label>
+                                        <input type="text" class="form-control" id="recebimento-multiplo-qtd-padrao" readonly>
+                                    </div>
+                                </div>
+                                
+                                <!-- Lista de produtos oculta -->
+                                <div id="lista-produtos-recebimento-principal" class="mt-2" style="max-height: 200px; overflow-y: auto; border: 1px solid #2d3748; border-radius: 8px; background-color: #1e293b; display: none;">
+                                    <!-- Produtos serão inseridos aqui via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LINHAS DE VOLUMES DO RECEBIMENTO -->
+                        <div class="card border-warning mb-4">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-layers"></i> Volumes do Recebimento</span>
+                                <button type="button" class="btn btn-sm btn-success" onclick="adicionarLinhaVolumeRecebimento()">
+                                    <i class="bi bi-plus"></i> Adicionar Volume
+                                </button>
+                            </div>
+                            <div class="card-body" id="volumes-recebimento-container">
+                                <!-- Linhas serão inseridas aqui via JS -->
+                            </div>
+                            
+                            <!-- RESUMO DO TOTAL -->
+                            <div class="card-footer bg-dark text-white">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Total de Volumes:</strong> <span id="total-volumes-recebimento">0</span>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <strong>Total Geral em UN:</strong> 
+                                        <span id="total-geral-un-recebimento" style="color: #fbbf24; font-size: 1.2rem; font-weight: 700;">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observações Gerais -->
+                        <div class="mb-3">
+                            <label class="form-label">Observações Gerais</label>
+                            <textarea class="form-control" id="recebimento-multiplo-observacoes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="salvar-recebimento-multiplo">
+                        <i class="bi bi-check-circle"></i> Confirmar Recebimento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL CATEGORIA -->
     <div class="modal fade" id="modalCategoria" tabindex="-1">
         <div class="modal-dialog">
