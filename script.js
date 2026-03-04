@@ -2352,13 +2352,13 @@ function verQRCodeCompleto() {
     if (unidadeAtual.tipo === 'unidade-multipla') {
         const primeiroProduto = unidadeAtual.produtos[0];
         const primeiroVolume = primeiroProduto.volumes[0];
-        urlCompleta = `${baseUrl}baixa-view.html?id=${unidadeAtual.id}&sku=${primeiroProduto.sku}&lote=${primeiroVolume.lote}&validade=${primeiroVolume.validade}&produto=${encodeURIComponent(primeiroProduto.nome)}&volume=${primeiroVolume.qtdVolumes}&quantidade=${primeiroVolume.totalUN}&unidade=${primeiroProduto.tipoEmbalagem}`;
+        urlCompleta = `${baseUrl}qr-view.html?id=${unidadeAtual.id}&sku=${primeiroProduto.sku}&lote=${primeiroVolume.lote}&validade=${primeiroVolume.validade}&produto=${encodeURIComponent(primeiroProduto.nome)}&volume=${primeiroVolume.qtdVolumes}&quantidade=${primeiroVolume.totalUN}&unidade=${primeiroProduto.tipoEmbalagem}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
     } else {
-        urlCompleta = `${baseUrl}baixa-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote || ''}&validade=${unidadeAtual.validade || ''}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume || 1}&quantidade=${unidadeAtual.quantidade || 0}&unidade=${unidadeAtual.unidadeEmbalagem || 'UN'}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
+        urlCompleta = `${baseUrl}qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote || ''}&validade=${unidadeAtual.validade || ''}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume || 1}&quantidade=${unidadeAtual.quantidade || 0}&unidade=${unidadeAtual.unidadeEmbalagem || 'UN'}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
     }
     
-    const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(urlCompleta)}`;
-    window.open(url, '_blank');
+    // Abre o qr-view.html, não a imagem da API
+    window.open(urlCompleta, '_blank');
 }
 
 // Filtrar unidades
@@ -3148,6 +3148,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
