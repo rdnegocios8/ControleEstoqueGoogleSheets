@@ -2090,10 +2090,7 @@ function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, q
 }
 
 // ============================================
-// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA (UNIDADES CORRETAS)
-// ============================================
-// ============================================
-// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA (VOLUME COM UNIDADE)
+// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA
 // ============================================
 function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     const tbody = document.getElementById('tabela-recebimentos');
@@ -2118,27 +2115,18 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             '-';
         
         // ============================================
-        // CORREÇÃO: Volume com unidade (igual ao método de Unidades)
+        // VOLUME: usar a unidade da embalagem (GAL, PLT, SC, TBR)
         // ============================================
-        let volumeComUnidade = '-';
-        
-        if (r.volumeNumero) {
-            // Se temos o número do volume e a unidade
-            volumeComUnidade = `${r.volumeNumero} ${r.unidadeVolume || ''}`;
-        } else if (r.volumeTexto) {
-            // Se temos o texto completo do volume (ex: "20 UN")
-            volumeComUnidade = r.volumeTexto;
-        } else if (r.volumes) {
-            // Fallback para o campo volumes
-            volumeComUnidade = `${r.volumes} UN`;
-        }
+        const volumeDisplay = r.volumeNumero ? 
+            `${r.volumeNumero} ${r.unidadeVolume || ''}` : 
+            (r.volumeTexto || '-');
         
         // ============================================
-        // Determinar a unidade correta para a quantidade
+        // QUANTIDADE: usar a unidade base do produto (UN, KG)
         // ============================================
         let unidadeQuantidade = 'UN';
         
-        // Se temos o SKU, tentar buscar a unidadeBase do produto
+        // Buscar a unidade base do produto pelo SKU
         if (r.sku) {
             const produto = produtos.find(p => p.sku === r.sku);
             if (produto && produto.unidadeBase) {
@@ -2146,9 +2134,16 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             }
         }
         
-        // Se não encontrou, usar a unidadeVolume como fallback
-        if (unidadeQuantidade === 'UN' && r.unidadeVolume) {
-            unidadeQuantidade = r.unidadeVolume;
+        // Se não encontrou, tentar adivinhar pelo contexto
+        if (unidadeQuantidade === 'UN') {
+            // Se o volume é em KG, a quantidade também deve ser KG
+            if (r.unidadeVolume === 'KG') {
+                unidadeQuantidade = 'KG';
+            }
+            // Se o volume é em GAL/PLT/SC, a quantidade é UN (unidades)
+            else if (['GAL', 'PLT', 'SC', 'TBR', 'CX', 'FD'].includes(r.unidadeVolume)) {
+                unidadeQuantidade = 'UN';
+            }
         }
         
         tr.innerHTML = `
@@ -2157,7 +2152,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             <td>${r.nf || '-'}</td>
             <td>${r.fornecedor || '-'}</td>
             <td>${resumoProduto}</td>
-            <td><strong class="text-info">${volumeComUnidade}</strong></td>
+            <td><strong class="text-info">${volumeDisplay}</strong></td>
             <td><strong class="text-warning">${(r.quantidadeTotal || 0).toFixed(2)}</strong> ${unidadeQuantidade}</td>
             <td>
                 <button class="btn btn-sm btn-info" onclick="verRecebimento('${r.idUnidade}')">
@@ -3145,6 +3140,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
