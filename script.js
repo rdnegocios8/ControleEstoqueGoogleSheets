@@ -1183,7 +1183,6 @@ async function carregarRecebimentos() {
                 const converter = (valor) => {
                     if (!valor) return 0;
                     if (typeof valor === 'string') {
-                        // Substituir vírgula por ponto e converter
                         return parseFloat(valor.replace(',', '.')) || 0;
                     }
                     return parseFloat(valor) || 0;
@@ -1203,8 +1202,15 @@ async function carregarRecebimentos() {
                     return partes[1] || 'UN';
                 };
                 
+                // CORREÇÃO: H = Quantidade Total, I = Volume (com unidade)
+                const quantidadeTotal = converter(row[7]);  // Coluna H: Quantidade Total
+                const volumeTexto = row[8] || '';           // Coluna I: Volume (ex: "1 PLT")
+                const volumeNumero = extrairNumeroVolume(volumeTexto);
+                const unidadeVolume = extrairUnidadeVolume(volumeTexto);
+                const qtdPorEmbalagem = converter(row[10]); // Coluna K: Qtd/Emb
+                
                 return {
-                    // Mapeamento direto das colunas
+                    // Dados básicos
                     data: row[0] || '',                          // Coluna A: Data
                     nf: row[1] || '-',                           // Coluna B: NF
                     fornecedor: row[2] || '-',                   // Coluna C: Fornecedor
@@ -1212,21 +1218,23 @@ async function carregarRecebimentos() {
                     produto: row[4] || '',                       // Coluna E: Produto
                     lote: row[5] || '',                          // Coluna F: Lote
                     validade: row[6] || '',                      // Coluna G: Validade
-                    volume: converter(row[7]),                   // Coluna H: Volume (valor numérico)
-                    volumeDisplay: row[7] || '0',                // Coluna H: Volume (texto original)
-                    unidadeVolume: extrairUnidadeVolume(row[8]), // Coluna I: Unidade (ex: "PLT", "KG", "SC")
-                    volumeCompleto: row[8] || '',                // Coluna I: Texto completo (ex: "1 PLT")
-                    qtdPorEmbalagem: converter(row[10]),         // Coluna K: Qtd/Emb
-                    localizacao: row[11] || '-',                 // Coluna L: Local
-                    responsavel: row[12] || 'Sistema',           // Coluna M: Resp
-                    observacoes: row[13] || '',                  // Coluna N: Obs
                     
-                    // Campos calculados para exibição
-                    quantidade: converter(row[7]) * converter(row[10]), // Volume * Qtd/Emb
-                    unidadeBase: 'KG', // Ajuste conforme necessário
+                    // CORRIGIDO: H é Quantidade Total
+                    quantidadeTotal: quantidadeTotal,             // Coluna H: Quantidade Total
                     
-                    // ID da unidade (se existir, senão gera um baseado nos dados)
-                    idUnidade: `REC-${row[0]?.replace(/-/g, '')}-${row[1] || 'NF'}` 
+                    // CORRIGIDO: I é Volume (com unidade)
+                    volumeTexto: volumeTexto,                     // Coluna I: Texto completo (ex: "1 PLT")
+                    volumeNumero: volumeNumero,                   // Número do volume
+                    unidadeVolume: unidadeVolume,                 // Unidade do volume (ex: "PLT")
+                    
+                    // Outros campos
+                    qtdPorEmbalagem: qtdPorEmbalagem,             // Coluna K: Qtd/Emb
+                    localizacao: row[11] || '-',                  // Coluna L: Local
+                    responsavel: row[12] || 'Sistema',            // Coluna M: Resp
+                    observacoes: row[13] || '',                   // Coluna N: Obs
+                    
+                    // ID da unidade (gerado artificialmente)
+                    idUnidade: `REC-${row[0]?.replace(/-/g, '')}-${row[1] || 'NF'}`
                 };
             });
             
@@ -2090,7 +2098,10 @@ function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, q
     window.open(url, '_blank', 'width=700,height=800');
 }
 
-// Atualizar tabela de recebimentos (MODIFICADA)
+// ============================================
+// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA
+// ============================================
+
 function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     const tbody = document.getElementById('tabela-recebimentos');
     if (!tbody) return;
@@ -2108,13 +2119,18 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     dados.slice(-50).reverse().forEach(r => {
         const tr = document.createElement('tr');
         
-        // Criar um resumo do produto (primeiros 30 caracteres)
+        // Criar um resumo do produto
         const resumoProduto = r.produto ? 
             (r.produto.length > 30 ? r.produto.substring(0, 30) + '...' : r.produto) : 
             '-';
         
-        // Calcular quantidade total
-        const quantidadeTotal = r.quantidade || 0;
+        // Verificar se existe uma unidade com este ID
+        const unidadeExiste = unidades.some(u => u.id === r.idUnidade);
+        
+        // Formatar o volume
+        const volumeDisplay = r.volumeNumero ? 
+            `${r.volumeNumero} ${r.unidadeVolume || ''}` : 
+            (r.volumeTexto || '-');
         
         tr.innerHTML = `
             <td><small class="text-warning">${r.idUnidade || '-'}</small></td>
@@ -2122,14 +2138,14 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             <td>${r.nf || '-'}</td>
             <td>${r.fornecedor || '-'}</td>
             <td>${resumoProduto}</td>
-            <td>${r.volume || '-'} ${r.unidadeVolume || ''}</td>
-            <td><strong class="text-warning">${quantidadeTotal.toFixed(2)}</strong> ${r.unidadeBase || 'UN'}</td>
+            <td>${volumeDisplay}</td>
+            <td><strong class="text-warning">${(r.quantidadeTotal || 0).toFixed(2)}</strong> UN</td>
             <td>
-                ${r.idUnidade ? 
+                ${unidadeExiste ? 
                     `<button class="btn btn-sm btn-info" onclick="verUnidade('${r.idUnidade}')">
                         <i class="bi bi-eye"></i> Ver
                     </button>` : 
-                    '<span class="text-muted">—</span>'
+                    `<span class="badge bg-secondary" title="Unidade não encontrada">Sem unidade</span>`
                 }
             </td>
         `;
@@ -3105,6 +3121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
