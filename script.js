@@ -2475,7 +2475,9 @@ function setupQRCode() {
     });
 }
 
-// Atualizar tabela de movimentações
+// ============================================
+// FUNÇÃO ATUALIZAR TABELA MOVIMENTAÇÕES
+// ============================================
 function atualizarTabelaMovimentacoes(movFiltradas = null) {
     const tbody = document.getElementById('tabela-movimentacoes');
     if (!tbody) return;
@@ -2492,12 +2494,17 @@ function atualizarTabelaMovimentacoes(movFiltradas = null) {
     dados.slice(-50).reverse().forEach(mov => {
         const produto = produtos.find(p => p.sku === mov.sku);
         const tr = document.createElement('tr');
+        
+        // Formatar volume com unidade
+        const volumeDisplay = mov.volume ? `${mov.volume} ${mov.unidadeEmbalagem || ''}` : '-';
+        
         tr.innerHTML = `
             <td>${formatarData(mov.data)}</td>
             <td><span class="badge ${mov.tipo === 'Entrada' ? 'bg-success' : mov.tipo === 'Saída' ? 'bg-warning' : 'bg-info'}">${mov.tipo}</span></td>
             <td><small>${mov.idUnidade}</small></td>
             <td>${produto ? produto.nome : mov.sku}</td>
-            <td>${mov.volume} ${mov.unidadeEmbalagem}</td>
+            <td>${volumeDisplay}</td>
+            <td>${mov.unidadeEmbalagem || ''}</td>
             <td>${mov.quantidade}</td>
             <td>${mov.destino || '-'}</td>
             <td>${mov.responsavel}</td>
@@ -3167,6 +3174,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
