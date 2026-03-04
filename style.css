@@ -1963,3 +1963,198 @@ body {
 #modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-thumb:hover {
     background: #f59e0b;
 }
+
+/* ============================================ */
+/* MODAL DETALHES RECEBIMENTO - FUNDO ESCURO */
+/* ============================================ */
+
+#modalDetalhesRecebimento {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+#modalDetalhesRecebimento .modal-content {
+    background-color: #0f172a !important;
+    border: 2px solid #fbbf24;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+#modalDetalhesRecebimento .modal-header {
+    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+    border-bottom: 2px solid #fbbf24;
+    border-radius: 24px 24px 0 0;
+    padding: 1.5rem;
+}
+
+#modalDetalhesRecebimento .modal-title {
+    color: #fbbf24 !important;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+#modalDetalhesRecebimento .modal-body {
+    background-color: #0f172a !important;
+    padding: 1.5rem;
+    color: #e2e8f0;
+}
+
+/* Cards de informação (Nota Fiscal, Resumo, Observações) */
+#modalDetalhesRecebimento .card {
+    background-color: #1e293b !important;
+    border: 1px solid #334155;
+    border-radius: 16px;
+}
+
+#modalDetalhesRecebimento .card-header {
+    background: linear-gradient(135deg, #334155, #1e293b) !important;
+    border-bottom: 2px solid #fbbf24;
+    color: #fbbf24;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+
+#modalDetalhesRecebimento .card-body {
+    background-color: #1e293b !important;
+    color: #cbd5e1;
+    padding: 1.25rem;
+}
+
+#modalDetalhesRecebimento .card-body p {
+    margin: 0.5rem 0;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #334155;
+}
+
+#modalDetalhesRecebimento .card-body strong {
+    color: #fbbf24;
+    width: 120px;
+    display: inline-block;
+}
+
+/* Tabela de produtos no modal */
+#modalDetalhesRecebimento .table-responsive {
+    background-color: transparent;
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+#modalDetalhesRecebimento .table {
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#modalDetalhesRecebimento .table thead th {
+    background: #1a2634 !important;
+    color: #fbbf24 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 12px 8px !important;
+    border-bottom: 2px solid #fbbf24 !important;
+    border: none;
+    white-space: nowrap;
+}
+
+#modalDetalhesRecebimento .table tbody tr {
+    background-color: #0f172a !important;
+    border-bottom: 1px solid #2d3748;
+    transition: all 0.2s ease;
+}
+
+#modalDetalhesRecebimento .table tbody tr:hover {
+    background-color: #1e293b !important;
+}
+
+#modalDetalhesRecebimento .table tbody tr:nth-child(even) {
+    background-color: #1a1f2e !important;
+}
+
+#modalDetalhesRecebimento .table td {
+    padding: 10px 8px;
+    color: #cbd5e1 !important;
+    border: none;
+    font-size: 0.9rem;
+}
+
+#modalDetalhesRecebimento .table td:first-child {
+    color: #fbbf24 !important;
+    font-weight: 500;
+}
+
+#modalDetalhesRecebimento .table td:nth-child(7) {
+    color: #fbbf24 !important;
+    font-weight: 600;
+}
+
+#modalDetalhesRecebimento .text-warning {
+    color: #fbbf24 !important;
+}
+
+/* Badge na tabela (se houver) */
+#modalDetalhesRecebimento .badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#modalDetalhesRecebimento .badge.bg-success {
+    background: #10b981 !important;
+    color: white !important;
+}
+
+#modalDetalhesRecebimento .badge.bg-warning {
+    background: #f59e0b !important;
+    color: #0f172a !important;
+}
+
+/* Botão fechar */
+#modalDetalhesRecebimento .btn-close {
+    background-color: #94a3b8 !important;
+    opacity: 0.8;
+    filter: none;
+}
+
+#modalDetalhesRecebimento .btn-close:hover {
+    opacity: 1;
+}
+
+/* Botão secundário (Fechar) */
+#modalDetalhesRecebimento .btn-secondary {
+    background: linear-gradient(135deg, #475569, #334155) !important;
+    border: none;
+    color: white !important;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#modalDetalhesRecebimento .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(71, 85, 105, 0.3);
+}
+
+/* Scrollbar da tabela */
+#modalDetalhesRecebimento .table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-track {
+    background: #1e293b;
+    border-radius: 4px;
+}
+
+#modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-thumb {
+    background: #fbbf24;
+    border-radius: 4px;
+}
+
+#modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #f59e0b;
+}
