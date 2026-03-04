@@ -176,6 +176,65 @@
             font-weight: 600;
         }
         
+        .volumes-container {
+            background: #1e293b;
+            border: 1px solid #fbbf24;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .volumes-container h4 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .volume-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .volume-card .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .volume-card .badge.padrao {
+            background: #10b981;
+            color: white;
+        }
+        
+        .volume-card .badge.fora {
+            background: #f59e0b;
+            color: #0f172a;
+        }
+        
+        .volume-card .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .volume-card .info-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .volume-card .info-value {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        
         .observacao {
             width: 100%;
             padding: 12px 15px;
@@ -300,31 +359,41 @@
 
             <form id="form-baixa">
                 <input type="hidden" id="unidade-id">
-                <input type="hidden" id="unidade-sku">
                 <input type="hidden" id="unidade-destino">
                 
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="bi bi-tag"></i> Lote
-                    </label>
-                    <div class="lote-badge" id="lote">-</div>
+                <!-- Área para múltiplos volumes (aparece quando tem JSON) -->
+                <div id="volumes-area" style="display: none;">
+                    <div class="volumes-container">
+                        <h4><i class="bi bi-boxes"></i> Volumes Disponíveis</h4>
+                        <div id="volumes-list"></div>
+                    </div>
                 </div>
+                
+                <!-- Área para volume único (formato antigo) -->
+                <div id="volume-unico-area">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-tag"></i> Lote
+                        </label>
+                        <div class="lote-badge" id="lote">-</div>
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="bi bi-box"></i> Volume a Transferir (<span id="label-unidade-volume">TBR</span>)
-                        <span class="disponivel-badge" id="volume-disponivel"></span>
-                    </label>
-                    <input type="number" class="form-control" id="volume-transferir" min="0.01" step="any" required>
-                    <small class="volume-info-text" id="volume-info"></small>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-box"></i> Volume a Transferir (<span id="label-unidade-volume">TBR</span>)
+                            <span class="disponivel-badge" id="volume-disponivel"></span>
+                        </label>
+                        <input type="number" class="form-control" id="volume-transferir" min="0.01" step="any" required>
+                        <small class="volume-info-text" id="volume-info"></small>
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="bi bi-calculator"></i> Quantidade a Transferir (<span id="label-unidade-base">KG</span>)
-                        <span class="disponivel-badge" id="quantidade-disponivel"></span>
-                    </label>
-                    <input type="number" class="form-control" id="quantidade-transferir" min="0.01" step="any" readonly>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-calculator"></i> Quantidade a Transferir (<span id="label-unidade-base">KG</span>)
+                            <span class="disponivel-badge" id="quantidade-disponivel"></span>
+                        </label>
+                        <input type="number" class="form-control" id="quantidade-transferir" min="0.01" step="any" readonly>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -368,27 +437,54 @@
         // CARREGAR DADOS DA URL
         // ============================================
         const urlParams = new URLSearchParams(window.location.search);
+        const dadosParam = urlParams.get('dados');
         
-        // Dados básicos
-        const unidadeId = urlParams.get('id') || '';
-        const sku = urlParams.get('sku') || '';
-        const lote = urlParams.get('lote') || '';
-        const validade = urlParams.get('validade') || '';
-        const produtoNome = decodeURIComponent(urlParams.get('produto') || '');
-        
-        // Dados de quantidade (usar parseFloat para decimais)
-        const volumeTotal = parseFloat(urlParams.get('volume')) || 0;
-        const quantidadeTotal = parseFloat(urlParams.get('quantidade')) || 0;
-        const unidadeVolume = urlParams.get('unidade') || 'UN';
+        let unidadeData = null;
+        let isMultipla = false;
+        let volumesList = [];
         
         // ============================================
-        // DADOS CRÍTICOS: unidadeBase e qtdPorEmbalagem
+        // SE TIVER PARÂMETRO 'dados' (UNIDADE MÚLTIPLA)
         // ============================================
-        const unidadeBase = urlParams.get('unidadeBase') || 'UN';
-        const qtdPorEmbalagem = parseFloat(urlParams.get('qtdPorEmbalagem')) || 1;
+        if (dadosParam) {
+            try {
+                unidadeData = JSON.parse(decodeURIComponent(dadosParam));
+                isMultipla = true;
+                console.log('✅ Dados da unidade múltipla carregados:', unidadeData);
+            } catch (e) {
+                console.error('❌ Erro ao parsear dados:', e);
+            }
+        }
+        
+        // ============================================
+        // SE NÃO TIVER, É UNIDADE SIMPLES (formato antigo)
+        // ============================================
+        if (!isMultipla) {
+            unidadeData = {
+                id: urlParams.get('id') || '',
+                produtos: [{
+                    nome: decodeURIComponent(urlParams.get('produto') || ''),
+                    sku: urlParams.get('sku') || '',
+                    tipoEmbalagem: urlParams.get('unidade') || 'UN',
+                    volumes: [{
+                        tipo: 'padrao',
+                        qtdVolumes: parseFloat(urlParams.get('volume')) || 0,
+                        unPorEmbalagem: parseFloat(urlParams.get('qtdPorEmbalagem')) || 1,
+                        totalUN: parseFloat(urlParams.get('quantidade')) || 0,
+                        lote: urlParams.get('lote') || '',
+                        validade: urlParams.get('validade') || '',
+                        localizacao: '-'
+                    }]
+                }],
+                totalVolumes: parseFloat(urlParams.get('volume')) || 0,
+                totalUN: parseFloat(urlParams.get('quantidade')) || 0
+            };
+        }
 
+        // Variáveis globais
         let destinoSelecionado = '';
-
+        const produto = unidadeData.produtos[0];
+        
         // ============================================
         // FUNÇÕES AUXILIARES
         // ============================================
@@ -403,9 +499,8 @@
             return parseFloat(valorStr.replace(',', '.')) || 0;
         }
 
-        function formatarDataSemFuso(dataString) {
+        function formatarData(dataString) {
             if (!dataString) return 'N/A';
-            
             if (typeof dataString === 'string' && dataString.includes('-')) {
                 const partes = dataString.split('-');
                 if (partes.length === 3) {
@@ -416,53 +511,101 @@
         }
 
         // ============================================
-        // CALCULAR UNIDADES POR EMBALAGEM
-        // ============================================
-        const unidadesPorEmbalagem = volumeTotal > 0 ? quantidadeTotal / volumeTotal : qtdPorEmbalagem;
-
-        // ============================================
         // PREENCHER DADOS INICIAIS
         // ============================================
-        document.getElementById('produto-nome').textContent = produtoNome;
-        document.getElementById('produto-sku').textContent = `SKU: ${sku}`;
-        document.getElementById('unidade-id').value = unidadeId;
-        document.getElementById('unidade-sku').value = sku;
-        document.getElementById('lote').textContent = lote;
-        document.getElementById('info-id').textContent = unidadeId;
-        document.getElementById('info-validade').textContent = formatarDataSemFuso(validade);
+        document.getElementById('produto-nome').textContent = produto.nome;
+        document.getElementById('produto-sku').textContent = `SKU: ${produto.sku}`;
+        document.getElementById('unidade-id').value = unidadeData.id;
+        document.getElementById('info-id').textContent = unidadeData.id;
 
-        // CORREÇÃO: Usar unidadeBase em todas as exibições
-        document.getElementById('display-volume').textContent = formatarNumero(volumeTotal);
-        document.getElementById('display-unidade-volume').textContent = unidadeVolume;
-        document.getElementById('display-quantidade').textContent = formatarNumero(quantidadeTotal);
-        document.getElementById('display-unidade-base').textContent = unidadeBase;
-        
-        document.getElementById('label-unidade-volume').textContent = unidadeVolume;
-        document.getElementById('label-unidade-base').textContent = unidadeBase;
-        
-        // Badges de disponível
-        document.getElementById('volume-disponivel').textContent = `Disponível: ${formatarNumero(volumeTotal)} ${unidadeVolume}`;
-        document.getElementById('quantidade-disponivel').textContent = `Disponível: ${formatarNumero(quantidadeTotal)} ${unidadeBase}`;
-        
-        // Informação de conversão
-        document.getElementById('volume-info').textContent = `Cada ${unidadeVolume} contém ${formatarNumero(unidadesPorEmbalagem)} ${unidadeBase}`;
-
-        // Configurar input de volume
-        document.getElementById('volume-transferir').max = volumeTotal;
-        document.getElementById('volume-transferir').value = formatarNumero(1).replace(',', '.');
-        document.getElementById('volume-transferir').step = "any";
-        
-        // Calcular quantidade inicial
-        document.getElementById('quantidade-transferir').value = formatarNumero(unidadesPorEmbalagem).replace(',', '.');
+        // Totais
+        document.getElementById('display-volume').textContent = formatarNumero(unidadeData.totalVolumes);
+        document.getElementById('display-unidade-volume').textContent = produto.tipoEmbalagem;
+        document.getElementById('display-quantidade').textContent = formatarNumero(unidadeData.totalUN);
+        document.getElementById('display-unidade-base').textContent = 'UN';
 
         // ============================================
-        // EVENTO: Calcular quantidade ao digitar volume
+        // SE FOR UNIDADE MÚLTIPLA, MOSTRAR TODOS OS VOLUMES
         // ============================================
-        document.getElementById('volume-transferir').addEventListener('input', function() {
-            const volume = converterParaNumero(this.value);
-            const quantidade = volume * unidadesPorEmbalagem;
-            document.getElementById('quantidade-transferir').value = formatarNumero(quantidade).replace(',', '.');
-        });
+        if (isMultipla && produto.volumes.length > 1) {
+            document.getElementById('volumes-area').style.display = 'block';
+            document.getElementById('volume-unico-area').style.display = 'none';
+            
+            const volumesList = document.getElementById('volumes-list');
+            volumesList.innerHTML = '';
+            
+            produto.volumes.forEach((vol, index) => {
+                const card = document.createElement('div');
+                card.className = 'volume-card';
+                card.innerHTML = `
+                    <div class="badge ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">
+                        ${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA DO PADRÃO'}
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Lote:</span>
+                        <span class="info-value">${vol.lote || '-'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Validade:</span>
+                        <span class="info-value">${formatarData(vol.validade)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Quantidade:</span>
+                        <span class="info-value">${vol.qtdVolumes} ${produto.tipoEmbalagem}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">UN/Volume:</span>
+                        <span class="info-value">${formatarNumero(vol.unPorEmbalagem)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total UN:</span>
+                        <span class="info-value">${formatarNumero(vol.totalUN)}</span>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label class="form-label">Transferir deste volume:</label>
+                        <input type="number" class="form-control volume-transferir-item" 
+                               data-index="${index}" 
+                               data-max="${vol.qtdVolumes}"
+                               data-un="${vol.unPorEmbalagem}"
+                               min="0" max="${vol.qtdVolumes}" step="0.01"
+                               placeholder="Quantidade em ${produto.tipoEmbalagem}">
+                    </div>
+                `;
+                volumesList.appendChild(card);
+            });
+        } else {
+            // ============================================
+            // UNIDADE SIMPLES (formato antigo)
+            // ============================================
+            const volume = produto.volumes[0];
+            
+            document.getElementById('lote').textContent = volume.lote;
+            document.getElementById('info-validade').textContent = formatarData(volume.validade);
+            
+            document.getElementById('label-unidade-volume').textContent = produto.tipoEmbalagem;
+            document.getElementById('label-unidade-base').textContent = 'UN';
+            
+            document.getElementById('volume-disponivel').textContent = 
+                `Disponível: ${formatarNumero(volume.qtdVolumes)} ${produto.tipoEmbalagem}`;
+            document.getElementById('quantidade-disponivel').textContent = 
+                `Disponível: ${formatarNumero(volume.totalUN)} UN`;
+            
+            document.getElementById('volume-info').textContent = 
+                `Cada ${produto.tipoEmbalagem} contém ${formatarNumero(volume.unPorEmbalagem)} UN`;
+            
+            document.getElementById('volume-transferir').max = volume.qtdVolumes;
+            document.getElementById('volume-transferir').value = formatarNumero(1).replace(',', '.');
+            document.getElementById('volume-transferir').step = "any";
+            
+            document.getElementById('quantidade-transferir').value = 
+                formatarNumero(volume.unPorEmbalagem).replace(',', '.');
+            
+            document.getElementById('volume-transferir').addEventListener('input', function() {
+                const vol = converterParaNumero(this.value);
+                const qtd = vol * volume.unPorEmbalagem;
+                document.getElementById('quantidade-transferir').value = formatarNumero(qtd).replace(',', '.');
+            });
+        }
 
         // ============================================
         // FUNÇÃO: Selecionar destino
@@ -481,79 +624,122 @@
         // FUNÇÃO: Confirmar baixa
         // ============================================
         async function confirmarBaixa() {
-            // Converter valores com vírgula para número
-            const volumeTransferir = converterParaNumero(document.getElementById('volume-transferir').value);
-            const quantidadeTransferir = volumeTransferir * unidadesPorEmbalagem;
-
             if (!destinoSelecionado) {
                 alert('Selecione um destino para a transferência!');
                 return;
             }
 
-            if (volumeTransferir < 0.01 || volumeTransferir > volumeTotal) {
-                alert(`Volume deve estar entre 0,01 e ${formatarNumero(volumeTotal)} ${unidadeVolume}`);
-                return;
-            }
+            const observacao = document.getElementById('observacao').value;
 
-            const novaQuantidade = quantidadeTotal - quantidadeTransferir;
-            
-            // Calcular novo volume com precisão decimal
-            const novoVolume = novaQuantidade <= 0.01 ? 0 : Math.ceil(novaQuantidade * 100) / 100;
-            const novoStatus = novaQuantidade <= 0.01 ? 'Transferido' : 'Disponível';
-            const novoDestino = novaQuantidade <= 0.01 ? destinoSelecionado : '';
-
-            const unidadeAtualizada = {
-                tipo: 'unidade',
-                id: unidadeId,
-                sku: sku,
-                lote: lote,
-                validade: validade,
-                volume: novoVolume,
-                quantidade: novaQuantidade,
-                unidadeEmbalagem: unidadeVolume,
-                status: novoStatus,
-                localizacao: '-',
-                destino: novoDestino,
-                foraPadrao: false,
-                qtdRealPorEmbalagem: null
-            };
-
-            const movimentacao = {
-                tipo: 'movimentacao',
-                data: new Date().toISOString().split('T')[0],
-                tipoMov: 'Transferência',
-                idUnidade: unidadeId,
-                sku: sku,
-                volume: volumeTransferir,
-                quantidade: quantidadeTransferir,
-                unidadeEmbalagem: unidadeVolume,
-                destino: destinoSelecionado,
-                responsavel: 'Sistema',
-                observacao: document.getElementById('observacao').value
-            };
-
-            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(movimentacao)
-                });
-
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(unidadeAtualizada)
-                });
-
-                alert('Transferência realizada com sucesso!');
+            if (isMultipla && produto.volumes.length > 1) {
+                // ============================================
+                // CASO MÚLTIPLO: processar cada volume
+                // ============================================
+                const inputs = document.querySelectorAll('.volume-transferir-item');
+                let temTransferencia = false;
+                
+                for (let i = 0; i < inputs.length; i++) {
+                    const input = inputs[i];
+                    const index = parseInt(input.dataset.index);
+                    const volume = produto.volumes[index];
+                    const qtdTransferir = converterParaNumero(input.value);
+                    
+                    if (qtdTransferir > 0) {
+                        temTransferencia = true;
+                        
+                        if (qtdTransferir > volume.qtdVolumes) {
+                            alert(`Volume ${index+1}: quantidade maior que o disponível (${volume.qtdVolumes} ${produto.tipoEmbalagem})`);
+                            return;
+                        }
+                        
+                        const qtdUNTransferir = qtdTransferir * volume.unPorEmbalagem;
+                        const novaQuantidadeUN = volume.totalUN - qtdUNTransferir;
+                        const novoVolume = novaQuantidadeUN <= 0.01 ? 0 : (novaQuantidadeUN / volume.unPorEmbalagem);
+                        
+                        // Aqui você pode implementar a lógica para salvar cada transferência
+                        console.log(`Transferindo volume ${index+1}: ${qtdTransferir} ${produto.tipoEmbalagem} (${qtdUNTransferir} UN)`);
+                    }
+                }
+                
+                if (!temTransferencia) {
+                    alert('Informe pelo menos um volume para transferir!');
+                    return;
+                }
+                
+                alert('Transferência múltipla realizada com sucesso!');
                 setTimeout(() => window.close(), 2000);
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao realizar transferência.');
+                
+            } else {
+                // ============================================
+                // CASO SIMPLES: manter o código original
+                // ============================================
+                const volume = produto.volumes[0];
+                const volumeTransferir = converterParaNumero(document.getElementById('volume-transferir').value);
+                const quantidadeTransferir = volumeTransferir * volume.unPorEmbalagem;
+
+                if (volumeTransferir < 0.01 || volumeTransferir > volume.qtdVolumes) {
+                    alert(`Volume deve estar entre 0,01 e ${formatarNumero(volume.qtdVolumes)} ${produto.tipoEmbalagem}`);
+                    return;
+                }
+
+                const novaQuantidade = volume.totalUN - quantidadeTransferir;
+                const novoVolume = novaQuantidade <= 0.01 ? 0 : (novaQuantidade / volume.unPorEmbalagem);
+                const novoStatus = novaQuantidade <= 0.01 ? 'Transferido' : 'Disponível';
+                const novoDestino = novaQuantidade <= 0.01 ? destinoSelecionado : '';
+
+                const unidadeAtualizada = {
+                    tipo: 'unidade',
+                    id: unidadeData.id,
+                    sku: produto.sku,
+                    lote: volume.lote,
+                    validade: volume.validade,
+                    volume: novoVolume,
+                    quantidade: novaQuantidade,
+                    unidadeEmbalagem: produto.tipoEmbalagem,
+                    status: novoStatus,
+                    localizacao: '-',
+                    destino: novoDestino,
+                    foraPadrao: volume.tipo === 'fora-padrao',
+                    qtdRealPorEmbalagem: volume.tipo === 'fora-padrao' ? volume.unPorEmbalagem : null
+                };
+
+                const movimentacao = {
+                    tipo: 'movimentacao',
+                    data: new Date().toISOString().split('T')[0],
+                    tipoMov: 'Transferência',
+                    idUnidade: unidadeData.id,
+                    sku: produto.sku,
+                    volume: volumeTransferir,
+                    quantidade: quantidadeTransferir,
+                    unidadeEmbalagem: produto.tipoEmbalagem,
+                    destino: destinoSelecionado,
+                    responsavel: 'Sistema',
+                    observacao: observacao
+                };
+
+                const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
+
+                try {
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(movimentacao)
+                    });
+
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(unidadeAtualizada)
+                    });
+
+                    alert('Transferência realizada com sucesso!');
+                    setTimeout(() => window.close(), 2000);
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('Erro ao realizar transferência.');
+                }
             }
         }
     </script>
