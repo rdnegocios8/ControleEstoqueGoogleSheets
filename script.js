@@ -2190,14 +2190,19 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     });
 }
 
-// Função verUnidade (CORRIGIDA - com URL completa no QR Code)
+// ============================================
+// FUNÇÃO VER UNIDADE - CORRIGIDA (SIMPLES + MÚLTIPLAS)
+// ============================================
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
     if (!unidadeAtual) return;
     
-    // Determinar a base da URL (onde os arquivos estão hospedados)
+    // Determinar a base da URL
     const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     
+    // ============================================
+    // CASO 1: UNIDADE MÚLTIPLA (vários produtos/volumes)
+    // ============================================
     if (unidadeAtual.tipo === 'unidade-multipla') {
         document.getElementById('detalhe-id').textContent = unidadeAtual.id;
         document.getElementById('detalhe-nf').textContent = unidadeAtual.numeroNF || '-';
@@ -2210,16 +2215,17 @@ function verUnidade(id) {
         const qrContainer = document.getElementById('unidade-qr-code');
         qrContainer.innerHTML = '';
         
-        // Construir URL para a primeira unidade (simplificado para múltiplos)
-        const primeiroProduto = unidadeAtual.produtos[0];
-        const primeiroVolume = primeiroProduto.volumes[0];
-        const urlCompleta = `${baseUrl}baixa-view.html?id=${unidadeAtual.id}&sku=${primeiroProduto.sku}&lote=${primeiroVolume.lote}&validade=${primeiroVolume.validade}&produto=${encodeURIComponent(primeiroProduto.nome)}&volume=${primeiroVolume.qtdVolumes}&quantidade=${primeiroVolume.totalUN}&unidade=${primeiroProduto.tipoEmbalagem}`;
+        // ============================================
+        // GERAR QR CODE PARA UNIDADE MÚLTIPLA
+        // ============================================
+        // Passar apenas o ID - o qr-view.html vai buscar os dados completos
+        const urlCompleta = `${baseUrl}qr-view.html?id=${unidadeAtual.id}&tipo=multipla`;
         
         setTimeout(() => {
             try {
                 if (typeof QRCode !== 'undefined') {
                     new QRCode(qrContainer, {
-                        text: urlCompleta,  // AGORA é a URL completa
+                        text: urlCompleta,
                         width: 150,
                         height: 150,
                         colorDark: '#000000',
@@ -2246,6 +2252,7 @@ function verUnidade(id) {
             }
         }, 100);
         
+        // Mostrar todos os produtos/volumes
         const container = document.getElementById('detalhe-produtos-container');
         container.innerHTML = '';
         
@@ -2287,7 +2294,11 @@ function verUnidade(id) {
             `;
             container.appendChild(produtoDiv);
         });
-    } else {
+    } 
+    // ============================================
+    // CASO 2: UNIDADE SIMPLES (formato original)
+    // ============================================
+    else {
         const produto = produtos.find(p => p.sku === unidadeAtual.sku);
         
         document.getElementById('detalhe-id').textContent = unidadeAtual.id;
@@ -2301,15 +2312,16 @@ function verUnidade(id) {
         const qrContainer = document.getElementById('unidade-qr-code');
         qrContainer.innerHTML = '';
         
-        // Construir URL completa para baixa-view.html com TODOS os parâmetros
-        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-        const urlCompleta = `${baseUrl}baixa-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote || ''}&validade=${unidadeAtual.validade || ''}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume || 1}&quantidade=${unidadeAtual.quantidade || 0}&unidade=${unidadeAtual.unidadeEmbalagem || 'UN'}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
+        // ============================================
+        // GERAR QR CODE PARA UNIDADE SIMPLES (formato original)
+        // ============================================
+        const urlCompleta = `${baseUrl}qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote || ''}&validade=${unidadeAtual.validade || ''}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume || 1}&quantidade=${unidadeAtual.quantidade || 0}&unidade=${unidadeAtual.unidadeEmbalagem || 'UN'}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
         
         setTimeout(() => {
             try {
                 if (typeof QRCode !== 'undefined') {
                     new QRCode(qrContainer, {
-                        text: urlCompleta,  // AGORA é a URL completa
+                        text: urlCompleta,
                         width: 150,
                         height: 150,
                         colorDark: '#000000',
@@ -2346,7 +2358,7 @@ function verUnidade(id) {
                     <p><strong>Lote:</strong> ${unidadeAtual.lote || '-'}</p>
                     <p><strong>Validade:</strong> ${formatarData(unidadeAtual.validade) || '-'}</p>
                     <p><strong>Volume:</strong> ${unidadeAtual.volume || 1} ${unidadeAtual.unidadeEmbalagem || ''}</p>
-                    <p><strong>Quantidade:</strong> ${(unidadeAtual.quantidade || 0).toFixed(2)} UN</p>
+                    <p><strong>Quantidade:</strong> ${(unidadeAtual.quantidade || 0).toFixed(2)} ${produto?.unidadeBase || 'UN'}</p>
                     <p><strong>Localização:</strong> ${unidadeAtual.localizacao || '-'}</p>
                     <p><strong>Fora do padrão:</strong> ${unidadeAtual.foraPadrao ? 'Sim' : 'Não'}</p>
                     <p><strong>Observações:</strong> ${unidadeAtual.observacoes || '-'}</p>
@@ -3174,6 +3186,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
