@@ -2090,7 +2090,7 @@ function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, q
 }
 
 // ============================================
-// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA
+// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - COM DEBUG
 // ============================================
 function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     const tbody = document.getElementById('tabela-recebimentos');
@@ -2109,40 +2109,86 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     dados.slice(-50).reverse().forEach(r => {
         const tr = document.createElement('tr');
         
+        // ============================================
+        // DEBUG: Verificar correspondência de SKU
+        // ============================================
+        console.log('=== DEBUG RECEBIMENTO ===');
+        console.log('SKU do recebimento:', r.sku);
+        console.log('Tipo do SKU:', typeof r.sku);
+        console.log('Comprimento:', r.sku?.length);
+        
+        // Listar todos os SKUs disponíveis nos produtos
+        console.log('SKUs disponíveis:', produtos.map(p => ({
+            sku: p.sku,
+            tipo: typeof p.sku,
+            comprimento: p.sku?.length
+        })));
+        
+        // Buscar produto com diferentes estratégias
+        let produto = null;
+        
+        if (r.sku) {
+            // Estratégia 1: Comparação exata
+            produto = produtos.find(p => p.sku === r.sku);
+            
+            // Estratégia 2: Remover zeros à esquerda
+            if (!produto) {
+                const skuLimpo = String(r.sku).replace(/^0+/, '');
+                produto = produtos.find(p => String(p.sku).replace(/^0+/, '') === skuLimpo);
+            }
+            
+            // Estratégia 3: Adicionar zeros à esquerda
+            if (!produto && !isNaN(r.sku)) {
+                const skuComZeros = String(r.sku).padStart(8, '0');
+                produto = produtos.find(p => p.sku === skuComZeros);
+            }
+            
+            // Estratégia 4: Comparação como string sem espaços
+            if (!produto) {
+                const skuString = String(r.sku).trim();
+                produto = produtos.find(p => String(p.sku).trim() === skuString);
+            }
+        }
+        
+        console.log('Produto encontrado:', produto);
+        
+        // ============================================
+        // BUSCAR UNIDADES
+        // ============================================
+        let unidadeVolume = 'UN';
+        let unidadeBase = 'UN';
+        
+        if (produto) {
+            unidadeVolume = produto.tipoEmbalagem || 'UN';
+            unidadeBase = produto.unidadeBase || 'UN';
+            console.log(`✅ Correspondência encontrada! Volume: ${unidadeVolume}, Base: ${unidadeBase}`);
+        } else {
+            console.log(`❌ Nenhum produto encontrado para SKU: ${r.sku}`);
+            
+            // Fallback: tentar adivinhar pela descrição do produto
+            if (r.produto) {
+                const produtoPorNome = produtos.find(p => 
+                    p.nome && r.produto && p.nome.includes(r.produto.substring(0, 10))
+                );
+                if (produtoPorNome) {
+                    unidadeVolume = produtoPorNome.tipoEmbalagem || 'UN';
+                    unidadeBase = produtoPorNome.unidadeBase || 'UN';
+                    console.log(`✅ Correspondência por nome! Volume: ${unidadeVolume}, Base: ${unidadeBase}`);
+                }
+            }
+        }
+        
         // Resumo do produto
         const resumoProduto = r.produto ? 
             (r.produto.length > 30 ? r.produto.substring(0, 30) + '...' : r.produto) : 
             '-';
         
-        // ============================================
-        // BUSCAR UNIDADES DA ABA PRODUTOS
-        // ============================================
-        let unidadeVolume = 'UN';     // Padrão
-        let unidadeBase = 'UN';       // Padrão
-        
-        if (r.sku) {
-            const produto = produtos.find(p => p.sku === r.sku);
-            if (produto) {
-                // Coluna E da aba Produtos: Tipo Embalagem (unidade do volume)
-                unidadeVolume = produto.tipoEmbalagem || 'UN';
-                
-                // Coluna G da aba Produtos: Unidade Base (unidade da quantidade)
-                unidadeBase = produto.unidadeBase || 'UN';
-                
-                console.log(`Produto ${r.sku}: Volume=${unidadeVolume}, Base=${unidadeBase}`);
-            }
-        }
-        
-        // ============================================
-        // VOLUME: usar unidadeVolume (da coluna E)
-        // ============================================
+        // Volume
         const volumeDisplay = r.volumeNumero ? 
             `${r.volumeNumero} ${unidadeVolume}` : 
-            (r.volumeTexto ? `${r.volumeTexto} ${unidadeVolume}` : '-');
+            (r.volumeTexto || '-');
         
-        // ============================================
-        // QUANTIDADE: usar unidadeBase (da coluna G)
-        // ============================================
+        // Quantidade
         const quantidadeDisplay = (r.quantidadeTotal || 0).toFixed(2);
         
         tr.innerHTML = `
@@ -3140,6 +3186,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
