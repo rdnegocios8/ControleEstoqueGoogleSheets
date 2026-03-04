@@ -917,50 +917,6 @@ async function salvarRecebimentoMultiplo() {
 }
 
 // ============================================
-// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA
-// ============================================
-
-function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
-    const tbody = document.getElementById('tabela-recebimentos');
-    if (!tbody) return;
-    
-    const dados = recebimentosFiltrados || recebimentos;
-    
-    tbody.innerHTML = '';
-    
-    if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum recebimento encontrado</td></tr>';
-        return;
-    }
-    
-    dados.slice().reverse().forEach(r => {
-        const tr = document.createElement('tr');
-        
-        // CORREÇÃO: Usar r.produtos (plural) em vez de r.produto (singular)
-        const produtosText = r.produtos ? `${r.produtos} produto(s)` : (r.resumo || '-');
-        
-        tr.innerHTML = `
-            <td><small class="text-warning">${r.idUnidade || '-'}</small></td>
-            <td>${formatarData(r.data)}</td>
-            <td>${r.nf || '-'}</td>
-            <td>${r.fornecedor || '-'}</td>
-            <td>${produtosText}</td>
-            <td>${r.volumes || '-'}</td>
-            <td><strong class="text-warning">${(r.totalUN || 0).toFixed(2)}</strong> UN</td>
-            <td>
-                ${r.idUnidade ? 
-                    `<button class="btn btn-sm btn-info" onclick="verUnidade('${r.idUnidade}')">
-                        <i class="bi bi-eye"></i> Ver
-                    </button>` : 
-                    '-'
-                }
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-// ============================================
 // FUNÇÕES PARA UNIDADE MÚLTIPLA (CRIAÇÃO MANUAL)
 // ============================================
 
@@ -1254,7 +1210,7 @@ async function carregarRecebimentos() {
 }
 
 // ============================================
-// FUNÇÃO VER DETALHES DO RECEBIMENTO
+// FUNÇÃO VER DETALHES DO RECEBIMENTO - CORRIGIDA
 // ============================================
 
 function verRecebimento(idUnidade) {
@@ -1264,6 +1220,8 @@ function verRecebimento(idUnidade) {
         alert('Recebimento não encontrado!');
         return;
     }
+    
+    console.log('Recebimento encontrado:', recebimento);
     
     // Preencher dados da NF
     document.getElementById('recebimento-data').textContent = formatarData(recebimento.data) || '-';
@@ -1277,47 +1235,43 @@ function verRecebimento(idUnidade) {
     document.getElementById('recebimento-total-un').textContent = (recebimento.totalUN || 0).toFixed(2);
     document.getElementById('recebimento-observacoes').textContent = recebimento.observacoes || '-';
     
-    // Buscar produtos relacionados (da planilha ou do recebimento)
+    // Buscar produtos relacionados
     const tbody = document.getElementById('tabela-produtos-recebimento');
     tbody.innerHTML = '';
     
     // Se tiver dados completos do recebimento (com produtos)
     if (recebimento.produtosDetalhados && recebimento.produtosDetalhados.length > 0) {
         recebimento.produtosDetalhados.forEach(p => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${p.nome || '-'}</td>
-                <td>${p.sku || '-'}</td>
-                <td>${p.lote || '-'}</td>
-                <td>${formatarData(p.validade) || '-'}</td>
-                <td>${p.volume || '-'} ${p.unidade || ''}</td>
-                <td>${p.qtdPorEmbalagem || '-'}</td>
-                <td class="text-warning">${(p.totalUN || 0).toFixed(2)}</td>
-                <td>${p.localizacao || '-'}</td>
-            `;
-            tbody.appendChild(tr);
+            p.volumes.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${p.nome || '-'}</td>
+                    <td>${p.sku || '-'}</td>
+                    <td>${v.lote || '-'}</td>
+                    <td>${formatarData(v.validade) || '-'}</td>
+                    <td>${v.qtdVolumes || '-'} ${p.tipoEmbalagem || ''}</td>
+                    <td>${v.unPorEmbalagem || '-'}</td>
+                    <td class="text-warning">${(v.totalUN || 0).toFixed(2)}</td>
+                    <td>${v.localizacao || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
         });
     } 
-    // Se não tiver detalhes, tentar buscar da planilha de recebimentos
+    // Se não tiver detalhes, usar os dados básicos
     else {
-        // Buscar na planilha de recebimentos (se tiver os dados carregados)
-        const recebimentoRaw = recebimentosRaw?.find(r => r.idUnidade === idUnidade);
-        if (recebimentoRaw) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${recebimentoRaw.produto || '-'}</td>
-                <td>${recebimentoRaw.sku || '-'}</td>
-                <td>${recebimentoRaw.lote || '-'}</td>
-                <td>${formatarData(recebimentoRaw.validade) || '-'}</td>
-                <td>${recebimentoRaw.volumeNumero || '-'} ${recebimentoRaw.unidadeVolume || ''}</td>
-                <td>${recebimentoRaw.qtdPorEmbalagem || '-'}</td>
-                <td class="text-warning">${(recebimentoRaw.quantidadeTotal || 0).toFixed(2)}</td>
-                <td>${recebimentoRaw.localizacao || '-'}</td>
-            `;
-            tbody.appendChild(tr);
-        } else {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum detalhe encontrado</td></tr>';
-        }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${recebimento.produto || recebimento.resumo || '-'}</td>
+            <td>${recebimento.sku || '-'}</td>
+            <td>${recebimento.lote || '-'}</td>
+            <td>${formatarData(recebimento.validade) || '-'}</td>
+            <td>${recebimento.volumeNumero || recebimento.volumes || '-'} ${recebimento.unidadeVolume || ''}</td>
+            <td>${recebimento.qtdPorEmbalagem || '-'}</td>
+            <td class="text-warning">${(recebimento.quantidadeTotal || recebimento.totalUN || 0).toFixed(2)}</td>
+            <td>${recebimento.localizacao || '-'}</td>
+        `;
+        tbody.appendChild(tr);
     }
     
     // Abrir modal
@@ -2173,7 +2127,6 @@ function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, q
 // ============================================
 // FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA
 // ============================================
-
 function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     const tbody = document.getElementById('tabela-recebimentos');
     if (!tbody) return;
@@ -2218,7 +2171,6 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
         tbody.appendChild(tr);
     });
 }
-
 // Função verUnidade (MODIFICADA)
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
@@ -3187,6 +3139,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
