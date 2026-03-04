@@ -872,24 +872,24 @@ async function salvarRecebimentoMultiplo() {
             const primeiroProduto = produtosArray[0];
             const primeiroVolume = primeiroProduto.volumes[0];
             
-            const recebimentoRegistro = {
-                tipo: 'recebimento',
-                idUnidade: idUnidade,
-                data: dataRecebimento,
-                nf: numeroNF,
-                fornecedor: fornecedor,
-                sku: primeiroProduto.sku,                    // Coluna D
-                produto: primeiroProduto.nome,                // Coluna E
-                lote: primeiroVolume.lote,                    // Coluna F
-                validade: primeiroVolume.validade,            // Coluna G
-                quantidade: totalUN,                           // Coluna H
-                volume: totalVolumes,                          // Coluna I
-                unidadeMedida: primeiroProduto.tipoEmbalagem, // Coluna J
-                qtdPorEmbalagem: primeiroVolume.unPorEmbalagem, // Coluna K
-                localizacao: primeiroVolume.localizacao || '', // Coluna L
-                responsavel: 'Sistema',                        // Coluna M
-                observacoes: observacoes,                      // Coluna N
-                tipoUnidade: 'Múltipla'                         // Coluna O
+                const recebimentoRegistro = {
+                    tipo: 'recebimento',
+                    idUnidade: idUnidade,
+                    data: dataRecebimento,
+                    nf: numeroNF,                                   // ← Coluna B (estava faltando)
+                    fornecedor: fornecedor,                         // ← Coluna C
+                    sku: primeiroProduto.sku,                       // ← Coluna D (código SKU)
+                    produto: primeiroProduto.nome,                   // ← Coluna E (descrição do produto)
+                    lote: primeiroVolume.lote,                       // ← Coluna F
+                    validade: primeiroVolume.validade,               // ← Coluna G
+                    quantidade: totalUN,                             // ← Coluna H
+                    volume: totalVolumes,                            // ← Coluna I
+                    unidadeMedida: primeiroProduto.tipoEmbalagem,    // ← Coluna J
+                    qtdPorEmbalagem: primeiroVolume.unPorEmbalagem,  // ← Coluna K
+                    localizacao: primeiroVolume.localizacao || '',   // ← Coluna L
+                    responsavel: 'Sistema',                          // ← Coluna M
+                    observacoes: observacoes,                        // ← Coluna N
+                    tipoUnidade: 'Múltipla'                          // ← Coluna O
                 };
         
        // ANTIGO:
@@ -3386,3 +3386,4 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
