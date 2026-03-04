@@ -434,6 +434,28 @@
 
     <script>
         // ============================================
+        // CONSTANTES
+        // ============================================
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
+
+        // ============================================
+        // FUNÇÃO PARA ENVIAR DADOS PARA O APPS SCRIPT (VIA GET)
+        // ============================================
+        async function enviarParaAppsScript(dados) {
+            const url = `${WEB_APP_URL}?dados=${encodeURIComponent(JSON.stringify(dados))}`;
+            
+            try {
+                await fetch(url, {
+                    mode: 'no-cors'
+                });
+                return true;
+            } catch (error) {
+                console.error('❌ Erro ao enviar:', error);
+                return false;
+            }
+        }
+
+        // ============================================
         // CARREGAR DADOS DA URL
         // ============================================
         const urlParams = new URLSearchParams(window.location.search);
@@ -441,7 +463,6 @@
         
         let unidadeData = null;
         let isMultipla = false;
-        let volumesList = [];
         
         // ============================================
         // SE TIVER PARÂMETRO 'dados' (UNIDADE MÚLTIPLA)
@@ -637,6 +658,7 @@
                 // ============================================
                 const inputs = document.querySelectorAll('.volume-transferir-item');
                 let temTransferencia = false;
+                let todasTransferencias = [];
                 
                 for (let i = 0; i < inputs.length; i++) {
                     const input = inputs[i];
@@ -656,14 +678,51 @@
                         const novaQuantidadeUN = volume.totalUN - qtdUNTransferir;
                         const novoVolume = novaQuantidadeUN <= 0.01 ? 0 : (novaQuantidadeUN / volume.unPorEmbalagem);
                         
-                        // Aqui você pode implementar a lógica para salvar cada transferência
-                        console.log(`Transferindo volume ${index+1}: ${qtdTransferir} ${produto.tipoEmbalagem} (${qtdUNTransferir} UN)`);
+                        // Criar unidade atualizada para este volume
+                        const idCompleto = unidadeData.produtos[0].volumes.length > 1 ? 
+                            `${unidadeData.id}-P1V${index+1}` : unidadeData.id;
+                        
+                        todasTransferencias.push({
+                            tipo: 'unidade',
+                            id: idCompleto,
+                            sku: produto.sku,
+                            lote: volume.lote,
+                            validade: volume.validade,
+                            volume: novoVolume,
+                            quantidade: novaQuantidadeUN,
+                            unidadeEmbalagem: produto.tipoEmbalagem,
+                            status: novaQuantidadeUN <= 0.01 ? 'Transferido' : 'Disponível',
+                            localizacao: volume.localizacao || '-',
+                            destino: novaQuantidadeUN <= 0.01 ? destinoSelecionado : '',
+                            foraPadrao: volume.tipo === 'fora-padrao',
+                            qtdRealPorEmbalagem: volume.tipo === 'fora-padrao' ? volume.unPorEmbalagem : null
+                        });
+                        
+                        // Criar movimentação para este volume
+                        todasTransferencias.push({
+                            tipo: 'movimentacao',
+                            data: new Date().toISOString().split('T')[0],
+                            tipoMov: 'Transferência',
+                            idUnidade: idCompleto,
+                            sku: produto.sku,
+                            volume: qtdTransferir,
+                            quantidade: qtdUNTransferir,
+                            unidadeEmbalagem: produto.tipoEmbalagem,
+                            destino: destinoSelecionado,
+                            responsavel: 'Sistema',
+                            observacao: observacao
+                        });
                     }
                 }
                 
                 if (!temTransferencia) {
                     alert('Informe pelo menos um volume para transferir!');
                     return;
+                }
+                
+                // Enviar todas as transferências
+                for (const dados of todasTransferencias) {
+                    await enviarParaAppsScript(dados);
                 }
                 
                 alert('Transferência múltipla realizada com sucesso!');
@@ -717,22 +776,9 @@
                     observacao: observacao
                 };
 
-                const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
-
                 try {
-                    await fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(movimentacao)
-                    });
-
-                    await fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(unidadeAtualizada)
-                    });
+                    await enviarParaAppsScript(movimentacao);
+                    await enviarParaAppsScript(unidadeAtualizada);
 
                     alert('Transferência realizada com sucesso!');
                     setTimeout(() => window.close(), 2000);
@@ -745,5 +791,3 @@
     </script>
 </body>
 </html>
-
-
