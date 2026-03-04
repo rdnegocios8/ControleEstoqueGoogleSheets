@@ -2467,24 +2467,50 @@ function verUnidade(id) {
     modal.show();
 }
 
-// Ver QR Code completo (CORRIGIDO)
+// Ver QR Code completo (CORRIGIDO - usa o mesmo formato da verUnidade)
 function verQRCodeCompleto() {
     if (!unidadeAtual) return;
     
-    const produto = produtos.find(p => p.sku === unidadeAtual.sku);
     const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     
     let urlCompleta;
     
     if (unidadeAtual.tipo === 'unidade-multipla') {
-        const primeiroProduto = unidadeAtual.produtos[0];
-        const primeiroVolume = primeiroProduto.volumes[0];
-        urlCompleta = `${baseUrl}qr-view.html?id=${unidadeAtual.id}&sku=${primeiroProduto.sku}&lote=${primeiroVolume.lote}&validade=${primeiroVolume.validade}&produto=${encodeURIComponent(primeiroProduto.nome)}&volume=${primeiroVolume.qtdVolumes}&quantidade=${primeiroVolume.totalUN}&unidade=${primeiroProduto.tipoEmbalagem}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
+        // ============================================
+        // CASO MÚLTIPLO: usar o mesmo formato da verUnidade
+        // ============================================
+        const dadosCompletos = {
+            id: unidadeAtual.id,
+            produtos: unidadeAtual.produtos.map(p => ({
+                nome: p.nome,
+                sku: p.sku,
+                tipoEmbalagem: p.tipoEmbalagem,
+                volumes: p.volumes.map(v => ({
+                    tipo: v.tipo,
+                    qtdVolumes: v.qtdVolumes,
+                    unPorEmbalagem: v.unPorEmbalagem,
+                    totalUN: v.totalUN,
+                    lote: v.lote,
+                    validade: v.validade,
+                    localizacao: v.localizacao
+                }))
+            })),
+            totalVolumes: unidadeAtual.totalVolumes,
+            totalUN: unidadeAtual.totalUN
+        };
+        
+        const dadosJSON = encodeURIComponent(JSON.stringify(dadosCompletos));
+        urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
+        
     } else {
+        // ============================================
+        // CASO SIMPLES: formato original (para não quebrar nada)
+        // ============================================
+        const produto = produtos.find(p => p.sku === unidadeAtual.sku);
         urlCompleta = `${baseUrl}qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote || ''}&validade=${unidadeAtual.validade || ''}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume || 1}&quantidade=${unidadeAtual.quantidade || 0}&unidade=${unidadeAtual.unidadeEmbalagem || 'UN'}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
     }
     
-    // Abre o qr-view.html, não a imagem da API
+    // Abre o qr-view.html com a URL correta
     window.open(urlCompleta, '_blank');
 }
 
@@ -3282,6 +3308,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
