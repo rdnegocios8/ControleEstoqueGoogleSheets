@@ -6,9 +6,9 @@
     <title>QR Code da Unidade</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <!-- Usando biblioteca mais estável -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
+        /* Seu CSS existente permanece o mesmo */
         body {
             background: linear-gradient(135deg, #0f172a, #1e293b);
             min-height: 100vh;
@@ -46,18 +46,17 @@
             background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
         }
         
-        .qr-header {
-            margin-bottom: 30px;
-        }
-        
-        .qr-header h2 {
-            color: #fbbf24;
+        .badge-unidade {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0f172a;
+            border-radius: 30px;
             font-weight: 700;
-            font-size: 2rem;
-            margin: 0;
+            margin-bottom: 20px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: none;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
         }
         
         .qr-code-box {
@@ -104,6 +103,76 @@
             font-weight: 600;
         }
         
+        .volumes-table {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #fbbf24;
+        }
+        
+        .volumes-table h4 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .volumes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .volume-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .volume-card .tipo {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .volume-card .tipo.padrao {
+            background: #10b981;
+            color: white;
+        }
+        
+        .volume-card .tipo.fora {
+            background: #f59e0b;
+            color: #0f172a;
+        }
+        
+        .volume-card p {
+            margin: 5px 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        
+        .volume-card p strong {
+            color: #fbbf24;
+        }
+        
+        .info-id {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            color: #fbbf24;
+            word-break: break-all;
+            margin: 15px 0;
+            border: 2px solid #fbbf24;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
         .qr-actions {
             display: flex;
             gap: 15px;
@@ -147,59 +216,6 @@
             box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3);
         }
         
-        .badge-unidade {
-            display: inline-block;
-            padding: 8px 20px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #0f172a;
-            border-radius: 30px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
-        }
-        
-        .info-id {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            color: #fbbf24;
-            word-break: break-all;
-            margin: 15px 0;
-            border: 2px solid #fbbf24;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-        
-        .volume-info {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            padding: 20px;
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #334155;
-        }
-        
-        .volume-item {
-            text-align: center;
-        }
-        
-        .volume-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #fbbf24;
-            line-height: 1.2;
-        }
-        
-        .volume-label {
-            font-size: 0.9rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
         @media print {
             .qr-actions, .badge-unidade {
                 display: none;
@@ -227,8 +243,9 @@
                 <!-- Informações serão preenchidas via JavaScript -->
             </div>
             
-            <div class="volume-info" id="volume-info">
-                <!-- Informações de volume serão preenchidas -->
+            <div class="volumes-table" id="volumes-table" style="display: none;">
+                <h4><i class="bi bi-boxes"></i> Volumes da Unidade</h4>
+                <div class="volumes-grid" id="volumes-grid"></div>
             </div>
             
             <div class="info-id" id="info-id"></div>
@@ -247,165 +264,186 @@
         </div>
     </div>
 
-   <script>
-    // ============================================
-    // CARREGAR DADOS DA URL
-    // ============================================
-    const urlParams = new URLSearchParams(window.location.search);
-    const unidadeId = urlParams.get('id');
-    const tipo = urlParams.get('tipo'); // 'multipla' ou null
-    
-    // ============================================
-    // DADOS PARA UNIDADE SIMPLES (formato original)
-    // ============================================
-    const sku = urlParams.get('sku');
-    const lote = urlParams.get('lote');
-    const validade = urlParams.get('validade');
-    const produtoNome = decodeURIComponent(urlParams.get('produto') || '');
-    const volume = urlParams.get('volume') || '0';
-    const quantidade = urlParams.get('quantidade') || '0';
-    const unidade = urlParams.get('unidade') || 'UN';
-    const unidadeBase = urlParams.get('unidadeBase') || 'UN';
-    const qtdPorEmbalagem = urlParams.get('qtdPorEmbalagem') || '1';
-
-    // ============================================
-    // CONSTRUIR LINK PARA BAIXA-VIEW
-    // ============================================
-    const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
-    let linkCompleto;
-    
-    if (tipo === 'multipla') {
-        // UNIDADE MÚLTIPLA: passar apenas o ID
-        linkCompleto = `${baseUrl}?id=${unidadeId}&tipo=multipla`;
-    } else {
-        // UNIDADE SIMPLES: passar todos os parâmetros
-        linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
-    }
-
-    // ============================================
-    // FUNÇÃO PARA FORMATAR DATA
-    // ============================================
-    function formatarDataSemFuso(dataString) {
-        if (!dataString) return 'N/A';
+    <script>
+        // ============================================
+        // CARREGAR DADOS DA URL
+        // ============================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const dadosParam = urlParams.get('dados');
         
-        if (typeof dataString === 'string' && dataString.includes('-')) {
-            const partes = dataString.split('-');
-            if (partes.length === 3) {
-                return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            }
-        }
-        return dataString;
-    }
-
-    // ============================================
-    // FUNÇÃO PARA FORMATAR NÚMERO
-    // ============================================
-    function formatarNumero(valor) {
-        if (!valor) return '0,00';
-        return parseFloat(valor).toFixed(2).replace('.', ',');
-    }
-
-    // ============================================
-    // FUNÇÃO PARA GERAR QR CODE
-    // ============================================
-    function gerarQRCode() {
-        const qrcodeDiv = document.getElementById('qrcode');
-        qrcodeDiv.innerHTML = '';
+        let unidadeData = null;
+        let isMultipla = false;
         
-        if (!unidadeId) {
-            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID da unidade não encontrado</p>';
-            return;
-        }
-
-        if (typeof QRCode !== 'undefined') {
+        // ============================================
+        // SE TIVER PARÂMETRO 'dados' (UNIDADE MÚLTIPLA)
+        // ============================================
+        if (dadosParam) {
             try {
-                QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
-                    width: 250,
-                    margin: 2
-                }, function(err, canvas) {
-                    if (err) {
-                        console.error('Erro:', err);
-                        qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
-                        return;
-                    }
-                    
-                    qrcodeDiv.innerHTML = '';
-                    canvas.style.width = '100%';
-                    canvas.style.height = 'auto';
-                    qrcodeDiv.appendChild(canvas);
-                });
-
-                // ============================================
-                // PREENCHER INFORMAÇÕES
-                // ============================================
-                if (tipo === 'multipla') {
-                    // UNIDADE MÚLTIPLA: mostrar mensagem
-                    document.getElementById('qr-info').innerHTML = `
-                        <p><strong>Unidade Múltipla</strong></p>
-                        <p>Esta unidade contém múltiplos produtos/volumes</p>
-                        <p>Escaneie o QR code para acessar a página de baixa</p>
-                    `;
-                    
-                    document.getElementById('volume-info').innerHTML = `
-                        <div class="volume-item">
-                            <div class="volume-value">-</div>
-                            <div class="volume-label">MÚLTIPLOS</div>
-                        </div>
-                        <div class="volume-item">
-                            <div class="volume-value">-</div>
-                            <div class="volume-label">VOLUMES</div>
-                        </div>
-                    `;
-                } else {
-                    // UNIDADE SIMPLES: mostrar informações detalhadas
-                    document.getElementById('qr-info').innerHTML = `
-                        <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
-                        <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
-                        <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
-                        <p><strong>Validade:</strong> ${formatarDataSemFuso(validade)}</p>
-                    `;
-
-                    document.getElementById('volume-info').innerHTML = `
-                        <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(volume)}</div>
-                            <div class="volume-label">${unidade}</div>
-                        </div>
-                        <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(quantidade)}</div>
-                            <div class="volume-label">${unidadeBase}</div>
-                        </div>
-                    `;
-                }
-
-                document.getElementById('info-id').innerHTML = `
-                    <i class="bi bi-upc-scan"></i> ID: ${unidadeId}
-                `;
-
+                unidadeData = JSON.parse(decodeURIComponent(dadosParam));
+                isMultipla = true;
+                console.log('✅ Dados da unidade múltipla carregados:', unidadeData);
             } catch (e) {
-                console.error('Erro:', e);
-                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
+                console.error('❌ Erro ao parsear dados:', e);
             }
-        } else {
-            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Biblioteca não carregada</p>';
-        }
-    }
-
-    function baixarQR() {
-        const canvas = document.querySelector('#qrcode canvas');
-        if (!canvas) {
-            alert('QR Code ainda não foi gerado!');
-            return;
         }
         
-        const link = document.createElement('a');
-        link.download = `qrcode-${unidadeId || 'unidade'}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    }
+        // ============================================
+        // SE NÃO TIVER, É UNIDADE SIMPLES (formato antigo)
+        // ============================================
+        if (!isMultipla) {
+            // Dados para unidade simples
+            unidadeData = {
+                id: urlParams.get('id'),
+                produtos: [{
+                    nome: decodeURIComponent(urlParams.get('produto') || ''),
+                    sku: urlParams.get('sku'),
+                    tipoEmbalagem: urlParams.get('unidade') || 'UN',
+                    volumes: [{
+                        tipo: 'padrao',
+                        qtdVolumes: parseFloat(urlParams.get('volume')) || 0,
+                        unPorEmbalagem: parseFloat(urlParams.get('qtdPorEmbalagem')) || 1,
+                        totalUN: parseFloat(urlParams.get('quantidade')) || 0,
+                        lote: urlParams.get('lote'),
+                        validade: urlParams.get('validade'),
+                        localizacao: '-'
+                    }]
+                }],
+                totalVolumes: parseFloat(urlParams.get('volume')) || 0,
+                totalUN: parseFloat(urlParams.get('quantidade')) || 0
+            };
+        }
 
-    window.onload = function() {
-        setTimeout(gerarQRCode, 100);
-    };
-</script>
+        // ============================================
+        // CONSTRUIR LINK PARA BAIXA-VIEW
+        // ============================================
+        const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
+        let linkCompleto;
+        
+        if (isMultipla) {
+            // Unidade múltipla: passar todos os dados
+            linkCompleto = `${baseUrl}?dados=${encodeURIComponent(JSON.stringify(unidadeData))}`;
+        } else {
+            // Unidade simples: formato original
+            linkCompleto = `${baseUrl}?id=${unidadeData.id}&sku=${unidadeData.produtos[0].sku}&lote=${unidadeData.produtos[0].volumes[0].lote}&validade=${unidadeData.produtos[0].volumes[0].validade}&produto=${encodeURIComponent(unidadeData.produtos[0].nome)}&volume=${unidadeData.produtos[0].volumes[0].qtdVolumes}&quantidade=${unidadeData.produtos[0].volumes[0].totalUN}&unidade=${unidadeData.produtos[0].tipoEmbalagem}&unidadeBase=UN&qtdPorEmbalagem=${unidadeData.produtos[0].volumes[0].unPorEmbalagem}`;
+        }
+
+        // ============================================
+        // FUNÇÃO PARA FORMATAR DATA
+        // ============================================
+        function formatarData(dataString) {
+            if (!dataString) return 'N/A';
+            if (typeof dataString === 'string' && dataString.includes('-')) {
+                const partes = dataString.split('-');
+                if (partes.length === 3) {
+                    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
+            }
+            return dataString;
+        }
+
+        // ============================================
+        // FUNÇÃO PARA FORMATAR NÚMERO
+        // ============================================
+        function formatarNumero(valor) {
+            if (!valor && valor !== 0) return '0,00';
+            return valor.toFixed(2).replace('.', ',');
+        }
+
+        // ============================================
+        // FUNÇÃO PARA GERAR QR CODE
+        // ============================================
+        function gerarQRCode() {
+            const qrcodeDiv = document.getElementById('qrcode');
+            qrcodeDiv.innerHTML = '';
+            
+            if (!unidadeData || !unidadeData.id) {
+                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID da unidade não encontrado</p>';
+                return;
+            }
+
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
+                        width: 250,
+                        margin: 2
+                    }, function(err, canvas) {
+                        if (err) {
+                            console.error('Erro:', err);
+                            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
+                            return;
+                        }
+                        
+                        qrcodeDiv.innerHTML = '';
+                        canvas.style.width = '100%';
+                        canvas.style.height = 'auto';
+                        qrcodeDiv.appendChild(canvas);
+                    });
+
+                    // ============================================
+                    // PREENCHER INFORMAÇÕES
+                    // ============================================
+                    const primeiroProduto = unidadeData.produtos[0];
+                    const primeiroVolume = primeiroProduto.volumes[0];
+                    
+                    document.getElementById('qr-info').innerHTML = `
+                        <p><strong>Produto:</strong> ${primeiroProduto.nome || 'N/A'}</p>
+                        <p><strong>SKU:</strong> ${primeiroProduto.sku || 'N/A'}</p>
+                        <p><strong>Lote:</strong> ${primeiroVolume.lote || 'N/A'}</p>
+                        <p><strong>Validade:</strong> ${formatarData(primeiroVolume.validade)}</p>
+                    `;
+
+                    // ============================================
+                    // SE FOR UNIDADE MÚLTIPLA, MOSTRAR TODOS OS VOLUMES
+                    // ============================================
+                    if (isMultipla && unidadeData.produtos[0].volumes.length > 1) {
+                        document.getElementById('volumes-table').style.display = 'block';
+                        const grid = document.getElementById('volumes-grid');
+                        grid.innerHTML = '';
+                        
+                        unidadeData.produtos[0].volumes.forEach(vol => {
+                            const card = document.createElement('div');
+                            card.className = 'volume-card';
+                            card.innerHTML = `
+                                <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA DO PADRÃO'}</span>
+                                <p><strong>Lote:</strong> ${vol.lote || '-'}</p>
+                                <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
+                                <p><strong>Qtd Volumes:</strong> ${vol.qtdVolumes} ${primeiroProduto.tipoEmbalagem}</p>
+                                <p><strong>UN/Vol:</strong> ${formatarNumero(vol.unPorEmbalagem)}</p>
+                                <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN)}</p>
+                            `;
+                            grid.appendChild(card);
+                        });
+                    }
+
+                    document.getElementById('info-id').innerHTML = `
+                        <i class="bi bi-upc-scan"></i> ID: ${unidadeData.id}
+                    `;
+
+                } catch (e) {
+                    console.error('Erro:', e);
+                    qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
+                }
+            } else {
+                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Biblioteca não carregada</p>';
+            }
+        }
+
+        function baixarQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                alert('QR Code ainda não foi gerado!');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = `qrcode-${unidadeData?.id || 'unidade'}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        window.onload = function() {
+            setTimeout(gerarQRCode, 100);
+        };
+    </script>
 </body>
 </html>
