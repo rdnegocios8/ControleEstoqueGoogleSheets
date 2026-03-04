@@ -1171,41 +1171,77 @@ async function salvarRecebimento() {
 // Carregar recebimentos
 async function carregarRecebimentos() {
     try {
+        console.log('📥 Carregando recebimentos da planilha...');
+        
         const response = await fetch(RECEBIMENTOS_URL);
         const data = await response.json();
         
         if (data.values && data.values.length > 1) {
+            // Pular cabeçalho (linha 1) e mapear dados
             recebimentos = data.values.slice(1).map(row => {
+                // Função para converter string com vírgula para número
                 const converter = (valor) => {
                     if (!valor) return 0;
                     if (typeof valor === 'string') {
+                        // Substituir vírgula por ponto e converter
                         return parseFloat(valor.replace(',', '.')) || 0;
                     }
                     return parseFloat(valor) || 0;
                 };
                 
+                // Extrair apenas o número da coluna I (ex: "1 PLT" → 1)
+                const extrairNumeroVolume = (valor) => {
+                    if (!valor) return 0;
+                    const partes = String(valor).split(' ');
+                    return converter(partes[0]) || 0;
+                };
+                
+                // Extrair a unidade da coluna I (ex: "1 PLT" → "PLT")
+                const extrairUnidadeVolume = (valor) => {
+                    if (!valor) return 'UN';
+                    const partes = String(valor).split(' ');
+                    return partes[1] || 'UN';
+                };
+                
                 return {
-                    data: row[0],
-                    nf: row[1],
-                    fornecedor: row[2],
-                    sku: row[3],
-                    produto: row[4],
-                    lote: row[5],
-                    validade: row[6],
-                    quantidade: converter(row[7]),
-                    volume: converter(row[8]),
-                    unidade: row[9],
-                    qtdPorEmbalagem: converter(row[10]),
-                    localizacao: row[11],
-                    responsavel: row[12],
-                    observacoes: row[13]
+                    // Mapeamento direto das colunas
+                    data: row[0] || '',                          // Coluna A: Data
+                    nf: row[1] || '-',                           // Coluna B: NF
+                    fornecedor: row[2] || '-',                   // Coluna C: Fornecedor
+                    sku: row[3] || '',                           // Coluna D: SKU
+                    produto: row[4] || '',                       // Coluna E: Produto
+                    lote: row[5] || '',                          // Coluna F: Lote
+                    validade: row[6] || '',                      // Coluna G: Validade
+                    volume: converter(row[7]),                   // Coluna H: Volume (valor numérico)
+                    volumeDisplay: row[7] || '0',                // Coluna H: Volume (texto original)
+                    unidadeVolume: extrairUnidadeVolume(row[8]), // Coluna I: Unidade (ex: "PLT", "KG", "SC")
+                    volumeCompleto: row[8] || '',                // Coluna I: Texto completo (ex: "1 PLT")
+                    qtdPorEmbalagem: converter(row[10]),         // Coluna K: Qtd/Emb
+                    localizacao: row[11] || '-',                 // Coluna L: Local
+                    responsavel: row[12] || 'Sistema',           // Coluna M: Resp
+                    observacoes: row[13] || '',                  // Coluna N: Obs
+                    
+                    // Campos calculados para exibição
+                    quantidade: converter(row[7]) * converter(row[10]), // Volume * Qtd/Emb
+                    unidadeBase: 'KG', // Ajuste conforme necessário
+                    
+                    // ID da unidade (se existir, senão gera um baseado nos dados)
+                    idUnidade: `REC-${row[0]?.replace(/-/g, '')}-${row[1] || 'NF'}` 
                 };
             });
             
-            atualizarTabelaRecebimentos();
+            console.log(`✅ ${recebimentos.length} recebimentos carregados`);
+        } else {
+            console.log('ℹ️ Nenhum recebimento encontrado na planilha');
+            recebimentos = [];
         }
+        
+        // Atualizar a tabela
+        atualizarTabelaRecebimentos();
+        
     } catch (error) {
-        console.error('Erro ao carregar recebimentos:', error);
+        console.error('❌ Erro ao carregar recebimentos:', error);
+        recebimentos = [];
     }
 }
 
@@ -2068,20 +2104,33 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
         return;
     }
     
+    // Mostrar os últimos 50 recebimentos em ordem reversa (mais recentes primeiro)
     dados.slice(-50).reverse().forEach(r => {
         const tr = document.createElement('tr');
+        
+        // Criar um resumo do produto (primeiros 30 caracteres)
+        const resumoProduto = r.produto ? 
+            (r.produto.length > 30 ? r.produto.substring(0, 30) + '...' : r.produto) : 
+            '-';
+        
+        // Calcular quantidade total
+        const quantidadeTotal = r.quantidade || 0;
+        
         tr.innerHTML = `
             <td><small class="text-warning">${r.idUnidade || '-'}</small></td>
             <td>${formatarData(r.data)}</td>
             <td>${r.nf || '-'}</td>
             <td>${r.fornecedor || '-'}</td>
-            <td>${r.resumo || `${r.produtos} produto(s)`}</td>
-            <td>${r.volumes || '-'}</td>
-            <td><strong class="text-warning">${(r.totalUN || 0).toFixed(2)}</strong> UN</td>
+            <td>${resumoProduto}</td>
+            <td>${r.volume || '-'} ${r.unidadeVolume || ''}</td>
+            <td><strong class="text-warning">${quantidadeTotal.toFixed(2)}</strong> ${r.unidadeBase || 'UN'}</td>
             <td>
-                <button class="btn btn-sm btn-info" onclick="verUnidade('${r.idUnidade}')">
-                    <i class="bi bi-eye"></i> Ver
-                </button>
+                ${r.idUnidade ? 
+                    `<button class="btn btn-sm btn-info" onclick="verUnidade('${r.idUnidade}')">
+                        <i class="bi bi-eye"></i> Ver
+                    </button>` : 
+                    '<span class="text-muted">—</span>'
+                }
             </td>
         `;
         tbody.appendChild(tr);
@@ -3056,6 +3105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
