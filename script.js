@@ -2109,35 +2109,67 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     dados.slice(-50).reverse().forEach(r => {
         const tr = document.createElement('tr');
         
+        // ============================================
+        // BUSCAR PRODUTO COM DIFERENTES ESTRATÉGIAS
+        // ============================================
+        let produto = null;
+        
+        if (r.sku) {
+            // Estratégia 1: Comparação exata
+            produto = produtos.find(p => p.sku === r.sku);
+            
+            // Estratégia 2: Remover zeros à esquerda
+            if (!produto) {
+                const skuLimpo = String(r.sku).replace(/^0+/, '');
+                produto = produtos.find(p => String(p.sku).replace(/^0+/, '') === skuLimpo);
+            }
+            
+            // Estratégia 3: Adicionar zeros à esquerda
+            if (!produto && !isNaN(r.sku)) {
+                const skuComZeros = String(r.sku).padStart(8, '0');
+                produto = produtos.find(p => p.sku === skuComZeros);
+            }
+            
+            // Estratégia 4: Comparação como string sem espaços
+            if (!produto) {
+                const skuString = String(r.sku).trim();
+                produto = produtos.find(p => String(p.sku).trim() === skuString);
+            }
+        }
+        
+        // ============================================
+        // BUSCAR UNIDADES
+        // ============================================
+        let unidadeVolume = 'UN';
+        let unidadeBase = 'UN';
+        
+        if (produto) {
+            unidadeVolume = produto.tipoEmbalagem || 'UN';
+            unidadeBase = produto.unidadeBase || 'UN';
+        } else {
+            // Fallback: tentar adivinhar pela descrição do produto
+            if (r.produto) {
+                const produtoPorNome = produtos.find(p => 
+                    p.nome && r.produto && p.nome.includes(r.produto.substring(0, 10))
+                );
+                if (produtoPorNome) {
+                    unidadeVolume = produtoPorNome.tipoEmbalagem || 'UN';
+                    unidadeBase = produtoPorNome.unidadeBase || 'UN';
+                }
+            }
+        }
+        
         // Resumo do produto
         const resumoProduto = r.produto ? 
             (r.produto.length > 30 ? r.produto.substring(0, 30) + '...' : r.produto) : 
             '-';
         
-        // ============================================
-        // BUSCAR UNIDADES DA ABA PRODUTOS
-        // ============================================
-        let unidadeVolume = 'UN';
-        let unidadeBase = 'UN';
-        
-        if (r.sku) {
-            const produto = produtos.find(p => p.sku === r.sku);
-            if (produto) {
-                unidadeVolume = produto.tipoEmbalagem || 'UN';
-                unidadeBase = produto.unidadeBase || 'UN';
-            }
-        }
-        
-        // ============================================
-        // VOLUME: usar unidadeVolume (da coluna E)
-        // ============================================
+        // Volume com unidade correta
         const volumeDisplay = r.volumeNumero ? 
             `${r.volumeNumero} ${unidadeVolume}` : 
             (r.volumeTexto ? `${r.volumeTexto} ${unidadeVolume}` : '-');
         
-        // ============================================
-        // QUANTIDADE: usar unidadeBase (da coluna G)
-        // ============================================
+        // Quantidade com unidade base
         const quantidadeDisplay = (r.quantidadeTotal || 0).toFixed(2);
         
         tr.innerHTML = `
@@ -3135,6 +3167,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
