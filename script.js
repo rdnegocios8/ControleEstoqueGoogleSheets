@@ -829,7 +829,7 @@ async function salvarRecebimentoMultiplo() {
         
         await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            
             headers: { 
                 'Content-Type': 'application/json'
             },
@@ -858,7 +858,7 @@ async function salvarRecebimentoMultiplo() {
         
         await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(recebimentoRegistro)
         });
@@ -1060,7 +1060,7 @@ async function salvarRecebimento() {
         // Salvar recebimento
         await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
+           
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(recebimento)
         });
@@ -1086,7 +1086,7 @@ async function salvarRecebimento() {
         
         await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(unidade)
         });
@@ -1912,7 +1912,7 @@ async function salvarProduto() {
     try {
         await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
+          
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(produto)
         });
@@ -1970,7 +1970,7 @@ async function salvarUnidade() {
     try {
         await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(unidade)
         });
@@ -3330,6 +3330,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
