@@ -722,14 +722,14 @@
                 try {
                     await fetch(WEB_APP_URL, {
                         method: 'POST',
-                        mode: 'no-cors',
+                        
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(movimentacao)
                     });
 
                     await fetch(WEB_APP_URL, {
                         method: 'POST',
-                        mode: 'no-cors',
+                        
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(unidadeAtualizada)
                     });
@@ -745,3 +745,4 @@
     </script>
 </body>
 </html>
+
