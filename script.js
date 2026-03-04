@@ -2150,21 +2150,21 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
 }
 
 // ============================================
-// FUNÇÃO ABRIR MODAL TRANSFERÊNCIA - ATUALIZADA
+// FUNÇÃO ABRIR MODAL TRANSFERÊNCIA - ATUALIZADA (CORRIGIDA)
 // ============================================
 function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, quantidade, unidade, unidadeBase, qtdPorEmbalagem) {
     // Verificar se a unidade é múltipla (pelo ID)
-    const unidade = unidades.find(u => u.id === id);
+    const unidadeEncontrada = unidades.find(u => u.id === id);
     
-    if (unidade && unidade.tipo === 'unidade-multipla') {
+    if (unidadeEncontrada && unidadeEncontrada.tipo === 'unidade-multipla') {
         // ============================================
         // CASO MÚLTIPLO: passar todos os dados em JSON
         // ============================================
         const dadosCompletos = {
-            id: unidade.id,
-            produtos: unidade.produtos,
-            totalVolumes: unidade.totalVolumes,
-            totalUN: unidade.totalUN
+            id: unidadeEncontrada.id,
+            produtos: unidadeEncontrada.produtos,
+            totalVolumes: unidadeEncontrada.totalVolumes,
+            totalUN: unidadeEncontrada.totalUN
         };
         
         const dadosJSON = encodeURIComponent(JSON.stringify(dadosCompletos));
@@ -3330,6 +3330,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
