@@ -868,17 +868,29 @@ async function salvarRecebimentoMultiplo() {
         // ============================================
         // ENVIO 2: Salvar como recebimento (FORMATO CORRETO)
         // ============================================
-        const recebimentoRegistro = {
-            tipo: 'recebimento',
-            idUnidade: idUnidade,
-            data: dataRecebimento,
-            nf: numeroNF,
-            fornecedor: fornecedor,
-            produtos: produtosArray.length,
-            volumes: totalVolumes,
-            totalUN: totalUN,
-            resumo: resumoProdutos.join(' | ')
-        };
+        // Pegar o primeiro produto e primeiro volume para os detalhes
+            const primeiroProduto = produtosArray[0];
+            const primeiroVolume = primeiroProduto.volumes[0];
+            
+            const recebimentoRegistro = {
+                tipo: 'recebimento',
+                idUnidade: idUnidade,
+                data: dataRecebimento,
+                nf: numeroNF,
+                fornecedor: fornecedor,
+                sku: primeiroProduto.sku,                    // Coluna D
+                produto: primeiroProduto.nome,                // Coluna E
+                lote: primeiroVolume.lote,                    // Coluna F
+                validade: primeiroVolume.validade,            // Coluna G
+                quantidade: totalUN,                           // Coluna H
+                volume: totalVolumes,                          // Coluna I
+                unidadeMedida: primeiroProduto.tipoEmbalagem, // Coluna J
+                qtdPorEmbalagem: primeiroVolume.unPorEmbalagem, // Coluna K
+                localizacao: primeiroVolume.localizacao || '', // Coluna L
+                responsavel: 'Sistema',                        // Coluna M
+                observacoes: observacoes,                      // Coluna N
+                tipoUnidade: 'Múltipla'                         // Coluna O
+                };
         
        // ANTIGO:
         await fetch(WEB_APP_URL, {
@@ -3374,32 +3386,3 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
