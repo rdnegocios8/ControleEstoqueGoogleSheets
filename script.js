@@ -2423,23 +2423,6 @@ function filtrarUnidades() {
     atualizarTabelaUnidades(unidadesFiltradas);
 }
 
-// Abrir modal de transferência
-function abrirModalTransferencia(id) {
-    const unidade = unidades.find(u => u.id === id);
-    if (!unidade) return;
-    
-    if (unidade.tipo === 'unidade-multipla') {
-        alert('Transferência para unidades múltiplas em desenvolvimento');
-        return;
-    }
-    
-    const produto = produtos.find(p => p.sku === unidade.sku);
-    
-    const url = `baixa-view.html?id=${unidade.id}&sku=${unidade.sku}&lote=${unidade.lote}&validade=${unidade.validade}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidade.volume}&quantidade=${unidade.quantidade}&unidade=${unidade.unidadeEmbalagem}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
-    
-    window.open(url, '_blank', 'width=700,height=800');
-}
-
 // Configurar QR Code scanner
 function setupQRCode() {
     const qrReaderElement = document.getElementById('qr-reader');
@@ -3165,6 +3148,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
