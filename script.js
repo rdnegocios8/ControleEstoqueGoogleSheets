@@ -2191,7 +2191,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - CORRIGIDA (SIMPLES + MÚLTIPLAS)
+// FUNÇÃO VER UNIDADE - COMPLETA (SIMPLES + MÚLTIPLAS)
 // ============================================
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
@@ -2216,10 +2216,37 @@ function verUnidade(id) {
         qrContainer.innerHTML = '';
         
         // ============================================
-        // GERAR QR CODE PARA UNIDADE MÚLTIPLA
+        // CONSTRUIR URL COM TODOS OS DADOS (OPÇÃO 1)
         // ============================================
-        // Passar apenas o ID - o qr-view.html vai buscar os dados completos
-        const urlCompleta = `${baseUrl}qr-view.html?id=${unidadeAtual.id}&tipo=multipla`;
+        
+        // Preparar objeto com todos os dados da unidade
+        const dadosUnidade = {
+            id: unidadeAtual.id,
+            produtos: unidadeAtual.produtos.map(p => ({
+                nome: p.nome,
+                sku: p.sku,
+                tipoEmbalagem: p.tipoEmbalagem,
+                volumes: p.volumes.map(v => ({
+                    tipo: v.tipo,
+                    qtdVolumes: v.qtdVolumes,
+                    unPorEmbalagem: v.unPorEmbalagem,
+                    totalUN: v.totalUN,
+                    lote: v.lote,
+                    validade: v.validade,
+                    localizacao: v.localizacao
+                }))
+            })),
+            totalVolumes: unidadeAtual.totalVolumes,
+            totalUN: unidadeAtual.totalUN,
+            numeroNF: unidadeAtual.numeroNF,
+            fornecedor: unidadeAtual.fornecedor,
+            dataRecebimento: unidadeAtual.dataRecebimento,
+            status: unidadeAtual.status
+        };
+        
+        // Converter para JSON e codificar para URL
+        const dadosJSON = encodeURIComponent(JSON.stringify(dadosUnidade));
+        const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
         
         setTimeout(() => {
             try {
@@ -2252,7 +2279,7 @@ function verUnidade(id) {
             }
         }, 100);
         
-        // Mostrar todos os produtos/volumes
+        // Mostrar todos os produtos/volumes no modal
         const container = document.getElementById('detalhe-produtos-container');
         container.innerHTML = '';
         
@@ -3186,6 +3213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
