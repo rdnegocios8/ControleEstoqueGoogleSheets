@@ -2125,7 +2125,7 @@ function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, q
 }
 
 // ============================================
-// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA
+// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA (UNIDADES CORRETAS)
 // ============================================
 function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     const tbody = document.getElementById('tabela-recebimentos');
@@ -2149,10 +2149,27 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             (r.produto.length > 30 ? r.produto.substring(0, 30) + '...' : r.produto) : 
             '-';
         
-        // Formatar volume
+        // Formatar volume com sua unidade correta
         const volumeDisplay = r.volumeNumero ? 
             `${r.volumeNumero} ${r.unidadeVolume || ''}` : 
             (r.volumeTexto || '-');
+        
+        // Determinar a unidade correta para a quantidade
+        // Prioridade: unidadeBase do produto > unidadeVolume > 'UN'
+        let unidadeQuantidade = 'UN';
+        
+        // Se temos o SKU, tentar buscar a unidadeBase do produto
+        if (r.sku) {
+            const produto = produtos.find(p => p.sku === r.sku);
+            if (produto && produto.unidadeBase) {
+                unidadeQuantidade = produto.unidadeBase;
+            }
+        }
+        
+        // Se não encontrou, usar a unidadeVolume como fallback
+        if (unidadeQuantidade === 'UN' && r.unidadeVolume) {
+            unidadeQuantidade = r.unidadeVolume;
+        }
         
         tr.innerHTML = `
             <td><small class="text-warning">${r.idUnidade || '-'}</small></td>
@@ -2161,7 +2178,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             <td>${r.fornecedor || '-'}</td>
             <td>${resumoProduto}</td>
             <td>${volumeDisplay}</td>
-            <td><strong class="text-warning">${(r.quantidadeTotal || 0).toFixed(2)}</strong> UN</td>
+            <td><strong class="text-warning">${(r.quantidadeTotal || 0).toFixed(2)}</strong> ${unidadeQuantidade}</td>
             <td>
                 <button class="btn btn-sm btn-info" onclick="verRecebimento('${r.idUnidade}')">
                     <i class="bi bi-eye"></i> Ver
@@ -3148,6 +3165,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
