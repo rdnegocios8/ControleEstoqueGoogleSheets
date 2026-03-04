@@ -69,7 +69,7 @@ body {
     border-bottom: 1px solid var(--border-color);
     padding: 1rem 1.25rem;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .list-group-item:last-child {
@@ -80,7 +80,7 @@ body {
     color: var(--accent-gold);
     margin-right: 12px;
     font-size: 1.2rem;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .list-group-item:hover {
@@ -114,7 +114,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 20px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     overflow: hidden;
 }
 
@@ -1944,4 +1944,3 @@ body #modalDetalhesRecebimento.modal.fade .modal-dialog .btn-secondary:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 5px 15px rgba(71, 85, 105, 0.3) !important;
 }
-
