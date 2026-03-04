@@ -248,9 +248,16 @@
     </div>
 
    <script>
-    // Carregar dados da URL
+    // ============================================
+    // CARREGAR DADOS DA URL
+    // ============================================
     const urlParams = new URLSearchParams(window.location.search);
     const unidadeId = urlParams.get('id');
+    const tipo = urlParams.get('tipo'); // 'multipla' ou null
+    
+    // ============================================
+    // DADOS PARA UNIDADE SIMPLES (formato original)
+    // ============================================
     const sku = urlParams.get('sku');
     const lote = urlParams.get('lote');
     const validade = urlParams.get('validade');
@@ -258,14 +265,22 @@
     const volume = urlParams.get('volume') || '0';
     const quantidade = urlParams.get('quantidade') || '0';
     const unidade = urlParams.get('unidade') || 'UN';
-    
-    // Carregar unidadeBase (se não vier, padrão 'UN')
     const unidadeBase = urlParams.get('unidadeBase') || 'UN';
     const qtdPorEmbalagem = urlParams.get('qtdPorEmbalagem') || '1';
 
-    // Construir link completo
+    // ============================================
+    // CONSTRUIR LINK PARA BAIXA-VIEW
+    // ============================================
     const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
-    const linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
+    let linkCompleto;
+    
+    if (tipo === 'multipla') {
+        // UNIDADE MÚLTIPLA: passar apenas o ID
+        linkCompleto = `${baseUrl}?id=${unidadeId}&tipo=multipla`;
+    } else {
+        // UNIDADE SIMPLES: passar todos os parâmetros
+        linkCompleto = `${baseUrl}?id=${unidadeId}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
+    }
 
     // ============================================
     // FUNÇÃO PARA FORMATAR DATA
@@ -321,26 +336,46 @@
                 });
 
                 // ============================================
-                // PREENCHER INFORMAÇÕES - CORRIGIDO!
+                // PREENCHER INFORMAÇÕES
                 // ============================================
-                document.getElementById('qr-info').innerHTML = `
-                    <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
-                    <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
-                    <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
-                    <p><strong>Validade:</strong> ${formatarDataSemFuso(validade)}</p>
-                `;
+                if (tipo === 'multipla') {
+                    // UNIDADE MÚLTIPLA: mostrar mensagem
+                    document.getElementById('qr-info').innerHTML = `
+                        <p><strong>Unidade Múltipla</strong></p>
+                        <p>Esta unidade contém múltiplos produtos/volumes</p>
+                        <p>Escaneie o QR code para acessar a página de baixa</p>
+                    `;
+                    
+                    document.getElementById('volume-info').innerHTML = `
+                        <div class="volume-item">
+                            <div class="volume-value">-</div>
+                            <div class="volume-label">MÚLTIPLOS</div>
+                        </div>
+                        <div class="volume-item">
+                            <div class="volume-value">-</div>
+                            <div class="volume-label">VOLUMES</div>
+                        </div>
+                    `;
+                } else {
+                    // UNIDADE SIMPLES: mostrar informações detalhadas
+                    document.getElementById('qr-info').innerHTML = `
+                        <p><strong>Produto:</strong> ${produtoNome || 'N/A'}</p>
+                        <p><strong>SKU:</strong> ${sku || 'N/A'}</p>
+                        <p><strong>Lote:</strong> ${lote || 'N/A'}</p>
+                        <p><strong>Validade:</strong> ${formatarDataSemFuso(validade)}</p>
+                    `;
 
-                // CORREÇÃO: Agora usa unidadeBase em vez de "UNIDADES" fixo
-                document.getElementById('volume-info').innerHTML = `
-                    <div class="volume-item">
-                        <div class="volume-value">${formatarNumero(volume)}</div>
-                        <div class="volume-label">${unidade}</div>
-                    </div>
-                    <div class="volume-item">
-                        <div class="volume-value">${formatarNumero(quantidade)}</div>
-                        <div class="volume-label">${unidadeBase}</div>
-                    </div>
-                `;
+                    document.getElementById('volume-info').innerHTML = `
+                        <div class="volume-item">
+                            <div class="volume-value">${formatarNumero(volume)}</div>
+                            <div class="volume-label">${unidade}</div>
+                        </div>
+                        <div class="volume-item">
+                            <div class="volume-value">${formatarNumero(quantidade)}</div>
+                            <div class="volume-label">${unidadeBase}</div>
+                        </div>
+                    `;
+                }
 
                 document.getElementById('info-id').innerHTML = `
                     <i class="bi bi-upc-scan"></i> ID: ${unidadeId}
@@ -374,5 +409,3 @@
 </script>
 </body>
 </html>
-
-
