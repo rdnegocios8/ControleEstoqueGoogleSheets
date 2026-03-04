@@ -2115,36 +2115,35 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             '-';
         
         // ============================================
-        // VOLUME: usar a unidade da embalagem (GAL, PLT, SC, TBR)
+        // BUSCAR UNIDADES DA ABA PRODUTOS
         // ============================================
-        const volumeDisplay = r.volumeNumero ? 
-            `${r.volumeNumero} ${r.unidadeVolume || ''}` : 
-            (r.volumeTexto || '-');
+        let unidadeVolume = 'UN';     // Padrão
+        let unidadeBase = 'UN';       // Padrão
         
-        // ============================================
-        // QUANTIDADE: usar a unidade base do produto (UN, KG)
-        // ============================================
-        let unidadeQuantidade = 'UN';
-        
-        // Buscar a unidade base do produto pelo SKU
         if (r.sku) {
             const produto = produtos.find(p => p.sku === r.sku);
-            if (produto && produto.unidadeBase) {
-                unidadeQuantidade = produto.unidadeBase;
+            if (produto) {
+                // Coluna E da aba Produtos: Tipo Embalagem (unidade do volume)
+                unidadeVolume = produto.tipoEmbalagem || 'UN';
+                
+                // Coluna G da aba Produtos: Unidade Base (unidade da quantidade)
+                unidadeBase = produto.unidadeBase || 'UN';
+                
+                console.log(`Produto ${r.sku}: Volume=${unidadeVolume}, Base=${unidadeBase}`);
             }
         }
         
-        // Se não encontrou, tentar adivinhar pelo contexto
-        if (unidadeQuantidade === 'UN') {
-            // Se o volume é em KG, a quantidade também deve ser KG
-            if (r.unidadeVolume === 'KG') {
-                unidadeQuantidade = 'KG';
-            }
-            // Se o volume é em GAL/PLT/SC, a quantidade é UN (unidades)
-            else if (['GAL', 'PLT', 'SC', 'TBR', 'CX', 'FD'].includes(r.unidadeVolume)) {
-                unidadeQuantidade = 'UN';
-            }
-        }
+        // ============================================
+        // VOLUME: usar unidadeVolume (da coluna E)
+        // ============================================
+        const volumeDisplay = r.volumeNumero ? 
+            `${r.volumeNumero} ${unidadeVolume}` : 
+            (r.volumeTexto ? `${r.volumeTexto} ${unidadeVolume}` : '-');
+        
+        // ============================================
+        // QUANTIDADE: usar unidadeBase (da coluna G)
+        // ============================================
+        const quantidadeDisplay = (r.quantidadeTotal || 0).toFixed(2);
         
         tr.innerHTML = `
             <td><small class="text-warning">${r.idUnidade || '-'}</small></td>
@@ -2153,7 +2152,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             <td>${r.fornecedor || '-'}</td>
             <td>${resumoProduto}</td>
             <td><strong class="text-info">${volumeDisplay}</strong></td>
-            <td><strong class="text-warning">${(r.quantidadeTotal || 0).toFixed(2)}</strong> ${unidadeQuantidade}</td>
+            <td><strong class="text-warning">${quantidadeDisplay}</strong> ${unidadeBase}</td>
             <td>
                 <button class="btn btn-sm btn-info" onclick="verRecebimento('${r.idUnidade}')">
                     <i class="bi bi-eye"></i> Ver
@@ -2163,6 +2162,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
         tbody.appendChild(tr);
     });
 }
+
 // Função verUnidade (CORRIGIDA - com URL completa no QR Code)
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
@@ -3140,6 +3140,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
