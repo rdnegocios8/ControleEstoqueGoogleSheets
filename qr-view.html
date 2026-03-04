@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
-        /* Seu CSS existente permanece o mesmo */
         body {
             background: linear-gradient(135deg, #0f172a, #1e293b);
             min-height: 100vh;
@@ -101,6 +100,34 @@
             width: 120px;
             display: inline-block;
             font-weight: 600;
+        }
+        
+        .volume-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+        
+        .volume-item {
+            text-align: center;
+        }
+        
+        .volume-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fbbf24;
+            line-height: 1.2;
+        }
+        
+        .volume-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .volumes-table {
@@ -243,8 +270,14 @@
                 <!-- Informações serão preenchidas via JavaScript -->
             </div>
             
+            <!-- Área para volume/quantidade (sempre visível) -->
+            <div class="volume-info" id="volume-info">
+                <!-- Será preenchido com os totais -->
+            </div>
+            
+            <!-- Área para múltiplos volumes (aparece só quando necessário) -->
             <div class="volumes-table" id="volumes-table" style="display: none;">
-                <h4><i class="bi bi-boxes"></i> Volumes da Unidade</h4>
+                <h4><i class="bi bi-boxes"></i> Detalhamento dos Volumes</h4>
                 <div class="volumes-grid" id="volumes-grid"></div>
             </div>
             
@@ -380,7 +413,7 @@
                     });
 
                     // ============================================
-                    // PREENCHER INFORMAÇÕES
+                    // PREENCHER INFORMAÇÕES BÁSICAS
                     // ============================================
                     const primeiroProduto = unidadeData.produtos[0];
                     const primeiroVolume = primeiroProduto.volumes[0];
@@ -393,22 +426,36 @@
                     `;
 
                     // ============================================
-                    // SE FOR UNIDADE MÚLTIPLA, MOSTRAR TODOS OS VOLUMES
+                    // MOSTRAR VOLUME E QUANTIDADE TOTAIS (sempre visível)
+                    // ============================================
+                    document.getElementById('volume-info').innerHTML = `
+                        <div class="volume-item">
+                            <div class="volume-value">${formatarNumero(unidadeData.totalVolumes)}</div>
+                            <div class="volume-label">${primeiroProduto.tipoEmbalagem}</div>
+                        </div>
+                        <div class="volume-item">
+                            <div class="volume-value">${formatarNumero(unidadeData.totalUN)}</div>
+                            <div class="volume-label">UN</div>
+                        </div>
+                    `;
+
+                    // ============================================
+                    // SE FOR UNIDADE MÚLTIPLA, MOSTRAR DETALHAMENTO
                     // ============================================
                     if (isMultipla && unidadeData.produtos[0].volumes.length > 1) {
                         document.getElementById('volumes-table').style.display = 'block';
                         const grid = document.getElementById('volumes-grid');
                         grid.innerHTML = '';
                         
-                        unidadeData.produtos[0].volumes.forEach(vol => {
+                        unidadeData.produtos[0].volumes.forEach((vol, index) => {
                             const card = document.createElement('div');
                             card.className = 'volume-card';
                             card.innerHTML = `
-                                <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA DO PADRÃO'}</span>
+                                <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">VOLUME ${index + 1} - ${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA'}</span>
                                 <p><strong>Lote:</strong> ${vol.lote || '-'}</p>
                                 <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
-                                <p><strong>Qtd Volumes:</strong> ${vol.qtdVolumes} ${primeiroProduto.tipoEmbalagem}</p>
-                                <p><strong>UN/Vol:</strong> ${formatarNumero(vol.unPorEmbalagem)}</p>
+                                <p><strong>Quantidade:</strong> ${vol.qtdVolumes} ${primeiroProduto.tipoEmbalagem}</p>
+                                <p><strong>UN/Volume:</strong> ${formatarNumero(vol.unPorEmbalagem)}</p>
                                 <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN)}</p>
                             `;
                             grid.appendChild(card);
