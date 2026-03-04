@@ -1775,98 +1775,103 @@ body {
 /* MODAL DETALHES RECEBIMENTO - FUNDO ESCURO */
 /* ============================================ */
 
+/* ============================================ */
+/* MODAL DETALHES RECEBIMENTO - FUNDO ESCURO (VERSÃO FORTE) */
+/* ============================================ */
+
 #modalDetalhesRecebimento {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.8) !important;
 }
 
 #modalDetalhesRecebimento .modal-content {
     background-color: #0f172a !important;
-    border: 2px solid #fbbf24;
-    border-radius: 24px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 2px solid #fbbf24 !important;
+    border-radius: 24px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
 }
 
 #modalDetalhesRecebimento .modal-header {
     background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-    border-bottom: 2px solid #fbbf24;
-    border-radius: 24px 24px 0 0;
-    padding: 1.5rem;
+    border-bottom: 2px solid #fbbf24 !important;
+    border-radius: 24px 24px 0 0 !important;
+    padding: 1.5rem !important;
 }
 
 #modalDetalhesRecebimento .modal-title {
     color: #fbbf24 !important;
-    font-weight: 700;
-    font-size: 1.3rem;
+    font-weight: 700 !important;
+    font-size: 1.3rem !important;
 }
 
 #modalDetalhesRecebimento .modal-body {
     background-color: #0f172a !important;
-    padding: 1.5rem;
-    color: #e2e8f0;
+    padding: 1.5rem !important;
+    color: #e2e8f0 !important;
 }
 
+/* Cards de informação */
 #modalDetalhesRecebimento .card {
     background-color: #1e293b !important;
-    border: 1px solid #334155;
-    border-radius: 16px;
+    border: 1px solid #334155 !important;
+    border-radius: 16px !important;
 }
 
 #modalDetalhesRecebimento .card-header {
     background: linear-gradient(135deg, #334155, #1e293b) !important;
-    border-bottom: 2px solid #fbbf24;
-    color: #fbbf24;
-    font-weight: 600;
-    padding: 1rem 1.25rem;
+    border-bottom: 2px solid #fbbf24 !important;
+    color: #fbbf24 !important;
+    font-weight: 600 !important;
+    padding: 1rem 1.25rem !important;
 }
 
 #modalDetalhesRecebimento .card-body {
     background-color: #1e293b !important;
-    color: #cbd5e1;
-    padding: 1.25rem;
+    color: #cbd5e1 !important;
+    padding: 1.25rem !important;
 }
 
 #modalDetalhesRecebimento .card-body p {
-    margin: 0.5rem 0;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #334155;
+    margin: 0.5rem 0 !important;
+    padding: 0.5rem 0 !important;
+    border-bottom: 1px solid #334155 !important;
 }
 
 #modalDetalhesRecebimento .card-body strong {
-    color: #fbbf24;
-    width: 120px;
-    display: inline-block;
+    color: #fbbf24 !important;
+    width: 120px !important;
+    display: inline-block !important;
 }
 
-/* Tabela de produtos no modal */
+/* Tabela de produtos */
 #modalDetalhesRecebimento .table-responsive {
-    background-color: transparent;
-    border-radius: 12px;
-    margin-top: 1rem;
+    background-color: transparent !important;
+    border-radius: 12px !important;
+    margin-top: 1rem !important;
 }
 
 #modalDetalhesRecebimento .table {
     color: #e2e8f0 !important;
     background-color: transparent !important;
-    border-collapse: collapse;
-    width: 100%;
+    border-collapse: collapse !important;
+    width: 100% !important;
 }
 
 #modalDetalhesRecebimento .table thead th {
     background: #1a2634 !important;
     color: #fbbf24 !important;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.5px !important;
     padding: 12px 8px !important;
     border-bottom: 2px solid #fbbf24 !important;
-    border: none;
+    border: none !important;
 }
 
 #modalDetalhesRecebimento .table tbody tr {
     background-color: #0f172a !important;
-    border-bottom: 1px solid #2d3748;
-    transition: all 0.2s ease;
+    border-bottom: 1px solid #2d3748 !important;
+    transition: all 0.2s ease !important;
 }
 
 #modalDetalhesRecebimento .table tbody tr:hover {
@@ -1878,283 +1883,69 @@ body {
 }
 
 #modalDetalhesRecebimento .table td {
-    padding: 10px 8px;
+    padding: 10px 8px !important;
     color: #cbd5e1 !important;
-    border: none;
-    font-size: 0.9rem;
+    border: none !important;
+    font-size: 0.9rem !important;
 }
 
 #modalDetalhesRecebimento .table td:first-child {
     color: #fbbf24 !important;
-    font-weight: 500;
+    font-weight: 500 !important;
 }
 
 #modalDetalhesRecebimento .table td:nth-child(7) {
     color: #fbbf24 !important;
-    font-weight: 600;
+    font-weight: 600 !important;
 }
 
 #modalDetalhesRecebimento .text-warning {
     color: #fbbf24 !important;
 }
 
-/* Badge na tabela */
-#modalDetalhesRecebimento .badge {
-    padding: 4px 8px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-#modalDetalhesRecebimento .badge.bg-success {
-    background: #10b981 !important;
-    color: white !important;
-}
-
-#modalDetalhesRecebimento .badge.bg-warning {
-    background: #f59e0b !important;
-    color: #0f172a !important;
-}
-
-/* Botão fechar */
+/* Botões */
 #modalDetalhesRecebimento .btn-close {
     background-color: #94a3b8 !important;
-    opacity: 0.8;
-    filter: none;
+    opacity: 0.8 !important;
+    filter: none !important;
 }
 
 #modalDetalhesRecebimento .btn-close:hover {
-    opacity: 1;
+    opacity: 1 !important;
 }
 
-/* Botão secundário (Fechar) */
 #modalDetalhesRecebimento .btn-secondary {
     background: linear-gradient(135deg, #475569, #334155) !important;
-    border: none;
+    border: none !important;
     color: white !important;
-    padding: 0.6rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    padding: 0.6rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
 }
 
 #modalDetalhesRecebimento .btn-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(71, 85, 105, 0.3);
+    transform: translateY(-2px) !important;
+    box-shadow: 0 5px 15px rgba(71, 85, 105, 0.3) !important;
 }
 
-/* Scrollbar da tabela */
+/* Scrollbar */
 #modalDetalhesRecebimento .table-responsive::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 8px !important;
+    height: 8px !important;
 }
 
 #modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-track {
-    background: #1e293b;
-    border-radius: 4px;
+    background: #1e293b !important;
+    border-radius: 4px !important;
 }
 
 #modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-thumb {
-    background: #fbbf24;
-    border-radius: 4px;
+    background: #fbbf24 !important;
+    border-radius: 4px !important;
 }
 
 #modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-thumb:hover {
-    background: #f59e0b;
-}
-
-/* ============================================ */
-/* MODAL DETALHES RECEBIMENTO - FUNDO ESCURO */
-/* ============================================ */
-
-#modalDetalhesRecebimento {
-    background-color: rgba(0, 0, 0, 0.8);
-}
-
-#modalDetalhesRecebimento .modal-content {
-    background-color: #0f172a !important;
-    border: 2px solid #fbbf24;
-    border-radius: 24px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-#modalDetalhesRecebimento .modal-header {
-    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-    border-bottom: 2px solid #fbbf24;
-    border-radius: 24px 24px 0 0;
-    padding: 1.5rem;
-}
-
-#modalDetalhesRecebimento .modal-title {
-    color: #fbbf24 !important;
-    font-weight: 700;
-    font-size: 1.3rem;
-}
-
-#modalDetalhesRecebimento .modal-body {
-    background-color: #0f172a !important;
-    padding: 1.5rem;
-    color: #e2e8f0;
-}
-
-/* Cards de informação (Nota Fiscal, Resumo, Observações) */
-#modalDetalhesRecebimento .card {
-    background-color: #1e293b !important;
-    border: 1px solid #334155;
-    border-radius: 16px;
-}
-
-#modalDetalhesRecebimento .card-header {
-    background: linear-gradient(135deg, #334155, #1e293b) !important;
-    border-bottom: 2px solid #fbbf24;
-    color: #fbbf24;
-    font-weight: 600;
-    padding: 1rem 1.25rem;
-}
-
-#modalDetalhesRecebimento .card-body {
-    background-color: #1e293b !important;
-    color: #cbd5e1;
-    padding: 1.25rem;
-}
-
-#modalDetalhesRecebimento .card-body p {
-    margin: 0.5rem 0;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #334155;
-}
-
-#modalDetalhesRecebimento .card-body strong {
-    color: #fbbf24;
-    width: 120px;
-    display: inline-block;
-}
-
-/* Tabela de produtos no modal */
-#modalDetalhesRecebimento .table-responsive {
-    background-color: transparent;
-    border-radius: 12px;
-    margin-top: 1rem;
-}
-
-#modalDetalhesRecebimento .table {
-    color: #e2e8f0 !important;
-    background-color: transparent !important;
-    border-collapse: collapse;
-    width: 100%;
-}
-
-#modalDetalhesRecebimento .table thead th {
-    background: #1a2634 !important;
-    color: #fbbf24 !important;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-    padding: 12px 8px !important;
-    border-bottom: 2px solid #fbbf24 !important;
-    border: none;
-    white-space: nowrap;
-}
-
-#modalDetalhesRecebimento .table tbody tr {
-    background-color: #0f172a !important;
-    border-bottom: 1px solid #2d3748;
-    transition: all 0.2s ease;
-}
-
-#modalDetalhesRecebimento .table tbody tr:hover {
-    background-color: #1e293b !important;
-}
-
-#modalDetalhesRecebimento .table tbody tr:nth-child(even) {
-    background-color: #1a1f2e !important;
-}
-
-#modalDetalhesRecebimento .table td {
-    padding: 10px 8px;
-    color: #cbd5e1 !important;
-    border: none;
-    font-size: 0.9rem;
-}
-
-#modalDetalhesRecebimento .table td:first-child {
-    color: #fbbf24 !important;
-    font-weight: 500;
-}
-
-#modalDetalhesRecebimento .table td:nth-child(7) {
-    color: #fbbf24 !important;
-    font-weight: 600;
-}
-
-#modalDetalhesRecebimento .text-warning {
-    color: #fbbf24 !important;
-}
-
-/* Badge na tabela (se houver) */
-#modalDetalhesRecebimento .badge {
-    padding: 4px 8px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-#modalDetalhesRecebimento .badge.bg-success {
-    background: #10b981 !important;
-    color: white !important;
-}
-
-#modalDetalhesRecebimento .badge.bg-warning {
     background: #f59e0b !important;
-    color: #0f172a !important;
 }
 
-/* Botão fechar */
-#modalDetalhesRecebimento .btn-close {
-    background-color: #94a3b8 !important;
-    opacity: 0.8;
-    filter: none;
-}
-
-#modalDetalhesRecebimento .btn-close:hover {
-    opacity: 1;
-}
-
-/* Botão secundário (Fechar) */
-#modalDetalhesRecebimento .btn-secondary {
-    background: linear-gradient(135deg, #475569, #334155) !important;
-    border: none;
-    color: white !important;
-    padding: 0.6rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-#modalDetalhesRecebimento .btn-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(71, 85, 105, 0.3);
-}
-
-/* Scrollbar da tabela */
-#modalDetalhesRecebimento .table-responsive::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-#modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-track {
-    background: #1e293b;
-    border-radius: 4px;
-}
-
-#modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-thumb {
-    background: #fbbf24;
-    border-radius: 4px;
-}
-
-#modalDetalhesRecebimento .table-responsive::-webkit-scrollbar-thumb:hover {
-    background: #f59e0b;
-}
