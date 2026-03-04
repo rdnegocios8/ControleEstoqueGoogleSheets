@@ -1,22 +1,3 @@
-/**
- * ============================================
- * SISTEMA DE CONTROLE DE ESTOQUE - RD NEGÓCIOS
- * ============================================
- * VERSÃO MELHORADA COM:
- * ✅ Arquitetura Modular
- * ✅ Tratamento de Erros Robusto
- * ✅ Validação de Dados
- * ✅ Funções Reutilizáveis
- * ✅ Logging Estruturado
- * ✅ Documentação Completa
- * ✅ Múltiplos Produtos e Volumes no Recebimento
- * ✅ Unidade Única com Múltiplos Volumes
- * ✅ QR Code Único para Todo o Recebimento
- * 
- * MANTÉM 100% DO CÓDIGO ORIGINAL + NOVAS FUNCIONALIDADES
- * ============================================
- */
-
 // ============================================
 // CONFIGURAÇÕES E CONSTANTES
 // ============================================
@@ -1144,26 +1125,12 @@ async function carregarRecebimentos() {
                     return parseFloat(valor) || 0;
                 };
                 
-                // Extrair apenas o número da coluna I (ex: "1 PLT" → 1)
-                const extrairNumeroVolume = (valor) => {
-                    if (!valor) return 0;
-                    const partes = String(valor).split(' ');
-                    return converter(partes[0]) || 0;
-                };
-                
-                // Extrair a unidade da coluna I (ex: "1 PLT" → "PLT")
-                const extrairUnidadeVolume = (valor) => {
-                    if (!valor) return 'UN';
-                    const partes = String(valor).split(' ');
-                    return partes[1] || 'UN';
-                };
-                
-                // CORREÇÃO: H = Quantidade Total, I = Volume (com unidade)
-                const quantidadeTotal = converter(row[7]);  // Coluna H: Quantidade Total
-                const volumeTexto = row[8] || '';           // Coluna I: Volume (ex: "1 PLT")
-                const volumeNumero = extrairNumeroVolume(volumeTexto);
-                const unidadeVolume = extrairUnidadeVolume(volumeTexto);
-                const qtdPorEmbalagem = converter(row[10]); // Coluna K: Qtd/Emb
+                // CORREÇÃO: Usar colunas corretas
+                const quantidadeTotal = converter(row[7]);           // Coluna H: Quantidade Total
+                const volumeNumero = converter(row[8]);              // Coluna I: Volume (número)
+                const unidadeVolume = row[9] || 'UN';                // Coluna J: Unidade de Medida
+                const volumeTexto = volumeNumero ? `${volumeNumero} ${unidadeVolume}` : ''; // Montar texto
+                const qtdPorEmbalagem = converter(row[10]);          // Coluna K: Qtd/Emb
                 
                 return {
                     // Dados básicos
@@ -1175,13 +1142,11 @@ async function carregarRecebimentos() {
                     lote: row[5] || '',                          // Coluna F: Lote
                     validade: row[6] || '',                      // Coluna G: Validade
                     
-                    // CORRIGIDO: H é Quantidade Total
+                    // CORRIGIDO: Separar número e unidade
                     quantidadeTotal: quantidadeTotal,             // Coluna H: Quantidade Total
-                    
-                    // CORRIGIDO: I é Volume (com unidade)
-                    volumeTexto: volumeTexto,                     // Coluna I: Texto completo (ex: "1 PLT")
-                    volumeNumero: volumeNumero,                   // Número do volume
-                    unidadeVolume: unidadeVolume,                 // Unidade do volume (ex: "PLT")
+                    volumeNumero: volumeNumero,                   // Coluna I: Volume (número)
+                    unidadeVolume: unidadeVolume,                 // Coluna J: Unidade
+                    volumeTexto: volumeTexto,                     // Texto completo montado
                     
                     // Outros campos
                     qtdPorEmbalagem: qtdPorEmbalagem,             // Coluna K: Qtd/Emb
@@ -3180,6 +3145,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
