@@ -425,62 +425,62 @@
                 </div>
 
                 <!-- MOVIMENTAÇÕES VIEW -->
-                <div id="movimentacoes-view" style="display: none;">
-                    <h2>Movimentações</h2>
+                    <div id="movimentacoes-view" style="display: none;">
+                        <h2>Movimentações</h2>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-2">
+                                <input type="date" class="form-control" id="filtro-data-inicio">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" class="form-control" id="filtro-data-fim">
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-control" id="filtro-tipo-movimentacao">
+                                    <option value="">Todos</option>
+                                    <option value="Entrada">Entrada</option>
+                                    <option value="Saída">Saída</option>
+                                    <option value="Transferência">Transferência</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-control" id="filtro-destino-movimentacao">
+                                    <option value="">Destino</option>
+                                    <option value="Farinheira">Farinheira</option>
+                                    <option value="Doméstica">Doméstica</option>
+                                    <option value="Massas">Massas</option>
+                                    <option value="Biscoito">Biscoito</option>
+                                    <option value="Transferência MV">Transferência MV</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" onclick="filtrarMovimentacoes()">
+                                    <i class="bi bi-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
                     
-                    <div class="row mt-4">
-                        <div class="col-md-2">
-                            <input type="date" class="form-control" id="filtro-data-inicio">
-                        </div>
-                        <div class="col-md-2">
-                            <input type="date" class="form-control" id="filtro-data-fim">
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-control" id="filtro-tipo-movimentacao">
-                                <option value="">Todos</option>
-                                <option value="Entrada">Entrada</option>
-                                <option value="Saída">Saída</option>
-                                <option value="Transferência">Transferência</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-control" id="filtro-destino-movimentacao">
-                                <option value="">Destino</option>
-                                <option value="Farinheira">Farinheira</option>
-                                <option value="Doméstica">Doméstica</option>
-                                <option value="Massas">Massas</option>
-                                <option value="Biscoito">Biscoito</option>
-                                <option value="Transferência MV">Transferência MV</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-primary w-100" onclick="filtrarMovimentacoes()">
-                                <i class="bi bi-search"></i> Filtrar
-                            </button>
+                        <div class="table-responsive mt-4">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Tipo</th>
+                                        <th>ID Unidade</th>
+                                        <th>Produto</th>
+                                        <th>Volume</th>
+                                        <th>Embalagem</th>
+                                        <th>Qtd UN</th>
+                                        <th>Destino</th>
+                                        <th>Responsável</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-movimentacoes">
+                                    <!-- Movimentações serão inseridas aqui -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-
-                    <div class="table-responsive mt-4">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Tipo</th>
-                                    <th>ID Unidade</th>
-                                    <th>Produto</th>
-                                    <th>Volume</th>
-                                    <th>Embalagem</th>
-                                    <th>Qtd UN</th>
-                                    <th>Destino</th>
-                                    <th>Responsável</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-movimentacoes">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <!-- RELATÓRIOS VIEW -->
                 <div id="relatorios-view" style="display: none;">
                     <h2>Relatórios</h2>
@@ -1189,5 +1189,6 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
