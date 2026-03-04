@@ -1841,3 +1841,107 @@ body #modalDetalhesRecebimento.modal.fade .modal-dialog .btn-secondary:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 5px 15px rgba(71, 85, 105, 0.3) !important;
 }
+
+/* ======================================================================================== */
+
+/* ============================================ */
+/* MODAL DETALHES RECEBIMENTO - FORÇA BRUTA */
+/* ============================================ */
+
+/* Forçar fundo escuro em TODOS os elementos do modal */
+#modalDetalhesRecebimento,
+#modalDetalhesRecebimento .modal-dialog,
+#modalDetalhesRecebimento .modal-content,
+#modalDetalhesRecebimento .modal-header,
+#modalDetalhesRecebimento .modal-body,
+#modalDetalhesRecebimento .modal-footer,
+#modalDetalhesRecebimento .card,
+#modalDetalhesRecebimento .card-header,
+#modalDetalhesRecebimento .card-body,
+#modalDetalhesRecebimento .table,
+#modalDetalhesRecebimento .table thead,
+#modalDetalhesRecebimento .table tbody,
+#modalDetalhesRecebimento .table tr,
+#modalDetalhesRecebimento .table th,
+#modalDetalhesRecebimento .table td,
+#modalDetalhesRecebimento .table-responsive {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+/* Fundo do backdrop (escuro atrás do modal) */
+#modalDetalhesRecebimento + .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Borda dourada no modal */
+#modalDetalhesRecebimento .modal-content {
+    border: 2px solid #fbbf24 !important;
+    border-radius: 24px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Cabeçalho dourado */
+#modalDetalhesRecebimento .modal-header {
+    border-bottom: 2px solid #fbbf24 !important;
+    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+}
+
+#modalDetalhesRecebimento .modal-title {
+    color: #fbbf24 !important;
+    font-weight: 700 !important;
+    font-size: 1.3rem !important;
+}
+
+/* Cards internos */
+#modalDetalhesRecebimento .card {
+    border: 1px solid #334155 !important;
+    border-radius: 16px !important;
+}
+
+#modalDetalhesRecebimento .card-header {
+    background: linear-gradient(135deg, #334155, #1e293b) !important;
+    border-bottom: 2px solid #fbbf24 !important;
+    color: #fbbf24 !important;
+    font-weight: 600 !important;
+}
+
+/* Tabela */
+#modalDetalhesRecebimento .table thead th {
+    background: #1a2634 !important;
+    color: #fbbf24 !important;
+    border-bottom: 2px solid #fbbf24 !important;
+}
+
+#modalDetalhesRecebimento .table tbody tr {
+    border-bottom: 1px solid #2d3748 !important;
+}
+
+#modalDetalhesRecebimento .table tbody tr:nth-child(even) {
+    background-color: #1a1f2e !important;
+}
+
+#modalDetalhesRecebimento .table td:first-child {
+    color: #fbbf24 !important;
+    font-weight: 500 !important;
+}
+
+/* Botões */
+#modalDetalhesRecebimento .btn-close {
+    background-color: #94a3b8 !important;
+    opacity: 0.8 !important;
+    filter: none !important;
+}
+
+#modalDetalhesRecebimento .btn-secondary {
+    background: linear-gradient(135deg, #475569, #334155) !important;
+    border: none !important;
+    color: white !important;
+}
+
+#modalDetalhesRecebimento .btn-secondary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 5px 15px rgba(71, 85, 105, 0.3) !important;
+}
+
