@@ -2153,9 +2153,31 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
 // FUNÇÃO ABRIR MODAL TRANSFERÊNCIA - ATUALIZADA
 // ============================================
 function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, quantidade, unidade, unidadeBase, qtdPorEmbalagem) {
-    const url = `baixa-view.html?id=${id}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
+    // Verificar se a unidade é múltipla (pelo ID)
+    const unidade = unidades.find(u => u.id === id);
     
-    window.open(url, '_blank', 'width=700,height=800');
+    if (unidade && unidade.tipo === 'unidade-multipla') {
+        // ============================================
+        // CASO MÚLTIPLO: passar todos os dados em JSON
+        // ============================================
+        const dadosCompletos = {
+            id: unidade.id,
+            produtos: unidade.produtos,
+            totalVolumes: unidade.totalVolumes,
+            totalUN: unidade.totalUN
+        };
+        
+        const dadosJSON = encodeURIComponent(JSON.stringify(dadosCompletos));
+        const url = `baixa-view.html?dados=${dadosJSON}`;
+        window.open(url, '_blank', 'width=700,height=800');
+        
+    } else {
+        // ============================================
+        // CASO SIMPLES: manter o formato original
+        // ============================================
+        const url = `baixa-view.html?id=${id}&sku=${sku}&lote=${lote}&validade=${validade}&produto=${encodeURIComponent(produtoNome)}&volume=${volume}&quantidade=${quantidade}&unidade=${unidade}&unidadeBase=${unidadeBase}&qtdPorEmbalagem=${qtdPorEmbalagem}`;
+        window.open(url, '_blank', 'width=700,height=800');
+    }
 }
 
 // ============================================
@@ -3308,6 +3330,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
