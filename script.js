@@ -2191,7 +2191,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - COMPLETA (SIMPLES + MÚLTIPLAS)
+// FUNÇÃO VER UNIDADE - COMPLETA E CORRIGIDA
 // ============================================
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
@@ -2216,11 +2216,11 @@ function verUnidade(id) {
         qrContainer.innerHTML = '';
         
         // ============================================
-        // CONSTRUIR URL COM TODOS OS DADOS (OPÇÃO 1)
+        // CONSTRUIR URL COM TODOS OS DADOS EM JSON
         // ============================================
         
         // Preparar objeto com todos os dados da unidade
-        const dadosUnidade = {
+        const dadosCompletos = {
             id: unidadeAtual.id,
             produtos: unidadeAtual.produtos.map(p => ({
                 nome: p.nome,
@@ -2245,7 +2245,7 @@ function verUnidade(id) {
         };
         
         // Converter para JSON e codificar para URL
-        const dadosJSON = encodeURIComponent(JSON.stringify(dadosUnidade));
+        const dadosJSON = encodeURIComponent(JSON.stringify(dadosCompletos));
         const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
         
         setTimeout(() => {
@@ -3213,6 +3213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
