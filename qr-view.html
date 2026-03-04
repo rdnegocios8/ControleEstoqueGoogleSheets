@@ -270,7 +270,7 @@
                 <!-- Informações serão preenchidas via JavaScript -->
             </div>
             
-            <!-- Área para volume/quantidade (sempre visível) -->
+            <!-- Área para volume/quantidade TOTAIS (sempre visível) -->
             <div class="volume-info" id="volume-info">
                 <!-- Será preenchido com os totais -->
             </div>
@@ -413,7 +413,7 @@
                     });
 
                     // ============================================
-                    // PREENCHER INFORMAÇÕES BÁSICAS
+                    // PREENCHER INFORMAÇÕES BÁSICAS (usando o primeiro volume)
                     // ============================================
                     const primeiroProduto = unidadeData.produtos[0];
                     const primeiroVolume = primeiroProduto.volumes[0];
