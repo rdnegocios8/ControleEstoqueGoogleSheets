@@ -13,6 +13,23 @@ const MOVIMENTACOES_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET
 const RECEBIMENTOS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Recebimentos?key=${API_KEY}`;
 const ESTOQUE_GERAL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Estoque Geral?key=${API_KEY}`;
 
+// ============================================
+// FUNÇÃO PARA ENVIAR DADOS PARA O APPS SCRIPT (VIA GET)
+// ============================================
+async function enviarParaAppsScript(dados) {
+    const url = `${WEB_APP_URL}?dados=${encodeURIComponent(JSON.stringify(dados))}`;
+    
+    try {
+        await fetch(url, {
+            mode: 'no-cors'  // Mantém o no-cors para evitar erro de CORS
+        });
+        return true;
+    } catch (error) {
+        console.error('❌ Erro ao enviar:', error);
+        return false;
+    }
+}
+
 // Variáveis globais
 let produtos = [];
 let unidades = [];
@@ -827,18 +844,25 @@ async function salvarRecebimentoMultiplo() {
         // ============================================
         console.log('📤 Enviando unidade para o Google Sheets...', unidadeUnica);
         
+       // ANTIGO:
         await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 tipo: 'unidade-multipla',
                 id: idUnidade,
                 dados: JSON.stringify(unidadeUnica),
                 timestamp: new Date().toISOString()
             })
+        });
+        
+        // NOVO:
+        await enviarParaAppsScript({
+            tipo: 'unidade-multipla',
+            id: idUnidade,
+            dados: JSON.stringify(unidadeUnica),
+            timestamp: new Date().toISOString()
         });
         
         // ============================================
@@ -856,12 +880,16 @@ async function salvarRecebimentoMultiplo() {
             resumo: resumoProdutos.join(' | ')
         };
         
+       // ANTIGO:
         await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(recebimentoRegistro)
         });
+        
+        // NOVO:
+        await enviarParaAppsScript(recebimentoRegistro);
         
         // ============================================
         // ADICIONAR À LISTA LOCAL (FORMATO CORRETO)
@@ -1058,12 +1086,16 @@ async function salvarRecebimento() {
     
     try {
         // Salvar recebimento
+       // ANTIGO:
         await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(recebimento)
         });
+        
+        // NOVO:
+        await enviarParaAppsScript(recebimento);
         
         // Criar unidade automaticamente
         const idUnidade = gerarIdUnico();
@@ -1084,12 +1116,16 @@ async function salvarRecebimento() {
             tipoEntrada: 'Recebimento'
         };
         
+        // ANTIGO:
         await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(unidade)
         });
+        
+        // NOVO:
+        await enviarParaAppsScript(unidade);
         
         // Limpar formulário
         document.getElementById('form-recebimento').reset();
@@ -1910,12 +1946,16 @@ async function salvarProduto() {
     }
     
     try {
+        // ANTIGO:
         await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(produto)
         });
+        
+        // NOVO:
+        await enviarParaAppsScript(produto);
         
         produtos.push(produto);
         
@@ -1968,12 +2008,16 @@ async function salvarUnidade() {
     };
     
     try {
+        // ANTIGO:
         await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(unidade)
         });
+        
+        // NOVO:
+        await enviarParaAppsScript(unidade);
         
         if (document.getElementById('unidade-id').value) {
             const index = unidades.findIndex(u => u.id === id);
@@ -3330,6 +3374,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
