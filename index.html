@@ -957,6 +957,92 @@
         </div>
     </div>
 
+<!-- MODAL DETALHES RECEBIMENTO -->
+<div class="modal fade" id="modalDetalhesRecebimento" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-truck"></i> Detalhes do Recebimento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Informações da NF -->
+                    <div class="col-md-4">
+                        <div class="card bg-dark mb-3">
+                            <div class="card-header text-warning">
+                                <i class="bi bi-file-text"></i> Nota Fiscal
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Data:</strong> <span id="recebimento-data"></span></p>
+                                <p><strong>NF:</strong> <span id="recebimento-nf"></span></p>
+                                <p><strong>Fornecedor:</strong> <span id="recebimento-fornecedor"></span></p>
+                                <p><strong>Responsável:</strong> <span id="recebimento-responsavel"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resumo -->
+                    <div class="col-md-4">
+                        <div class="card bg-dark mb-3">
+                            <div class="card-header text-warning">
+                                <i class="bi bi-boxes"></i> Resumo
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Total Produtos:</strong> <span id="recebimento-total-produtos"></span></p>
+                                <p><strong>Total Volumes:</strong> <span id="recebimento-total-volumes"></span></p>
+                                <p><strong>Total UN:</strong> <span id="recebimento-total-un"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Observações -->
+                    <div class="col-md-4">
+                        <div class="card bg-dark mb-3">
+                            <div class="card-header text-warning">
+                                <i class="bi bi-chat-text"></i> Observações
+                            </div>
+                            <div class="card-body">
+                                <p id="recebimento-observacoes">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lista de Produtos -->
+                <h6 class="text-warning mt-3 mb-3">
+                    <i class="bi bi-box"></i> Produtos Recebidos
+                </h6>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>SKU</th>
+                                <th>Lote</th>
+                                <th>Validade</th>
+                                <th>Volume</th>
+                                <th>Qtd/Emb</th>
+                                <th>Total UN</th>
+                                <th>Local</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-produtos-recebimento">
+                            <!-- Produtos serão inseridos aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+  
     <!-- MODAL VER PRODUTO -->
     <div class="modal fade" id="modalVerProduto" tabindex="-1">
         <div class="modal-dialog modal-xl">
@@ -1103,4 +1189,5 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
