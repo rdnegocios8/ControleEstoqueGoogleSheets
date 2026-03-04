@@ -2127,6 +2127,9 @@ function abrirModalTransferencia(id, sku, lote, validade, produtoNome, volume, q
 // ============================================
 // FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA (UNIDADES CORRETAS)
 // ============================================
+// ============================================
+// FUNÇÃO ATUALIZAR TABELA RECEBIMENTOS - CORRIGIDA (VOLUME COM UNIDADE)
+// ============================================
 function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
     const tbody = document.getElementById('tabela-recebimentos');
     if (!tbody) return;
@@ -2149,13 +2152,25 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             (r.produto.length > 30 ? r.produto.substring(0, 30) + '...' : r.produto) : 
             '-';
         
-        // Formatar volume com sua unidade correta
-        const volumeDisplay = r.volumeNumero ? 
-            `${r.volumeNumero} ${r.unidadeVolume || ''}` : 
-            (r.volumeTexto || '-');
+        // ============================================
+        // CORREÇÃO: Volume com unidade (igual ao método de Unidades)
+        // ============================================
+        let volumeComUnidade = '-';
         
+        if (r.volumeNumero) {
+            // Se temos o número do volume e a unidade
+            volumeComUnidade = `${r.volumeNumero} ${r.unidadeVolume || ''}`;
+        } else if (r.volumeTexto) {
+            // Se temos o texto completo do volume (ex: "20 UN")
+            volumeComUnidade = r.volumeTexto;
+        } else if (r.volumes) {
+            // Fallback para o campo volumes
+            volumeComUnidade = `${r.volumes} UN`;
+        }
+        
+        // ============================================
         // Determinar a unidade correta para a quantidade
-        // Prioridade: unidadeBase do produto > unidadeVolume > 'UN'
+        // ============================================
         let unidadeQuantidade = 'UN';
         
         // Se temos o SKU, tentar buscar a unidadeBase do produto
@@ -2177,7 +2192,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
             <td>${r.nf || '-'}</td>
             <td>${r.fornecedor || '-'}</td>
             <td>${resumoProduto}</td>
-            <td>${volumeDisplay}</td>
+            <td><strong class="text-info">${volumeComUnidade}</strong></td>
             <td><strong class="text-warning">${(r.quantidadeTotal || 0).toFixed(2)}</strong> ${unidadeQuantidade}</td>
             <td>
                 <button class="btn btn-sm btn-info" onclick="verRecebimento('${r.idUnidade}')">
@@ -3165,6 +3180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
