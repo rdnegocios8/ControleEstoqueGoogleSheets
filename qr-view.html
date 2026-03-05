@@ -397,98 +397,100 @@
             return valor.toFixed(2).replace('.', ',');
         }
 
-        // ============================================
-        // FUNÇÃO PARA GERAR QR CODE
-        // ============================================
-        function gerarQRCode() {
-            const qrcodeDiv = document.getElementById('qrcode');
-            qrcodeDiv.innerHTML = '';
-            
-            if (!unidadeData || !unidadeData.id) {
-                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID da unidade não encontrado</p>';
-                return;
-            }
-
-            if (typeof QRCode !== 'undefined') {
-                try {
-                    QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
-                        width: 250,
-                        margin: 2
-                    }, function(err, canvas) {
-                        if (err) {
-                            console.error('Erro:', err);
-                            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
-                            return;
-                        }
-                        
-                        qrcodeDiv.innerHTML = '';
-                        canvas.style.width = '100%';
-                        canvas.style.height = 'auto';
-                        qrcodeDiv.appendChild(canvas);
-                    });
-
-                    // ============================================
-                    // PREENCHER INFORMAÇÕES BÁSICAS (usando o primeiro volume)
-                    // ============================================
-                    const primeiroProduto = unidadeData.produtos[0];
-                    const primeiroVolume = primeiroProduto.volumes[0];
-                    
-                    document.getElementById('qr-info').innerHTML = `
-                        <p><strong>Produto:</strong> ${primeiroProduto.nome || 'N/A'}</p>
-                        <p><strong>SKU:</strong> ${primeiroProduto.sku || 'N/A'}</p>
-                        <p><strong>Lote:</strong> ${primeiroVolume.lote || 'N/A'}</p>
-                        <p><strong>Validade:</strong> ${formatarData(primeiroVolume.validade)}</p>
-                    `;
-
-                    // ============================================
-                    // MOSTRAR VOLUME E QUANTIDADE TOTAIS (sempre visível)
-                    // ============================================
-                    document.getElementById('volume-info').innerHTML = `
-                        <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(unidadeData.totalVolumes)}</div>
-                            <div class="volume-label">${primeiroProduto.tipoEmbalagem}</div>
-                        </div>
-                        <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(unidadeData.totalUN)}</div>
-                            <div class="volume-label">UN</div>
-                        </div>
-                    `;
-
-                    // ============================================
-                    // SE FOR UNIDADE MÚLTIPLA, MOSTRAR DETALHAMENTO
-                    // ============================================
-                    if (isMultipla && unidadeData.produtos[0].volumes.length > 1) {
-                        document.getElementById('volumes-table').style.display = 'block';
-                        const grid = document.getElementById('volumes-grid');
-                        grid.innerHTML = '';
-                        
-                        unidadeData.produtos[0].volumes.forEach((vol, index) => {
-                            const card = document.createElement('div');
-                            card.className = 'volume-card';
-                            card.innerHTML = `
-                                <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">VOLUME ${index + 1} - ${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA'}</span>
-                                <p><strong>Lote:</strong> ${vol.lote || '-'}</p>
-                                <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
-                                <p><strong>Quantidade:</strong> ${vol.qtdVolumes} ${primeiroProduto.tipoEmbalagem}</p>
-                                <p><strong>UN/Volume:</strong> ${formatarNumero(vol.unPorEmbalagem)}</p>
-                                <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN)}</p>
-                            `;
-                            grid.appendChild(card);
-                        });
-                    }
-
-                    document.getElementById('info-id').innerHTML = `
-                        <i class="bi bi-upc-scan"></i> ID: ${unidadeData.id}
-                    `;
-
-                } catch (e) {
-                    console.error('Erro:', e);
-                    qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
+       // ============================================
+       // FUNÇÃO PARA GERAR QR CODE (CORRIGIDA)
+       // ============================================
+            function gerarQRCode() {
+                const qrcodeDiv = document.getElementById('qrcode');
+                qrcodeDiv.innerHTML = '';
+                
+                if (!unidadeData || !unidadeData.id) {
+                    qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID da unidade não encontrado</p>';
+                    return;
                 }
-            } else {
-                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Biblioteca não carregada</p>';
+            
+                if (typeof QRCode !== 'undefined') {
+                    try {
+                        QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
+                            width: 250,
+                            margin: 2
+                        }, function(err, canvas) {
+                            if (err) {
+                                console.error('Erro:', err);
+                                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
+                                return;
+                            }
+                            
+                            qrcodeDiv.innerHTML = '';
+                            canvas.style.width = '100%';
+                            canvas.style.height = 'auto';
+                            qrcodeDiv.appendChild(canvas);
+                        });
+            
+                        // ============================================
+                        // PREENCHER INFORMAÇÕES BÁSICAS DO PRODUTO
+                        // ============================================
+                        const produto = unidadeData.produto || unidadeData.produtos?.[0];
+                        const volumes = unidadeData.volumes || unidadeData.produtos?.[0]?.volumes || [];
+                        
+                        document.getElementById('qr-info').innerHTML = `
+                            <p><strong>Produto:</strong> ${unidadeData.produto || produto?.nome || 'N/A'}</p>
+                            <p><strong>SKU:</strong> ${unidadeData.sku || produto?.sku || 'N/A'}</p>
+                            ${volumes.length > 0 ? `
+                                <p><strong>Lote:</strong> ${volumes[0].lote || 'N/A'}</p>
+                                <p><strong>Validade:</strong> ${formatarData(volumes[0].validade)}</p>
+                            ` : ''}
+                        `;
+            
+                        // ============================================
+                        // MOSTRAR VOLUME E QUANTIDADE TOTAIS
+                        // ============================================
+                        document.getElementById('volume-info').innerHTML = `
+                            <div class="volume-item">
+                                <div class="volume-value">${formatarNumero(unidadeData.totalVolumes || 0)}</div>
+                                <div class="volume-label">${unidadeData.tipoEmbalagem || 'UN'}</div>
+                            </div>
+                            <div class="volume-item">
+                                <div class="volume-value">${formatarNumero(unidadeData.totalUN || 0)}</div>
+                                <div class="volume-label">UN</div>
+                            </div>
+                        `;
+            
+                        // ============================================
+                        // MOSTRAR DETALHAMENTO DOS VOLUMES
+                        // ============================================
+                        if (volumes.length > 0) {
+                            document.getElementById('volumes-table').style.display = 'block';
+                            const grid = document.getElementById('volumes-grid');
+                            grid.innerHTML = '';
+                            
+                            volumes.forEach((vol, index) => {
+                                const card = document.createElement('div');
+                                card.className = 'volume-card';
+                                card.innerHTML = `
+                                    <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">VOLUME ${index + 1} - ${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA'}</span>
+                                    <p><strong>Lote:</strong> ${vol.lote || '-'}</p>
+                                    <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
+                                    <p><strong>Quantidade:</strong> ${vol.qtdVolumes || 0} ${unidadeData.tipoEmbalagem || 'UN'}</p>
+                                    <p><strong>UN/Volume:</strong> ${formatarNumero(vol.unPorEmbalagem || 0)}</p>
+                                    <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN || 0)}</p>
+                                `;
+                                grid.appendChild(card);
+                            });
+                        }
+            
+                        document.getElementById('info-id').innerHTML = `
+                            <i class="bi bi-upc-scan"></i> ID: ${unidadeData.id}
+                        `;
+            
+                    } catch (e) {
+                        console.error('Erro:', e);
+                        qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
+                    }
+                } else {
+                    qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Biblioteca não carregada</p>';
+                }
             }
-        }
 
         function baixarQR() {
             const canvas = document.querySelector('#qrcode canvas');
@@ -509,3 +511,4 @@
     </script>
 </body>
 </html>
+
