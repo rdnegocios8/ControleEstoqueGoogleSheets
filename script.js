@@ -2362,29 +2362,19 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - COMPLETA E CORRIGIDA
+// FUNÇÃO VER UNIDADE - CORRIGIDA (ACEITA P, M, QUALQUER LETRA)
 // ============================================
 function verUnidade(id) {
     console.log('🔍 ID recebido:', id);
     
-    // Extrair o ID base (UN-2KDCMC39-4PHJ)
-    const idBase = id.replace(/-P\d+V\d+$/, '');
+    // Extrair o ID base (UN-2KDCMC39-4PHJ) - ACEITA QUALQUER LETRA MAIÚSCULA
+    const idBase = id.replace(/-[A-Z]\d+V\d+$/, '');
     console.log('📦 ID Base:', idBase);
     
     // Buscar TODAS as unidades com esse ID base
-    // Ignorar registros que não têm o padrão -PxVx
-const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.includes('-P') && u.id.includes('V'));
+    const todasUnidades = unidades.filter(u => u.id.startsWith(idBase));
     console.log('📦 Total de unidades encontradas:', todasUnidades.length);
-    console.log('📦 Unidades encontradas:', todasUnidades.map(u => ({
-        id: u.id,
-        sku: u.sku,
-        quantidade: u.quantidade,
-        volume: u.volume,
-        lote: u.lote,
-        validade: u.validade,
-        foraPadrao: u.foraPadrao,
-        qtdRealPorEmbalagem: u.qtdRealPorEmbalagem
-    })));
+    console.log('📦 Unidades encontradas:', todasUnidades.map(u => u.id));
     
     if (todasUnidades.length === 0) {
         console.log('❌ Nenhuma unidade encontrada!');
@@ -2392,28 +2382,27 @@ const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.inclu
     }
     
     // ============================================
-    // AGRUPAR POR PRODUTO (P1, P2, etc)
+    // AGRUPAR POR PRODUTO (P1, P2, etc) - ACEITA QUALQUER LETRA
     // ============================================
     const produtosMap = new Map();
     
     todasUnidades.forEach(u => {
-        // Extrair P1, P2 do ID (ex: UN-2KDCMC39-4PHJ-P1V1 → P1)
-        const match = u.id.match(/-P(\d+)V/);
+        // Extrair número do produto - aceita QUALQUER LETRA MAIÚSCULA (P, M, Q, X, etc)
+        const match = u.id.match(/-[A-Z](\d+)V/);
         if (!match) {
-            console.log('⚠️ Unidade sem padrão PxVx:', u.id);
+            console.log('⚠️ Unidade sem padrão válido (ignorada):', u.id);
             return;
         }
         
         const produtoNum = match[1];
-        const produtoKey = `P${produtoNum}`;
+        const produtoKey = `P${produtoNum}`; // Normaliza para P internamente
         
         if (!produtosMap.has(produtoKey)) {
             // Buscar informações do produto
             const produtoInfo = produtos.find(p => p.sku === u.sku);
-            console.log(`📦 Produto ${produtoKey} encontrado:`, produtoInfo?.nome || u.sku);
             
             produtosMap.set(produtoKey, {
-                id: `${idBase}-P${produtoNum}`,
+                id: `${idBase}-P${produtoNum}`, // Sempre usa P no ID final
                 nome: produtoInfo?.nome || u.sku,
                 sku: u.sku,
                 tipoEmbalagem: u.unidadeEmbalagem || 'UN',
@@ -2438,8 +2427,6 @@ const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.inclu
         produto.volumes.push(volume);
         produto.totalVolumes += u.volume || 1;
         produto.totalUN += u.quantidade || 0;
-        
-        console.log(`📦 Volume adicionado ao ${produtoKey}:`, volume);
     });
     
     // Criar objeto da unidade
@@ -2461,11 +2448,8 @@ const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.inclu
             id: p.id,
             nome: p.nome,
             totalVolumes: p.totalVolumes,
-            totalUN: p.totalUN,
-            volumes: p.volumes.length
-        })),
-        totalVolumes: unidadeAtual.totalVolumes,
-        totalUN: unidadeAtual.totalUN
+            totalUN: p.totalUN
+        }))
     });
     
     // ============================================
@@ -2492,11 +2476,11 @@ const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.inclu
         
         // Preparar objeto APENAS com este produto (TODOS os volumes dele)
         const dadosProduto = {
-            id: produto.id,  // Ex: UN-2KDCMC39-4PHJ-P1
+            id: produto.id,
             produto: produto.nome,
             sku: produto.sku,
             tipoEmbalagem: produto.tipoEmbalagem,
-            volumes: produto.volumes,  // TODOS os volumes deste P
+            volumes: produto.volumes,
             totalVolumes: produto.totalVolumes,
             totalUN: produto.totalUN,
             numeroNF: unidadeAtual.numeroNF,
@@ -2504,8 +2488,6 @@ const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.inclu
             dataRecebimento: unidadeAtual.dataRecebimento,
             status: unidadeAtual.status
         };
-        
-        console.log(`📦 Dados do Produto ${pIndex+1}:`, dadosProduto);
         
         // Criar card para este produto
         const produtoCard = document.createElement('div');
@@ -2534,8 +2516,6 @@ const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.inclu
             const dadosJSON = encodeURIComponent(JSON.stringify(dadosProduto));
             const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
             
-            console.log(`🔍 URL gerada para produto ${pIndex+1}:`, urlCompleta);
-            
             try {
                 if (typeof QRCode !== 'undefined') {
                     new QRCode(document.getElementById(`qr-produto-${pIndex}`), {
@@ -2554,7 +2534,7 @@ const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.inclu
                     `;
                 }
             } catch (e) {
-                console.error('❌ Erro ao gerar QR code:', e);
+                console.error('Erro ao gerar QR code:', e);
             }
         }, 100 * pIndex);
     });
@@ -3459,6 +3439,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
