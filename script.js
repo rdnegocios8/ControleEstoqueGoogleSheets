@@ -2362,7 +2362,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - COMPLETA E CORRIGIDA
+// FUNÇÃO VER UNIDADE - CORRIGIDA (1 QR CODE POR PRODUTO)
 // ============================================
 function verUnidade(id) {
     unidadeAtual = unidades.find(u => u.id === id);
@@ -2383,21 +2383,29 @@ function verUnidade(id) {
         document.getElementById('detalhe-total-volumes').textContent = unidadeAtual.totalVolumes;
         document.getElementById('detalhe-total-un').textContent = unidadeAtual.totalUN.toFixed(2);
         
+        // ============================================
+        // LIMPAR E PREPARAR CONTAINER DE QR CODES
+        // ============================================
         const qrContainer = document.getElementById('unidade-qr-code');
-        qrContainer.innerHTML = '';
+        qrContainer.innerHTML = '<h6 class="text-info mb-3">📱 QR Codes por Produto:</h6>';
+        qrContainer.className = 'd-flex flex-wrap gap-3 justify-content-center';
         
         // ============================================
-        // CONSTRUIR URL COM TODOS OS DADOS EM JSON
+        // GERAR UM QR CODE PARA CADA PRODUTO
         // ============================================
-        
-        // Preparar objeto com todos os dados da unidade
-        const dadosCompletos = {
-            id: unidadeAtual.id,
-            produtos: unidadeAtual.produtos.map(p => ({
-                nome: p.nome,
-                sku: p.sku,
-                tipoEmbalagem: p.tipoEmbalagem,
-                volumes: p.volumes.map(v => ({
+        unidadeAtual.produtos.forEach((produto, pIndex) => {
+            
+            // Calcular totais deste produto
+            let totalVolumesProduto = produto.volumes.reduce((sum, v) => sum + v.qtdVolumes, 0);
+            let totalUNProduto = produto.volumes.reduce((sum, v) => sum + v.totalUN, 0);
+            
+            // Preparar objeto APENAS com este produto
+            const dadosProduto = {
+                id: `${unidadeAtual.id}-P${pIndex+1}`,
+                produto: produto.nome,
+                sku: produto.sku,
+                tipoEmbalagem: produto.tipoEmbalagem,
+                volumes: produto.volumes.map(v => ({
                     tipo: v.tipo,
                     qtdVolumes: v.qtdVolumes,
                     unPorEmbalagem: v.unPorEmbalagem,
@@ -2405,52 +2413,70 @@ function verUnidade(id) {
                     lote: v.lote,
                     validade: v.validade,
                     localizacao: v.localizacao
-                }))
-            })),
-            totalVolumes: unidadeAtual.totalVolumes,
-            totalUN: unidadeAtual.totalUN,
-            numeroNF: unidadeAtual.numeroNF,
-            fornecedor: unidadeAtual.fornecedor,
-            dataRecebimento: unidadeAtual.dataRecebimento,
-            status: unidadeAtual.status
-        };
-        
-        // Converter para JSON e codificar para URL
-        const dadosJSON = encodeURIComponent(JSON.stringify(dadosCompletos));
-        const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
-        
-        setTimeout(() => {
-            try {
-                if (typeof QRCode !== 'undefined') {
-                    new QRCode(qrContainer, {
-                        text: urlCompleta,
-                        width: 150,
-                        height: 150,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                } else {
-                    qrContainer.innerHTML = `
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlCompleta)}" 
-                             alt="QR Code" 
-                             style="width: 150px; height: 150px; border-radius: 8px; border: 2px solid #fbbf24;">
+                })),
+                totalVolumes: totalVolumesProduto,
+                totalUN: totalUNProduto,
+                numeroNF: unidadeAtual.numeroNF,
+                fornecedor: unidadeAtual.fornecedor,
+                dataRecebimento: unidadeAtual.dataRecebimento,
+                status: unidadeAtual.status
+            };
+            
+            // Criar card para este produto
+            const produtoCard = document.createElement('div');
+            produtoCard.className = 'card bg-dark mb-3';
+            produtoCard.style.width = '200px';
+            produtoCard.style.border = '1px solid #fbbf24';
+            
+            produtoCard.innerHTML = `
+                <div class="card-header text-warning p-2 text-center" style="font-size: 0.9rem;">
+                    <strong>${produto.nome.length > 20 ? produto.nome.substring(0, 20) + '...' : produto.nome}</strong>
+                </div>
+                <div class="card-body text-center p-2">
+                    <div id="qr-produto-${pIndex}" style="width: 150px; height: 150px; margin: 0 auto;"></div>
+                    <div class="mt-2">
+                        <small class="text-info">${totalVolumesProduto} volumes</small><br>
+                        <small class="text-warning">${totalUNProduto.toFixed(2)} UN</small><br>
+                        <small class="text-muted" style="font-size: 0.7rem;">${unidadeAtual.id}-P${pIndex+1}</small>
+                    </div>
+                </div>
+            `;
+            
+            qrContainer.appendChild(produtoCard);
+            
+            // Gerar QR code para este produto
+            setTimeout(() => {
+                const dadosJSON = encodeURIComponent(JSON.stringify(dadosProduto));
+                const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
+                
+                try {
+                    if (typeof QRCode !== 'undefined') {
+                        new QRCode(document.getElementById(`qr-produto-${pIndex}`), {
+                            text: urlCompleta,
+                            width: 150,
+                            height: 150,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+                    } else {
+                        document.getElementById(`qr-produto-${pIndex}`).innerHTML = `
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlCompleta)}" 
+                                 alt="QR Code" 
+                                 style="width: 150px; height: 150px; border-radius: 8px; border: 2px solid #fbbf24;">
+                        `;
+                    }
+                } catch (e) {
+                    document.getElementById(`qr-produto-${pIndex}`).innerHTML = `
+                        <div class="alert alert-warning p-1 text-center" style="font-size: 0.8rem;">
+                            <i class="bi bi-exclamation-triangle"></i> Erro
+                        </div>
                     `;
                 }
-            } catch (e) {
-                qrContainer.innerHTML = `
-                    <div class="alert alert-warning p-2 text-center">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <p class="mb-1">Clique para ver o QR Code</p>
-                        <button class="btn btn-sm btn-primary" onclick="verQRCodeCompleto()">
-                            <i class="bi bi-qr-code"></i> Ver QR Code
-                        </button>
-                    </div>
-                `;
-            }
-        }, 100);
+            }, 100 * pIndex);
+        });
         
-        // Mostrar todos os produtos/volumes no modal
+        // Mostrar todos os produtos/volumes no modal (parte de baixo)
         const container = document.getElementById('detalhe-produtos-container');
         container.innerHTML = '';
         
@@ -2459,7 +2485,8 @@ function verUnidade(id) {
             produtoDiv.className = 'card bg-dark mb-3';
             produtoDiv.innerHTML = `
                 <div class="card-header text-warning">
-                    <strong>${produto.nome}</strong> (SKU: ${produto.sku})
+                    <strong>${produto.nome}</strong> (SKU: ${produto.sku}) 
+                    <span class="badge bg-info float-end">ID: ${unidadeAtual.id}-P${pIndex+1}</span>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
@@ -2487,6 +2514,15 @@ function verUnidade(id) {
                                 </tr>
                             `).join('')}
                         </tbody>
+                        <tfoot>
+                            <tr class="table-info">
+                                <td colspan="3"><strong>Total do Produto:</strong></td>
+                                <td><strong>${produto.volumes.reduce((sum, v) => sum + v.qtdVolumes, 0)}</strong></td>
+                                <td></td>
+                                <td><strong class="text-warning">${produto.volumes.reduce((sum, v) => sum + v.totalUN, 0).toFixed(2)}</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             `;
@@ -2509,9 +2545,10 @@ function verUnidade(id) {
         
         const qrContainer = document.getElementById('unidade-qr-code');
         qrContainer.innerHTML = '';
+        qrContainer.className = 'text-center';
         
         // ============================================
-        // GERAR QR CODE PARA UNIDADE SIMPLES (formato original)
+        // GERAR QR CODE PARA UNIDADE SIMPLES
         // ============================================
         const urlCompleta = `${baseUrl}qr-view.html?id=${unidadeAtual.id}&sku=${unidadeAtual.sku}&lote=${unidadeAtual.lote || ''}&validade=${unidadeAtual.validade || ''}&produto=${encodeURIComponent(produto?.nome || '')}&volume=${unidadeAtual.volume || 1}&quantidade=${unidadeAtual.quantidade || 0}&unidade=${unidadeAtual.unidadeEmbalagem || 'UN'}&unidadeBase=${produto?.unidadeBase || 'UN'}&qtdPorEmbalagem=${produto?.qtdPorEmbalagem || 1}`;
         
@@ -3410,6 +3447,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
