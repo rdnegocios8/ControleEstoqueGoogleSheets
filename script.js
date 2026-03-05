@@ -14,19 +14,59 @@ const RECEBIMENTOS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_
 const ESTOQUE_GERAL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Estoque Geral?key=${API_KEY}`;
 
 // ============================================
-// FUNÇÃO PARA ENVIAR DADOS PARA O APPS SCRIPT (VIA GET)
+// FUNÇÃO PARA ENVIAR DADOS PARA O APPS SCRIPT (CORRIGIDA)
 // ============================================
 async function enviarParaAppsScript(dados) {
-    const url = `${WEB_APP_URL}?dados=${encodeURIComponent(JSON.stringify(dados))}`;
+    const url = WEB_APP_URL;
     
     try {
+        console.log('📤 Enviando para Apps Script:', dados);
+        
+        // Primeira tentativa: com CORS (para ver erro)
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            });
+            
+            if (response.ok) {
+                const texto = await response.text();
+                console.log('✅ Resposta do servidor:', texto);
+                return true;
+            } else {
+                console.warn('⚠️ Resposta com erro:', response.status);
+            }
+        } catch (corsError) {
+            console.warn('⚠️ Erro de CORS, tentando no-cors...', corsError);
+        }
+        
+        // Segunda tentativa: com no-cors (fallback)
         await fetch(url, {
-            mode: 'no-cors'  // Mantém o no-cors para evitar erro de CORS
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
         });
+        
+        console.log('📤 Enviado em modo no-cors');
         return true;
+        
     } catch (error) {
         console.error('❌ Erro ao enviar:', error);
-        return false;
+        
+        // Fallback: tentar via GET
+        try {
+            const getUrl = `${WEB_APP_URL}?dados=${encodeURIComponent(JSON.stringify(dados))}`;
+            await fetch(getUrl, { mode: 'no-cors' });
+            console.log('📤 Enviado via GET (fallback)');
+            return true;
+        } catch (getError) {
+            console.error('❌ Erro também no GET:', getError);
+            return false;
+        }
     }
 }
 
@@ -3370,5 +3410,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
