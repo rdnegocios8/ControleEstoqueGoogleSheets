@@ -371,8 +371,8 @@ function adicionarVolumeProduto(produtoIndex) {
     const tipoEmbalagem = document.getElementById(`produto-tipo-embalagem-${produtoIndex}`)?.value || 'ML';
     
     // Valores iniciais
-    const qtdInicial = isPrimeiroVolume ? 10 : 1;
-    const unPorEmbInicial = isPrimeiroVolume ? qtdPadrao : 168;
+    const qtdInicial = isPrimeiroVolume ? '' : '';
+    const unPorEmbInicial = isPrimeiroVolume ? qtdPadrao : '';
     
     const divVolume = document.createElement('div');
     divVolume.className = 'volume-row mb-3 p-3 border rounded';
@@ -735,7 +735,6 @@ function selecionarProdutoRecebimentoMultiplo(produtoIndex, sku, nome, tipoEmbal
 // ============================================
 // FUNÇÃO SALVAR RECEBIMENTO MÚLTIPLO - CORRIGIDA
 // ============================================
-
 async function salvarRecebimentoMultiplo() {
     const dataRecebimento = document.getElementById('recebimento-multiplo-data').value;
     const numeroNF = document.getElementById('recebimento-multiplo-nf').value;
@@ -835,7 +834,7 @@ async function salvarRecebimentoMultiplo() {
         produtos: produtosArray,
         totalVolumes: totalVolumes,
         totalUN: totalUN,
-        resumo: produtosArray.map(p => `${p.nome.substring(0, 20)}...`).join('; ')
+        resumo: produtosArray.map(p => p.nome.substring(0, 20)).join('; ')
     };
     
     try {
@@ -844,20 +843,6 @@ async function salvarRecebimentoMultiplo() {
         // ============================================
         console.log('📤 Enviando unidade para o Google Sheets...', unidadeUnica);
         
-       // ANTIGO:
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                tipo: 'unidade-multipla',
-                id: idUnidade,
-                dados: JSON.stringify(unidadeUnica),
-                timestamp: new Date().toISOString()
-            })
-        });
-        
-        // NOVO:
         await enviarParaAppsScript({
             tipo: 'unidade-multipla',
             id: idUnidade,
@@ -866,49 +851,48 @@ async function salvarRecebimentoMultiplo() {
         });
         
         // ============================================
-        // ENVIO 2: Salvar como recebimento (FORMATO CORRETO)
+        // ENVIO 2: Criar um RECEBIMENTO para CADA PRODUTO
         // ============================================
-        // Pegar o primeiro produto e primeiro volume para os detalhes
-            const primeiroProduto = produtosArray[0];
-            const primeiroVolume = primeiroProduto.volumes[0];
+        for (let p = 0; p < produtosArray.length; p++) {
+            const produto = produtosArray[p];
             
-                const recebimentoRegistro = {
-                    tipo: 'recebimento',
-                    idUnidade: idUnidade,
-                    data: dataRecebimento,
-                    nf: numeroNF,                                   // ← Coluna B (estava faltando)
-                    fornecedor: fornecedor,                         // ← Coluna C
-                    sku: primeiroProduto.sku,                       // ← Coluna D (código SKU)
-                    produto: primeiroProduto.nome,                   // ← Coluna E (descrição do produto)
-                    lote: primeiroVolume.lote,                       // ← Coluna F
-                    validade: primeiroVolume.validade,               // ← Coluna G
-                    quantidade: totalUN,                             // ← Coluna H
-                    volume: totalVolumes,                            // ← Coluna I
-                    unidadeMedida: primeiroProduto.tipoEmbalagem,    // ← Coluna J
-                    qtdPorEmbalagem: primeiroVolume.unPorEmbalagem,  // ← Coluna K
-                    localizacao: primeiroVolume.localizacao || '',   // ← Coluna L
-                    responsavel: 'Sistema',                          // ← Coluna M
-                    observacoes: observacoes,                        // ← Coluna N
-                    tipoUnidade: 'Múltipla'                          // ← Coluna O
-                };
-        
-       // ANTIGO:
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(recebimentoRegistro)
-        });
-        
-        // NOVO:
-        await enviarParaAppsScript(recebimentoRegistro);
+            // Calcular totais deste produto
+            let totalVolumesProduto = produto.volumes.reduce((sum, v) => sum + v.qtdVolumes, 0);
+            let totalUNProduto = produto.volumes.reduce((sum, v) => sum + v.totalUN, 0);
+            
+            // Pegar o primeiro volume para dados padrão
+            const primeiroVolume = produto.volumes[0];
+            
+            const recebimentoRegistro = {
+                tipo: 'recebimento',
+                idUnidade: `${idUnidade}-P${p+1}`, // ID único para este produto
+                data: dataRecebimento,
+                nf: numeroNF,
+                fornecedor: fornecedor,
+                sku: produto.sku,
+                produto: produto.nome,
+                lote: primeiroVolume.lote || '',
+                validade: primeiroVolume.validade || '',
+                quantidade: totalUNProduto,
+                volume: totalVolumesProduto,
+                unidadeMedida: produto.tipoEmbalagem,
+                qtdPorEmbalagem: primeiroVolume.unPorEmbalagem,
+                localizacao: primeiroVolume.localizacao || '',
+                responsavel: 'Sistema',
+                observacoes: observacoes,
+                tipoUnidade: 'Múltipla'
+            };
+            
+            await enviarParaAppsScript(recebimentoRegistro);
+            console.log(`✅ Recebimento para produto ${p+1} enviado: ${produto.nome}`);
+        }
         
         // ============================================
-        // ADICIONAR À LISTA LOCAL (FORMATO CORRETO)
+        // ADICIONAR À LISTA LOCAL
         // ============================================
         unidades.push(unidadeUnica);
         
-        // CORREÇÃO: Adicionar recebimento com a estrutura correta
+        // Adicionar UM recebimento na lista local (para exibição)
         recebimentos.push({
             idUnidade: idUnidade,
             data: dataRecebimento,
@@ -929,7 +913,7 @@ async function salvarRecebimentoMultiplo() {
         atualizarTabelaUnidades();
         atualizarTabelaRecebimentos();
         
-        alert(`✅ Recebimento concluído! Unidade criada: ${idUnidade}`);
+        alert(`✅ Recebimento concluído! Unidade criada: ${idUnidade}\n${produtosArray.length} produtos processados.`);
         
     } catch (error) {
         console.error('❌ Erro detalhado:', error);
@@ -3378,12 +3362,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (volumeRow0) {
         volumesData[0] = {
             tipo: 'padrao',
-            qtd: 10,
-            unPorEmbalagem: 250,
+            qtd: '',
+            unPorEmbalagem: '',
             lote: '',
             validade: '',
             localizacao: ''
         };
     }
 });
+
 
