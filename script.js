@@ -2372,7 +2372,8 @@ function verUnidade(id) {
     console.log('📦 ID Base:', idBase);
     
     // Buscar TODAS as unidades com esse ID base
-    const todasUnidades = unidades.filter(u => u.id.startsWith(idBase));
+    // Ignorar registros que não têm o padrão -PxVx
+const todasUnidades = unidades.filter(u => u.id.startsWith(idBase) && u.id.includes('-P') && u.id.includes('V'));
     console.log('📦 Total de unidades encontradas:', todasUnidades.length);
     console.log('📦 Unidades encontradas:', todasUnidades.map(u => ({
         id: u.id,
@@ -3458,6 +3459,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
