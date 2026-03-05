@@ -2165,7 +2165,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                     const produtoInfo = produtos.find(p => p.sku === produto.sku);
                     
                     tr.innerHTML = `
-                        <td><small class="text-warning">${u.id}</small><br><small class="text-info">M${pIndex+1}V${vIndex+1}</small></td>
+                        <td><small class="text-warning">${u.id}</small><br><small class="text-info">${u.id.split('-').pop()}</small></td>
                         <td>${produto.nome}</td>
                         <td><span class="badge ${getCategoriaBadgeClass(produtoInfo?.categoria)}">${produtoInfo?.categoria || '-'}</span></td>
                         <td><span class="badge bg-info">${produto.tipoEmbalagem}</span></td>
@@ -3439,6 +3439,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
