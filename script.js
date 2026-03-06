@@ -950,7 +950,7 @@ async function salvarRecebimentoMultiplo() {
         if (modal) modal.hide();
         
         // Atualizar interface
-        atualizarTabelaUnidades();
+        ();
         atualizarTabelaRecebimentos();
         
         alert(`✅ Recebimento concluído! Unidade criada: ${idUnidade}\n${produtosArray.length} produtos processados.`);
@@ -1458,7 +1458,7 @@ function mostrarView(view) {
     if (view === 'scanner') setupQRCode();
     if (view === 'unidades') {
         preencherFiltros();
-        atualizarTabelaUnidades();
+        ();
     }
     if (view === 'recebimentos') {
         preencherSelectProdutosRecebimento();
@@ -1705,7 +1705,7 @@ function carregarDadosExemplo() {
 function atualizarInterface() {
     atualizarPainel();
     atualizarCardsProdutos();
-    atualizarTabelaUnidades();
+    ();
     atualizarTabelaMovimentacoes();
     atualizarUltimasMovimentacoes();
     preencherFiltros();
@@ -2138,7 +2138,8 @@ function gerarIdUnico() {
 
 // Atualizar tabela de unidades (MODIFICADA)
 // ============================================
-// FUNÇÃO ATUALIZAR TABELA DE UNIDADES - VERSÃO ORIGINAL RESTAURADA
+// ============================================
+// FUNÇÃO ATUALIZAR TABELA DE UNIDADES - CORRIGIDA
 // ============================================
 function atualizarTabelaUnidades(unidadesFiltradas = null) {
     const tbody = document.getElementById('tabela-unidades');
@@ -2154,18 +2155,22 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
     }
     
     dados.forEach(u => {
-        // Verificar se é unidade múltipla (com vários produtos)
-        if (u.tipo === 'unidade-multipla') {
-            // Para unidades múltiplas, criar uma linha para cada produto/volume
+        // CASO 1: UNIDADE MÚLTIPLA (com produtos/volumes)
+        if (u.tipo === 'unidade-multipla' && u.produtos) {
             u.produtos.forEach((produto, pIndex) => {
                 produto.volumes.forEach((volume, vIndex) => {
                     const tr = document.createElement('tr');
                     
-                    // Encontrar o produto nos dados principais para pegar categoria
+                    // Gerar ID completo com sufixo
+                    const idCompleto = `${u.id}-P${pIndex+1}V${vIndex+1}`;
+                    
+                    // Buscar informações do produto
                     const produtoInfo = produtos.find(p => p.sku === produto.sku);
                     
                     tr.innerHTML = `
-                        <td><small class="text-warning">${u.id}</small><br><small class="text-info">${u.id.split('-').pop()}</small></td>
+                        <td>
+                            <small class="text-warning">${idCompleto}</small>
+                        </td>
                         <td>${produto.nome}</td>
                         <td><span class="badge ${getCategoriaBadgeClass(produtoInfo?.categoria)}">${produtoInfo?.categoria || '-'}</span></td>
                         <td><span class="badge bg-info">${produto.tipoEmbalagem}</span></td>
@@ -2173,15 +2178,15 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                         <td>${formatarData(volume.validade) || '-'}</td>
                         <td>${volume.qtdVolumes}</td>
                         <td>${volume.totalUN.toFixed(2).replace('.', ',')} ${produtoInfo?.unidadeBase || 'UN'}</td>
-                        <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">Recebimento</span></td>
+                        <td><span class="badge ${u.tipoEntrada === 'Recebimento' ? 'bg-info' : 'bg-secondary'}">${u.tipoEntrada || 'Manual'}</span></td>
                         <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                         <td>${u.destino || '-'}</td>
                         <td>
-                            <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')" title="Ver detalhes">
+                            <button class="btn btn-sm btn-info" onclick="verUnidade('${idCompleto}')" title="Ver detalhes">
                                 <i class="bi bi-eye"></i>
                             </button>
                             ${u.status === 'Disponível' && volume.totalUN > 0 ? `
-                                <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}', '${produto.sku}', '${volume.lote}', '${volume.validade}', '${produto.nome}', ${volume.qtdVolumes}, ${volume.totalUN}, '${produto.tipoEmbalagem}', '${produtoInfo?.unidadeBase || 'UN'}', ${produtoInfo?.qtdPorEmbalagem || 1})" title="Dar baixa">
+                                <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${idCompleto}', '${produto.sku}', '${volume.lote}', '${volume.validade}', '${produto.nome}', ${volume.qtdVolumes}, ${volume.totalUN}, '${produto.tipoEmbalagem}', '${produtoInfo?.unidadeBase || 'UN'}', ${produtoInfo?.qtdPorEmbalagem || 1})" title="Dar baixa">
                                     <i class="bi bi-arrow-right"></i>
                                 </button>
                             ` : ''}
@@ -2190,14 +2195,14 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                     tbody.appendChild(tr);
                 });
             });
-        } else {
-            // Unidade simples (formato original)
+        } 
+        // CASO 2: UNIDADE SIMPLES
+        else {
             const produto = produtos.find(p => p.sku === u.sku);
             const validadeDate = new Date(u.validade);
             const hoje = new Date();
             const vencido = validadeDate < hoje;
             
-            // CORREÇÃO: Formatar com 2 casas decimais
             const quantidadeFormatada = u.quantidade.toFixed(2).replace('.', ',');
             
             const tr = document.createElement('tr');
@@ -3439,6 +3444,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
