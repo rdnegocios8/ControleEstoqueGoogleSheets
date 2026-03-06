@@ -950,7 +950,7 @@ async function salvarRecebimentoMultiplo() {
         if (modal) modal.hide();
         
         // Atualizar interface
-        ();
+        atualizarTabelaUnidades();
         atualizarTabelaRecebimentos();
         
         alert(`✅ Recebimento concluído! Unidade criada: ${idUnidade}\n${produtosArray.length} produtos processados.`);
@@ -1458,7 +1458,7 @@ function mostrarView(view) {
     if (view === 'scanner') setupQRCode();
     if (view === 'unidades') {
         preencherFiltros();
-        ();
+        atualizarTabelaUnidades();
     }
     if (view === 'recebimentos') {
         preencherSelectProdutosRecebimento();
@@ -1705,7 +1705,7 @@ function carregarDadosExemplo() {
 function atualizarInterface() {
     atualizarPainel();
     atualizarCardsProdutos();
-    ();
+    atualizarTabelaUnidades();
     atualizarTabelaMovimentacoes();
     atualizarUltimasMovimentacoes();
     preencherFiltros();
@@ -2136,7 +2136,6 @@ function gerarIdUnico() {
     return id;
 }
 
-// Atualizar tabela de unidades (MODIFICADA)
 // ============================================
 // FUNÇÃO ATUALIZAR TABELA DE UNIDADES - CORRIGIDA (SEM ERROS)
 // ============================================
@@ -3445,16 +3444,3 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
