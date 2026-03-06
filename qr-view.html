@@ -319,40 +319,73 @@
         function corrigirEstruturaDados(dados) {
             console.log('🔧 Corrigindo estrutura:', dados);
             
-            // Caso 1: Já tem produtos e não está vazio
+            // CASO 1: Já tem produtos e não está vazio (estrutura correta)
             if (dados.produtos && dados.produtos.length > 0) {
                 console.log('✅ Estrutura já está correta (com produtos)');
+                
+                // Garantir que cada produto tenha um array de volumes
+                dados.produtos.forEach(produto => {
+                    if (!produto.volumes) produto.volumes = [];
+                    if (!produto.tipoEmbalagem) produto.tipoEmbalagem = 'UN';
+                });
+                
                 return dados;
             }
             
-            // Caso 2: Tem produto direto (formato novo)
-            if (dados.produto && dados.sku) {
-                console.log('✅ Convertendo formato novo para formato esperado');
+            // CASO 2: Tem campos individuais (formato antigo)
+            if (dados.id && (dados.produto || dados.sku || dados.nome)) {
+                console.log('✅ Convertendo formato antigo para novo formato');
+                
+                // Verificar se tem volumes
+                let volumes = [];
+                if (dados.volumes && dados.volumes.length > 0) {
+                    volumes = dados.volumes;
+                } else if (dados.volume !== undefined) {
+                    // Criar volume único a partir dos dados antigos
+                    volumes = [{
+                        tipo: dados.tipo || 'padrao',
+                        qtdVolumes: parseFloat(dados.volume) || 1,
+                        unPorEmbalagem: parseFloat(dados.qtdPorEmbalagem) || 1,
+                        totalUN: parseFloat(dados.quantidade) || 0,
+                        lote: dados.lote || '',
+                        validade: dados.validade || '',
+                        localizacao: dados.localizacao || '-'
+                    }];
+                }
+                
                 return {
                     id: dados.id,
                     produtos: [{
-                        nome: dados.produto,
-                        sku: dados.sku,
-                        tipoEmbalagem: dados.tipoEmbalagem || 'UN',
-                        volumes: dados.volumes || []
+                        nome: dados.produto || dados.nome || 'Produto',
+                        sku: dados.sku || 'SKU',
+                        tipoEmbalagem: dados.tipoEmbalagem || dados.unidade || 'UN',
+                        volumes: volumes
                     }],
-                    totalVolumes: dados.totalVolumes || 0,
-                    totalUN: dados.totalUN || 0
+                    totalVolumes: dados.totalVolumes || (dados.volume ? parseFloat(dados.volume) : (volumes.length > 0 ? volumes.reduce((sum, v) => sum + (v.qtdVolumes || 1), 0) : 1)),
+                    totalUN: dados.totalUN || (dados.quantidade ? parseFloat(dados.quantidade) : (volumes.length > 0 ? volumes.reduce((sum, v) => sum + (v.totalUN || 0), 0) : 0))
                 };
             }
             
-            // Caso 3: Dados mínimos (fallback)
-            console.log('⚠️ Criando estrutura mínima');
+            // CASO 3: Dados mínimos (fallback)
+            console.log('⚠️ Criando estrutura mínima com ID:', dados.id);
             return {
                 id: dados.id || 'ID desconhecido',
                 produtos: [{
-                    nome: dados.nome || dados.produto || 'Produto',
+                    nome: dados.produto || dados.nome || 'Produto',
                     sku: dados.sku || 'SKU',
-                    tipoEmbalagem: dados.tipoEmbalagem || 'UN',
-                    volumes: dados.volumes || []
+                    tipoEmbalagem: dados.tipoEmbalagem || dados.unidade || 'UN',
+                    volumes: [{
+                        tipo: 'padrao',
+                        qtdVolumes: 1,
+                        unPorEmbalagem: 1,
+                        totalUN: 0,
+                        lote: '',
+                        validade: '',
+                        localizacao: '-'
+                    }]
                 }],
-                totalVolumes: dados.totalVolumes || 0,
-                totalUN: dados.totalUN || 0
+                totalVolumes: 1,
+                totalUN: 0
             };
         }
 
@@ -363,54 +396,83 @@
         const dadosParam = urlParams.get('dados');
         
         let unidadeData = null;
-        let isMultipla = false;
         
         // ============================================
-        // PROCESSAR DADOS - COM CORREÇÃO DE ESTRUTURA
+        // PROCESSAR DADOS - PRIORIDADE MÁXIMA PARA O PARÂMETRO 'dados'
         // ============================================
         if (dadosParam) {
             try {
+                // Tentar parsear o JSON
                 const dadosParsed = JSON.parse(decodeURIComponent(dadosParam));
-                console.log('📦 Dados brutos da URL:', dadosParsed);
+                console.log('📦 Dados brutos da URL (parâmetro dados):', dadosParsed);
                 
                 // APLICAR A CORREÇÃO DE ESTRUTURA
                 unidadeData = corrigirEstruturaDados(dadosParsed);
-                isMultipla = true;
                 
                 console.log('✅ Dados após correção:', unidadeData);
                 
             } catch (e) {
                 console.error('❌ Erro ao parsear dados:', e);
+                console.log('🔍 String recebida:', dadosParam);
             }
         }
         
         // ============================================
-        // SE NÃO TIVER, É UNIDADE SIMPLES (formato antigo)
+        // SE NÃO TIVER O PARÂMETRO 'dados', TENTAR O FORMATO ANTIGO
         // ============================================
-        if (!isMultipla) {
+        if (!unidadeData) {
             const id = urlParams.get('id');
             if (id) {
+                console.log('📦 Usando formato antigo com parâmetros individuais');
+                
+                // Coletar todos os parâmetros
+                const produto = decodeURIComponent(urlParams.get('produto') || '');
+                const sku = urlParams.get('sku') || '';
+                const lote = urlParams.get('lote') || '';
+                const validade = urlParams.get('validade') || '';
+                const volume = parseFloat(urlParams.get('volume')) || 1;
+                const quantidade = parseFloat(urlParams.get('quantidade')) || 0;
+                const unidade = urlParams.get('unidade') || 'UN';
+                const unidadeBase = urlParams.get('unidadeBase') || 'UN';
+                const qtdPorEmbalagem = parseFloat(urlParams.get('qtdPorEmbalagem')) || 1;
+                
+                // Calcular unPorEmbalagem se não veio direto
+                let unPorEmbalagem = qtdPorEmbalagem;
+                if (volume > 0 && quantidade > 0 && !qtdPorEmbalagem) {
+                    unPorEmbalagem = quantidade / volume;
+                }
+                
                 unidadeData = {
                     id: id,
                     produtos: [{
-                        nome: decodeURIComponent(urlParams.get('produto') || ''),
-                        sku: urlParams.get('sku') || '',
-                        tipoEmbalagem: urlParams.get('unidade') || 'UN',
+                        nome: produto || 'Produto',
+                        sku: sku,
+                        tipoEmbalagem: unidade,
                         volumes: [{
                             tipo: 'padrao',
-                            qtdVolumes: parseFloat(urlParams.get('volume')) || 0,
-                            unPorEmbalagem: parseFloat(urlParams.get('qtdPorEmbalagem')) || 1,
-                            totalUN: parseFloat(urlParams.get('quantidade')) || 0,
-                            lote: urlParams.get('lote') || '',
-                            validade: urlParams.get('validade') || '',
+                            qtdVolumes: volume,
+                            unPorEmbalagem: unPorEmbalagem,
+                            totalUN: quantidade,
+                            lote: lote,
+                            validade: validade,
                             localizacao: '-'
                         }]
                     }],
-                    totalVolumes: parseFloat(urlParams.get('volume')) || 0,
-                    totalUN: parseFloat(urlParams.get('quantidade')) || 0
+                    totalVolumes: volume,
+                    totalUN: quantidade
                 };
+                
                 console.log('📦 Dados do formato antigo:', unidadeData);
             }
+        }
+
+        // ============================================
+        // SE AINDA NÃO TIVER DADOS, MOSTRAR ERRO
+        // ============================================
+        if (!unidadeData) {
+            console.error('❌ Nenhum dado encontrado na URL');
+            document.body.innerHTML = '<div class="alert alert-danger m-5">Erro: Nenhum dado encontrado na URL</div>';
+            throw new Error('Sem dados');
         }
 
         // ============================================
@@ -419,10 +481,17 @@
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         let linkCompleto;
         
-        if (unidadeData) {
-            linkCompleto = `${baseUrl}?dados=${encodeURIComponent(JSON.stringify(unidadeData))}`;
-            console.log('🔗 Link gerado:', linkCompleto);
-        }
+        // Para o QR code, usar o mesmo objeto mas APENAS com o primeiro produto
+        // (o QR code vai apontar para a unidade inteira)
+        const dadosParaQR = {
+            id: unidadeData.id,
+            produtos: unidadeData.produtos,
+            totalVolumes: unidadeData.totalVolumes,
+            totalUN: unidadeData.totalUN
+        };
+        
+        linkCompleto = `${baseUrl}?dados=${encodeURIComponent(JSON.stringify(dadosParaQR))}`;
+        console.log('🔗 Link gerado para QR Code:', linkCompleto);
 
         // ============================================
         // FUNÇÃO PARA FORMATAR DATA
@@ -442,7 +511,7 @@
         // FUNÇÃO PARA FORMATAR NÚMERO
         // ============================================
         function formatarNumero(valor) {
-            if (!valor && valor !== 0) return '0,00';
+            if (valor === undefined || valor === null) return '0,00';
             return valor.toFixed(2).replace('.', ',');
         }
 
@@ -460,6 +529,7 @@
 
             if (typeof QRCode !== 'undefined') {
                 try {
+                    // Gerar QR Code
                     QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
                         width: 250,
                         margin: 2
@@ -476,30 +546,52 @@
                         qrcodeDiv.appendChild(canvas);
                     });
 
-                    // PEGAR O PRIMEIRO PRODUTO
-                    const produto = unidadeData.produtos?.[0];
-                    if (!produto) {
+                    // ============================================
+                    // PREENCHER INFORMAÇÕES NA TELA
+                    // ============================================
+                    
+                    // Se tiver múltiplos produtos, mostrar o primeiro como principal
+                    const primeiroProduto = unidadeData.produtos?.[0];
+                    if (!primeiroProduto) {
                         console.error('❌ Nenhum produto encontrado');
                         return;
                     }
                     
-                    const volumes = produto.volumes || [];
+                    // Coletar todos os volumes de todos os produtos
+                    let todosVolumes = [];
+                    let totalProdutos = unidadeData.produtos.length;
                     
-                    // PREENCHER INFORMAÇÕES BÁSICAS
-                    document.getElementById('qr-info').innerHTML = `
-                        <p><strong>Produto:</strong> ${produto.nome || 'N/A'}</p>
-                        <p><strong>SKU:</strong> ${produto.sku || 'N/A'}</p>
-                        ${volumes.length > 0 ? `
-                            <p><strong>Lote:</strong> ${volumes[0].lote || 'N/A'}</p>
-                            <p><strong>Validade:</strong> ${formatarData(volumes[0].validade)}</p>
-                        ` : ''}
-                    `;
+                    unidadeData.produtos.forEach(produto => {
+                        if (produto.volumes && produto.volumes.length > 0) {
+                            todosVolumes = todosVolumes.concat(produto.volumes);
+                        }
+                    });
+                    
+                    // Se tiver apenas um produto com um volume, mostrar informações básicas
+                    if (totalProdutos === 1 && todosVolumes.length === 1) {
+                        const volume = todosVolumes[0];
+                        
+                        document.getElementById('qr-info').innerHTML = `
+                            <p><strong>Produto:</strong> ${primeiroProduto.nome || 'N/A'}</p>
+                            <p><strong>SKU:</strong> ${primeiroProduto.sku || 'N/A'}</p>
+                            <p><strong>Lote:</strong> ${volume.lote || 'N/A'}</p>
+                            <p><strong>Validade:</strong> ${formatarData(volume.validade)}</p>
+                        `;
+                    } else {
+                        // Múltiplos produtos ou volumes
+                        document.getElementById('qr-info').innerHTML = `
+                            <p><strong>Unidade:</strong> ${unidadeData.id}</p>
+                            <p><strong>Produtos:</strong> ${totalProdutos}</p>
+                            <p><strong>Volumes:</strong> ${unidadeData.totalVolumes || todosVolumes.length}</p>
+                            <p><strong>Total UN:</strong> ${formatarNumero(unidadeData.totalUN || 0)}</p>
+                        `;
+                    }
 
                     // MOSTRAR VOLUME E QUANTIDADE TOTAIS
                     document.getElementById('volume-info').innerHTML = `
                         <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(unidadeData.totalVolumes || 0)}</div>
-                            <div class="volume-label">${produto.tipoEmbalagem || 'UN'}</div>
+                            <div class="volume-value">${formatarNumero(unidadeData.totalVolumes || todosVolumes.length)}</div>
+                            <div class="volume-label">VOLUMES</div>
                         </div>
                         <div class="volume-item">
                             <div class="volume-value">${formatarNumero(unidadeData.totalUN || 0)}</div>
@@ -507,25 +599,40 @@
                         </div>
                     `;
 
-                    // MOSTRAR DETALHAMENTO DOS VOLUMES
-                    if (volumes.length > 0) {
+                    // MOSTRAR DETALHAMENTO DOS VOLUMES (se houver mais de um)
+                    if (todosVolumes.length > 1 || totalProdutos > 1) {
                         document.getElementById('volumes-table').style.display = 'block';
                         const grid = document.getElementById('volumes-grid');
                         grid.innerHTML = '';
                         
-                        volumes.forEach((vol, index) => {
-                            const card = document.createElement('div');
-                            card.className = 'volume-card';
-                            card.innerHTML = `
-                                <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">VOLUME ${index + 1} - ${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA'}</span>
-                                <p><strong>Lote:</strong> ${vol.lote || '-'}</p>
-                                <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
-                                <p><strong>Quantidade:</strong> ${vol.qtdVolumes || 0} ${produto.tipoEmbalagem}</p>
-                                <p><strong>UN/Volume:</strong> ${formatarNumero(vol.unPorEmbalagem || 0)}</p>
-                                <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN || 0)}</p>
-                            `;
-                            grid.appendChild(card);
+                        let volumeIndex = 1;
+                        unidadeData.produtos.forEach(produto => {
+                            if (produto.volumes && produto.volumes.length > 0) {
+                                produto.volumes.forEach(vol => {
+                                    const card = document.createElement('div');
+                                    card.className = 'volume-card';
+                                    
+                                    // Título mostrando produto e volume
+                                    const titulo = totalProdutos > 1 ? 
+                                        `${produto.nome?.substring(0, 15) || 'Produto'} - Vol ${volumeIndex}` : 
+                                        `Volume ${volumeIndex}`;
+                                    
+                                    card.innerHTML = `
+                                        <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">${titulo}</span>
+                                        <p><strong>Lote:</strong> ${vol.lote || '-'}</p>
+                                        <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
+                                        <p><strong>Quantidade:</strong> ${vol.qtdVolumes || 0} ${produto.tipoEmbalagem || 'UN'}</p>
+                                        <p><strong>UN/Volume:</strong> ${formatarNumero(vol.unPorEmbalagem || 0)}</p>
+                                        <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN || 0)}</p>
+                                    `;
+                                    grid.appendChild(card);
+                                    volumeIndex++;
+                                });
+                            }
                         });
+                    } else if (todosVolumes.length === 1) {
+                        // Se tiver apenas um volume, não mostrar a tabela
+                        document.getElementById('volumes-table').style.display = 'none';
                     }
 
                     document.getElementById('info-id').innerHTML = `
