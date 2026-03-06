@@ -2138,8 +2138,7 @@ function gerarIdUnico() {
 
 // Atualizar tabela de unidades (MODIFICADA)
 // ============================================
-// ============================================
-// FUNÇÃO ATUALIZAR TABELA DE UNIDADES - CORRIGIDA
+// FUNÇÃO ATUALIZAR TABELA DE UNIDADES - CORRIGIDA (SEM ERROS)
 // ============================================
 function atualizarTabelaUnidades(unidadesFiltradas = null) {
     const tbody = document.getElementById('tabela-unidades');
@@ -2185,11 +2184,12 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                             <button class="btn btn-sm btn-info" onclick="verUnidade('${idCompleto}')" title="Ver detalhes">
                                 <i class="bi bi-eye"></i>
                             </button>
-                            ${u.status === 'Disponível' && volume.totalUN > 0 ? `
-                                <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${idCompleto}', '${produto.sku}', '${volume.lote}', '${volume.validade}', '${produto.nome}', ${volume.qtdVolumes}, ${volume.totalUN}, '${produto.tipoEmbalagem}', '${produtoInfo?.unidadeBase || 'UN'}', ${produtoInfo?.qtdPorEmbalagem || 1})" title="Dar baixa">
+                            ${u.status === 'Disponível' && volume.totalUN > 0 ? 
+                                `<button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${idCompleto}', '${produto.sku}', '${volume.lote}', '${volume.validade}', '${produto.nome}', ${volume.qtdVolumes}, ${volume.totalUN}, '${produto.tipoEmbalagem}', '${produtoInfo?.unidadeBase || 'UN'}', ${produtoInfo?.qtdPorEmbalagem || 1})" title="Dar baixa">
                                     <i class="bi bi-arrow-right"></i>
-                                </button>
-                            ` : ''}
+                                </button>` 
+                                : ''
+                            }
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -2222,11 +2222,12 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                     <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')" title="Ver detalhes">
                         <i class="bi bi-eye"></i>
                     </button>
-                    ${u.status === 'Disponível' && u.quantidade > 0 ? `
-                        <button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}', '${u.sku}', '${u.lote}', '${u.validade}', '${produto?.nome || ''}', ${u.volume}, ${u.quantidade}, '${u.unidadeEmbalagem}', '${produto?.unidadeBase || 'UN'}', ${produto?.qtdPorEmbalagem || 1})" title="Dar baixa">
+                    ${u.status === 'Disponível' && u.quantidade > 0 ? 
+                        `<button class="btn btn-sm btn-warning" onclick="abrirModalTransferencia('${u.id}', '${u.sku}', '${u.lote}', '${u.validade}', '${produto?.nome || ''}', ${u.volume}, ${u.quantidade}, '${u.unidadeEmbalagem}', '${produto?.unidadeBase || 'UN'}', ${produto?.qtdPorEmbalagem || 1})" title="Dar baixa">
                             <i class="bi bi-arrow-right"></i>
-                        </button>
-                    ` : ''}
+                        </button>` 
+                        : ''
+                    }
                 </td>
             `;
             tbody.appendChild(tr);
@@ -3444,6 +3445,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
