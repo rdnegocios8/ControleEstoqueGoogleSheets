@@ -314,6 +314,49 @@
 
     <script>
         // ============================================
+        // FUNÇÃO PARA CORRIGIR A ESTRUTURA DOS DADOS
+        // ============================================
+        function corrigirEstruturaDados(dados) {
+            console.log('🔧 Corrigindo estrutura:', dados);
+            
+            // Caso 1: Já tem produtos e não está vazio
+            if (dados.produtos && dados.produtos.length > 0) {
+                console.log('✅ Estrutura já está correta (com produtos)');
+                return dados;
+            }
+            
+            // Caso 2: Tem produto direto (formato novo)
+            if (dados.produto && dados.sku) {
+                console.log('✅ Convertendo formato novo para formato esperado');
+                return {
+                    id: dados.id,
+                    produtos: [{
+                        nome: dados.produto,
+                        sku: dados.sku,
+                        tipoEmbalagem: dados.tipoEmbalagem || 'UN',
+                        volumes: dados.volumes || []
+                    }],
+                    totalVolumes: dados.totalVolumes || 0,
+                    totalUN: dados.totalUN || 0
+                };
+            }
+            
+            // Caso 3: Dados mínimos (fallback)
+            console.log('⚠️ Criando estrutura mínima');
+            return {
+                id: dados.id || 'ID desconhecido',
+                produtos: [{
+                    nome: dados.nome || dados.produto || 'Produto',
+                    sku: dados.sku || 'SKU',
+                    tipoEmbalagem: dados.tipoEmbalagem || 'UN',
+                    volumes: dados.volumes || []
+                }],
+                totalVolumes: dados.totalVolumes || 0,
+                totalUN: dados.totalUN || 0
+            };
+        }
+
+        // ============================================
         // CARREGAR DADOS DA URL
         // ============================================
         const urlParams = new URLSearchParams(window.location.search);
@@ -323,52 +366,18 @@
         let isMultipla = false;
         
         // ============================================
-        // PROCESSAR DADOS - ACEITA AMBAS AS ESTRUTURAS
+        // PROCESSAR DADOS - COM CORREÇÃO DE ESTRUTURA
         // ============================================
         if (dadosParam) {
             try {
                 const dadosParsed = JSON.parse(decodeURIComponent(dadosParam));
-                console.log('📦 Dados recebidos:', dadosParsed);
+                console.log('📦 Dados brutos da URL:', dadosParsed);
                 
-                // VERIFICAR E ADAPTAR A ESTRUTURA
-                if (dadosParsed.produto && dadosParsed.sku) {
-                    // É a estrutura NOVA (produto direto) - USADA PELO SEU SISTEMA
-                    console.log('✅ Estrutura nova detectada (produto direto)');
-                    unidadeData = {
-                        id: dadosParsed.id,
-                        produtos: [{
-                            nome: dadosParsed.produto,
-                            sku: dadosParsed.sku,
-                            tipoEmbalagem: dadosParsed.tipoEmbalagem,
-                            volumes: dadosParsed.volumes || []
-                        }],
-                        totalVolumes: dadosParsed.totalVolumes,
-                        totalUN: dadosParsed.totalUN
-                    };
-                } 
-                else if (dadosParsed.produtos && dadosParsed.produtos.length > 0) {
-                    // É a estrutura ANTIGA (já tem produtos)
-                    console.log('✅ Estrutura antiga detectada (com produtos)');
-                    unidadeData = dadosParsed;
-                }
-                else {
-                    // Estrutura desconhecida - tentar adaptar
-                    console.warn('⚠️ Estrutura desconhecida, tentando adaptar:', dadosParsed);
-                    unidadeData = {
-                        id: dadosParsed.id || 'ID desconhecido',
-                        produtos: [{
-                            nome: dadosParsed.nome || dadosParsed.produto || 'Produto',
-                            sku: dadosParsed.sku || 'SKU',
-                            tipoEmbalagem: dadosParsed.tipoEmbalagem || 'UN',
-                            volumes: dadosParsed.volumes || []
-                        }],
-                        totalVolumes: dadosParsed.totalVolumes || 0,
-                        totalUN: dadosParsed.totalUN || 0
-                    };
-                }
-                
+                // APLICAR A CORREÇÃO DE ESTRUTURA
+                unidadeData = corrigirEstruturaDados(dadosParsed);
                 isMultipla = true;
-                console.log('✅ Dados processados com sucesso:', unidadeData);
+                
+                console.log('✅ Dados após correção:', unidadeData);
                 
             } catch (e) {
                 console.error('❌ Erro ao parsear dados:', e);
@@ -379,26 +388,29 @@
         // SE NÃO TIVER, É UNIDADE SIMPLES (formato antigo)
         // ============================================
         if (!isMultipla) {
-            // Dados para unidade simples
-            unidadeData = {
-                id: urlParams.get('id'),
-                produtos: [{
-                    nome: decodeURIComponent(urlParams.get('produto') || ''),
-                    sku: urlParams.get('sku'),
-                    tipoEmbalagem: urlParams.get('unidade') || 'UN',
-                    volumes: [{
-                        tipo: 'padrao',
-                        qtdVolumes: parseFloat(urlParams.get('volume')) || 0,
-                        unPorEmbalagem: parseFloat(urlParams.get('qtdPorEmbalagem')) || 1,
-                        totalUN: parseFloat(urlParams.get('quantidade')) || 0,
-                        lote: urlParams.get('lote'),
-                        validade: urlParams.get('validade'),
-                        localizacao: '-'
-                    }]
-                }],
-                totalVolumes: parseFloat(urlParams.get('volume')) || 0,
-                totalUN: parseFloat(urlParams.get('quantidade')) || 0
-            };
+            const id = urlParams.get('id');
+            if (id) {
+                unidadeData = {
+                    id: id,
+                    produtos: [{
+                        nome: decodeURIComponent(urlParams.get('produto') || ''),
+                        sku: urlParams.get('sku') || '',
+                        tipoEmbalagem: urlParams.get('unidade') || 'UN',
+                        volumes: [{
+                            tipo: 'padrao',
+                            qtdVolumes: parseFloat(urlParams.get('volume')) || 0,
+                            unPorEmbalagem: parseFloat(urlParams.get('qtdPorEmbalagem')) || 1,
+                            totalUN: parseFloat(urlParams.get('quantidade')) || 0,
+                            lote: urlParams.get('lote') || '',
+                            validade: urlParams.get('validade') || '',
+                            localizacao: '-'
+                        }]
+                    }],
+                    totalVolumes: parseFloat(urlParams.get('volume')) || 0,
+                    totalUN: parseFloat(urlParams.get('quantidade')) || 0
+                };
+                console.log('📦 Dados do formato antigo:', unidadeData);
+            }
         }
 
         // ============================================
@@ -407,12 +419,9 @@
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         let linkCompleto;
         
-        if (isMultipla) {
-            // Unidade múltipla: passar todos os dados
+        if (unidadeData) {
             linkCompleto = `${baseUrl}?dados=${encodeURIComponent(JSON.stringify(unidadeData))}`;
-        } else {
-            // Unidade simples: formato original
-            linkCompleto = `${baseUrl}?id=${unidadeData.id}&sku=${unidadeData.produtos[0].sku}&lote=${unidadeData.produtos[0].volumes[0].lote}&validade=${unidadeData.produtos[0].volumes[0].validade}&produto=${encodeURIComponent(unidadeData.produtos[0].nome)}&volume=${unidadeData.produtos[0].volumes[0].qtdVolumes}&quantidade=${unidadeData.produtos[0].volumes[0].totalUN}&unidade=${unidadeData.produtos[0].tipoEmbalagem}&unidadeBase=UN&qtdPorEmbalagem=${unidadeData.produtos[0].volumes[0].unPorEmbalagem}`;
+            console.log('🔗 Link gerado:', linkCompleto);
         }
 
         // ============================================
@@ -438,7 +447,7 @@
         }
 
         // ============================================
-        // FUNÇÃO PARA GERAR QR CODE - VERSÃO CORRIGIDA
+        // FUNÇÃO PARA GERAR QR CODE
         // ============================================
         function gerarQRCode() {
             const qrcodeDiv = document.getElementById('qrcode');
@@ -467,8 +476,13 @@
                         qrcodeDiv.appendChild(canvas);
                     });
 
-                    // PEGAR O PRIMEIRO PRODUTO (sempre existe após adaptação)
-                    const produto = unidadeData.produtos[0];
+                    // PEGAR O PRIMEIRO PRODUTO
+                    const produto = unidadeData.produtos?.[0];
+                    if (!produto) {
+                        console.error('❌ Nenhum produto encontrado');
+                        return;
+                    }
+                    
                     const volumes = produto.volumes || [];
                     
                     // PREENCHER INFORMAÇÕES BÁSICAS
