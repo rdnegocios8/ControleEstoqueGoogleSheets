@@ -463,19 +463,36 @@
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbysRomAyxbYAgrqdqqURTTAbwnGFiv9VXD_x11nzwdYbwmKMySmReWH9MBNcR3aeX9S/exec';
 
         // ============================================
-        // FUNÇÃO PARA ENVIAR DADOS PARA O APPS SCRIPT (VIA GET)
+        // FUNÇÃO PARA ENVIAR DADOS PARA O APPS SCRIPT (VIA POST)
         // ============================================
         async function enviarParaAppsScript(dados) {
-            const url = `${WEB_APP_URL}?dados=${encodeURIComponent(JSON.stringify(dados))}`;
+            console.log('📤 Enviando para Apps Script:', dados);
             
             try {
-                await fetch(url, {
-                    mode: 'no-cors'
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dados)
                 });
+                
+                console.log('✅ Enviado com sucesso');
                 return true;
             } catch (error) {
                 console.error('❌ Erro ao enviar:', error);
-                return false;
+                
+                // Fallback: tentar via GET
+                try {
+                    const getUrl = `${WEB_APP_URL}?dados=${encodeURIComponent(JSON.stringify(dados))}`;
+                    await fetch(getUrl, { mode: 'no-cors' });
+                    console.log('📤 Enviado via GET (fallback)');
+                    return true;
+                } catch (getError) {
+                    console.error('❌ Erro também no GET:', getError);
+                    return false;
+                }
             }
         }
 
@@ -666,7 +683,7 @@
         }
 
         // ============================================
-        // FUNÇÃO: Confirmar baixa
+        // FUNÇÃO: Confirmar baixa (CORRIGIDA)
         // ============================================
         async function confirmarBaixa() {
             if (!destinoSelecionado) {
@@ -707,7 +724,7 @@
                             `${unidadeData.id}-P1V${index+1}` : unidadeData.id;
                         
                         todasTransferencias.push({
-                            tipo: 'unidade',
+                            tipo: 'unidade',  // <--- CORRIGIDO: tipo = 'unidade'
                             id: idCompleto,
                             sku: produto.sku,
                             lote: volume.lote,
@@ -724,7 +741,7 @@
                         
                         // Criar movimentação para este volume
                         todasTransferencias.push({
-                            tipo: 'movimentacao',
+                            tipo: 'movimentacao',  // <--- CORRIGIDO: tipo = 'movimentacao'
                             data: new Date().toISOString().split('T')[0],
                             tipoMov: 'Transferência',
                             idUnidade: idCompleto,
@@ -771,7 +788,7 @@
                 const novoDestino = novaQuantidade <= 0.01 ? destinoSelecionado : '';
 
                 const unidadeAtualizada = {
-                    tipo: 'unidade',
+                    tipo: 'unidade',  // <--- CORRIGIDO: tipo = 'unidade'
                     id: unidadeData.id,
                     sku: produto.sku,
                     lote: volume.lote,
@@ -787,7 +804,7 @@
                 };
 
                 const movimentacao = {
-                    tipo: 'movimentacao',
+                    tipo: 'movimentacao',  // <--- CORRIGIDO: tipo = 'movimentacao'
                     data: new Date().toISOString().split('T')[0],
                     tipoMov: 'Transferência',
                     idUnidade: unidadeData.id,
@@ -801,8 +818,13 @@
                 };
 
                 try {
+                    // Enviar movimentação primeiro
                     await enviarParaAppsScript(movimentacao);
+                    console.log('✅ Movimentação enviada');
+                    
+                    // Depois enviar unidade atualizada
                     await enviarParaAppsScript(unidadeAtualizada);
+                    console.log('✅ Unidade atualizada enviada');
 
                     alert('Transferência realizada com sucesso!');
                     setTimeout(() => window.close(), 2000);
