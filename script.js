@@ -2372,55 +2372,47 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 function verUnidade(id) {
     console.log('🔍 ID recebido:', id);
     
-    // Extrair o ID base (UN-2KDCMC39-4PHJ) - remove QUALQUER sufixo como -P1V1, -M1V2, -X1V3
+    // Extrair o ID base (UN-2KDCMC39-4PHJ)
     const idBase = id.replace(/-[A-Z]\d+V\d+$/, '');
     console.log('📦 ID Base:', idBase);
     
     // Buscar TODAS as unidades com esse ID base
     const todasUnidades = unidades.filter(u => u.id.startsWith(idBase));
     console.log('📦 Total de unidades encontradas:', todasUnidades.length);
-    console.log('📦 Unidades encontradas:', todasUnidades.map(u => u.id));
     
     if (todasUnidades.length === 0) {
-        console.log('❌ Nenhuma unidade encontrada!');
+        alert('Unidade não encontrada!');
         return;
     }
     
-    // ============================================
-    // AGRUPAR POR PRODUTO (P1, P2, M1, M2, etc) - MANTÉM A LETRA ORIGINAL
-    // ============================================
+    // AGRUPAR POR PRODUTO
     const produtosMap = new Map();
     
     todasUnidades.forEach(u => {
-        // Extrair letra e número do produto - EX: P1, M2, X3
         const match = u.id.match(/-([A-Z])(\d+)V/);
         if (!match) {
-            console.log('⚠️ Unidade sem padrão válido (ignorada):', u.id);
+            console.log('⚠️ Unidade ignorada (sem padrão):', u.id);
             return;
         }
         
-        const letraProduto = match[1]; // P, M, X, etc
-        const numeroProduto = match[2]; // 1, 2, 3
-        const produtoKey = `${letraProduto}${numeroProduto}`; // P1, M2, X3
+        const letraProduto = match[1];
+        const numeroProduto = match[2];
+        const produtoKey = `${letraProduto}${numeroProduto}`;
         
         if (!produtosMap.has(produtoKey)) {
-            // Buscar informações do produto
             const produtoInfo = produtos.find(p => p.sku === u.sku);
             
             produtosMap.set(produtoKey, {
-                id: `${idBase}-${letraProduto}${numeroProduto}`, // Mantém a letra original
+                id: `${idBase}-${letraProduto}${numeroProduto}`,
                 nome: produtoInfo?.nome || u.sku,
                 sku: u.sku,
                 tipoEmbalagem: u.unidadeEmbalagem || 'UN',
-                letraProduto: letraProduto, // Salvar a letra para referência
-                numeroProduto: numeroProduto,
                 volumes: [],
                 totalVolumes: 0,
                 totalUN: 0
             });
         }
         
-        // Adicionar volume ao produto
         const produto = produtosMap.get(produtoKey);
         const volume = {
             tipo: u.foraPadrao ? 'fora-padrao' : 'padrao',
@@ -2437,16 +2429,15 @@ function verUnidade(id) {
         produto.totalUN += u.quantidade || 0;
     });
     
-    // Se não encontrou nenhum produto válido
+    // Se não encontrou nenhum produto
     if (produtosMap.size === 0) {
-        console.log('❌ Nenhum produto válido encontrado!');
+        alert('Nenhum produto válido encontrado!');
         return;
     }
     
     // Criar objeto da unidade
     unidadeAtual = {
         id: idBase,
-        tipo: 'unidade-multipla',
         produtos: Array.from(produtosMap.values()),
         totalVolumes: Array.from(produtosMap.values()).reduce((sum, p) => sum + p.totalVolumes, 0),
         totalUN: Array.from(produtosMap.values()).reduce((sum, p) => sum + p.totalUN, 0),
@@ -2456,21 +2447,7 @@ function verUnidade(id) {
         status: todasUnidades[0]?.status || 'Disponível'
     };
     
-    console.log('📦 Unidade múltipla criada:', {
-        id: unidadeAtual.id,
-        produtos: unidadeAtual.produtos.map(p => ({
-            id: p.id,
-            nome: p.nome,
-            letra: p.letraProduto,
-            numero: p.numeroProduto,
-            totalVolumes: p.totalVolumes,
-            totalUN: p.totalUN
-        }))
-    });
-    
-    // ============================================
     // PREENCHER DADOS BÁSICOS
-    // ============================================
     document.getElementById('detalhe-id').textContent = unidadeAtual.id;
     document.getElementById('detalhe-nf').textContent = unidadeAtual.numeroNF || '-';
     document.getElementById('detalhe-fornecedor').textContent = unidadeAtual.fornecedor || '-';
@@ -2479,9 +2456,7 @@ function verUnidade(id) {
     document.getElementById('detalhe-total-volumes').textContent = unidadeAtual.totalVolumes;
     document.getElementById('detalhe-total-un').textContent = unidadeAtual.totalUN.toFixed(2);
     
-    // ============================================
-    // GERAR QR CODES - 1 POR PRODUTO
-    // ============================================
+    // GERAR QR CODES
     const qrContainer = document.getElementById('unidade-qr-code');
     qrContainer.innerHTML = '<h6 class="text-info mb-3">📱 QR Codes por Produto:</h6>';
     qrContainer.className = 'd-flex flex-wrap gap-3 justify-content-center';
@@ -2489,8 +2464,6 @@ function verUnidade(id) {
     const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     
     unidadeAtual.produtos.forEach((produto, pIndex) => {
-        
-        // Preparar objeto APENAS com este produto (TODOS os volumes dele)
         const dadosProduto = {
             id: produto.id,
             produto: produto.nome,
@@ -2498,14 +2471,9 @@ function verUnidade(id) {
             tipoEmbalagem: produto.tipoEmbalagem,
             volumes: produto.volumes,
             totalVolumes: produto.totalVolumes,
-            totalUN: produto.totalUN,
-            numeroNF: unidadeAtual.numeroNF,
-            fornecedor: unidadeAtual.fornecedor,
-            dataRecebimento: unidadeAtual.dataRecebimento,
-            status: unidadeAtual.status
+            totalUN: produto.totalUN
         };
         
-        // Criar card para este produto
         const produtoCard = document.createElement('div');
         produtoCard.className = 'card bg-dark mb-3';
         produtoCard.style.width = '200px';
@@ -2527,37 +2495,21 @@ function verUnidade(id) {
         
         qrContainer.appendChild(produtoCard);
         
-        // Gerar QR code para este produto
         setTimeout(() => {
             const dadosJSON = encodeURIComponent(JSON.stringify(dadosProduto));
             const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
             
-            try {
-                if (typeof QRCode !== 'undefined') {
-                    new QRCode(document.getElementById(`qr-produto-${pIndex}`), {
-                        text: urlCompleta,
-                        width: 150,
-                        height: 150,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                } else {
-                    document.getElementById(`qr-produto-${pIndex}`).innerHTML = `
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlCompleta)}" 
-                             alt="QR Code" 
-                             style="width: 150px; height: 150px; border-radius: 8px; border: 2px solid #fbbf24;">
-                    `;
-                }
-            } catch (e) {
-                console.error('Erro ao gerar QR code:', e);
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(document.getElementById(`qr-produto-${pIndex}`), {
+                    text: urlCompleta,
+                    width: 150,
+                    height: 150
+                });
             }
         }, 100 * pIndex);
     });
     
-    // ============================================
-    // MOSTRAR TABELA DE VOLUMES (AGRUPADA POR PRODUTO)
-    // ============================================
+    // MOSTRAR VOLUMES
     const container = document.getElementById('detalhe-produtos-container');
     container.innerHTML = '';
     
@@ -2579,7 +2531,6 @@ function verUnidade(id) {
                             <th>Qtd Volumes</th>
                             <th>UN/Vol</th>
                             <th>Total UN</th>
-                            <th>Local</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2589,27 +2540,18 @@ function verUnidade(id) {
                                 <td>${v.lote || '-'}</td>
                                 <td>${formatarData(v.validade) || '-'}</td>
                                 <td>${v.qtdVolumes}</td>
-                                <td>${v.unPorEmbalagem}</td>
+                                <td>${v.unPorEmbalagem.toFixed(2)}</td>
                                 <td class="text-warning">${v.totalUN.toFixed(2)}</td>
-                                <td>${v.localizacao || '-'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
-                    <tfoot>
-                        <tr class="table-info">
-                            <td colspan="3"><strong>Total do Produto:</strong></td>
-                            <td><strong>${produto.totalVolumes}</strong></td>
-                            <td></td>
-                            <td><strong class="text-warning">${produto.totalUN.toFixed(2)}</strong></td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
         `;
         container.appendChild(produtoDiv);
     });
     
+    // ABRIR MODAL
     const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
     modal.show();
 }
@@ -3455,4 +3397,5 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
