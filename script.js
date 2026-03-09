@@ -1893,7 +1893,7 @@ function verProduto(sku) {
                                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                                 <td>${v.localizacao}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
+                                    <button class="btn btn-sm btn-info" onclick="('${u.id}')">
                                         <i class="bi bi-eye"></i>
                                     </button>
                                 </td>
@@ -1914,7 +1914,7 @@ function verProduto(sku) {
                     <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                     <td>${u.localizacao}</td>
                     <td>
-                        <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')">
+                        <button class="btn btn-sm btn-info" onclick="('${u.id}')">
                             <i class="bi bi-eye"></i>
                         </button>
                     </td>
@@ -2180,7 +2180,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                         <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                         <td>${u.destino || '-'}</td>
                         <td>
-                            <button class="btn btn-sm btn-info" onclick="verUnidade('${idCompleto}')" title="Ver detalhes">
+                            <button class="btn btn-sm btn-info" onclick="('${idCompleto}')" title="Ver detalhes">
                                 <i class="bi bi-eye"></i>
                             </button>
                             ${u.status === 'Disponível' && volume.totalUN > 0 ? 
@@ -2218,7 +2218,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.destino || '-'}</td>
                 <td>
-                    <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')" title="Ver detalhes">
+                    <button class="btn btn-sm btn-info" onclick="('${u.id}')" title="Ver detalhes">
                         <i class="bi bi-eye"></i>
                     </button>
                     ${u.status === 'Disponível' && u.quantidade > 0 ? 
@@ -2367,12 +2367,12 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - CORRIGIDA (ACEITA P, M, QUALQUER LETRA)
+// FUNÇÃO VER UNIDADE - CORRIGIDA (MANTÉM A LETRA ORIGINAL)
 // ============================================
 function verUnidade(id) {
     console.log('🔍 ID recebido:', id);
     
-    // Extrair o ID base (UN-2KDCMC39-4PHJ) - ACEITA QUALQUER LETRA MAIÚSCULA
+    // Extrair o ID base (UN-2KDCMC39-4PHJ) - remove QUALQUER sufixo como -P1V1, -M1V2, -X1V3
     const idBase = id.replace(/-[A-Z]\d+V\d+$/, '');
     console.log('📦 ID Base:', idBase);
     
@@ -2387,30 +2387,33 @@ function verUnidade(id) {
     }
     
     // ============================================
-    // AGRUPAR POR PRODUTO (P1, P2, etc) - ACEITA QUALQUER LETRA
+    // AGRUPAR POR PRODUTO (P1, P2, M1, M2, etc) - MANTÉM A LETRA ORIGINAL
     // ============================================
     const produtosMap = new Map();
     
     todasUnidades.forEach(u => {
-        // Extrair número do produto - aceita QUALQUER LETRA MAIÚSCULA (P, M, Q, X, etc)
-        const match = u.id.match(/-[A-Z](\d+)V/);
+        // Extrair letra e número do produto - EX: P1, M2, X3
+        const match = u.id.match(/-([A-Z])(\d+)V/);
         if (!match) {
             console.log('⚠️ Unidade sem padrão válido (ignorada):', u.id);
             return;
         }
         
-        const produtoNum = match[1];
-        const produtoKey = `P${produtoNum}`; // Normaliza para P internamente
+        const letraProduto = match[1]; // P, M, X, etc
+        const numeroProduto = match[2]; // 1, 2, 3
+        const produtoKey = `${letraProduto}${numeroProduto}`; // P1, M2, X3
         
         if (!produtosMap.has(produtoKey)) {
             // Buscar informações do produto
             const produtoInfo = produtos.find(p => p.sku === u.sku);
             
             produtosMap.set(produtoKey, {
-                id: `${idBase}-P${produtoNum}`, // Sempre usa P no ID final
+                id: `${idBase}-${letraProduto}${numeroProduto}`, // Mantém a letra original
                 nome: produtoInfo?.nome || u.sku,
                 sku: u.sku,
                 tipoEmbalagem: u.unidadeEmbalagem || 'UN',
+                letraProduto: letraProduto, // Salvar a letra para referência
+                numeroProduto: numeroProduto,
                 volumes: [],
                 totalVolumes: 0,
                 totalUN: 0
@@ -2434,6 +2437,12 @@ function verUnidade(id) {
         produto.totalUN += u.quantidade || 0;
     });
     
+    // Se não encontrou nenhum produto válido
+    if (produtosMap.size === 0) {
+        console.log('❌ Nenhum produto válido encontrado!');
+        return;
+    }
+    
     // Criar objeto da unidade
     unidadeAtual = {
         id: idBase,
@@ -2452,6 +2461,8 @@ function verUnidade(id) {
         produtos: unidadeAtual.produtos.map(p => ({
             id: p.id,
             nome: p.nome,
+            letra: p.letraProduto,
+            numero: p.numeroProduto,
             totalVolumes: p.totalVolumes,
             totalUN: p.totalUN
         }))
@@ -3444,3 +3455,4 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
