@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             background: linear-gradient(135deg, #0f172a, #1e293b);
             min-height: 100vh;
@@ -20,20 +26,18 @@
         }
         
         .qr-container {
-            max-width: 800px;
+            max-width: 1100px;  /* Aumentado para paisagem */
             width: 100%;
         }
         
         .qr-card {
             background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 2px solid #fbbf24;
+            border: 3px solid #fbbf24;
             border-radius: 24px;
-            padding: 40px;
-            text-align: center;
+            padding: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(251, 191, 36, 0.1);
             position: relative;
             overflow: hidden;
-            transition: box-shadow 0.2s ease;
         }
         
         .qr-card::before {
@@ -48,28 +52,37 @@
         
         .badge-unidade {
             display: inline-block;
-            padding: 8px 20px;
+            padding: 10px 25px;
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #0f172a;
-            border-radius: 30px;
-            font-weight: 700;
-            margin-bottom: 20px;
+            border-radius: 40px;
+            font-weight: 800;
+            margin-bottom: 25px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
+            letter-spacing: 1.5px;
+            font-size: 1.1rem;
+            border: 2px solid #ffffff33;
+        }
+        
+        /* LAYOUT PAISAGEM: QR Code à esquerda, informações à direita */
+        .paisagem-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        
+        .qr-code-section {
+            flex: 0 0 300px;  /* Largura fixa para o QR Code */
+            text-align: center;
         }
         
         .qr-code-box {
             background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-            padding: 30px;
+            padding: 20px;
             border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
             border: 3px solid #fbbf24;
             box-shadow: 0 15px 40px rgba(251, 191, 36, 0.2);
-            min-height: 320px;
+            margin-bottom: 15px;
         }
         
         #qrcode canvas, #qrcode img {
@@ -79,66 +92,78 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
-        .qr-info {
+        .info-section {
+            flex: 1;
+            min-width: 0; /* Evita overflow */
+        }
+        
+        /* Título do produto BEM GRANDE */
+        .produto-titulo-grande {
             background: linear-gradient(135deg, #334155, #1e293b);
+            border: 2px solid #fbbf24;
             border-radius: 16px;
-            padding: 25px;
-            margin: 20px 0;
-            border: 2px solid #fbbf24;
-            text-align: left;
+            padding: 20px 25px;
+            margin-bottom: 20px;
             box-shadow: 0 8px 20px rgba(251, 191, 36, 0.08);
         }
         
-        .qr-info p {
-            margin: 12px 0;
-            color: #cbd5e1;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 8px;
-            font-size: 1rem;
-        }
-        
-        .qr-info strong {
+        .produto-titulo-grande h2 {
             color: #fbbf24;
-            width: 120px;
-            display: inline-block;
-            font-weight: 600;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            line-height: 1.3;
+            word-break: break-word;
         }
         
-        .volume-info {
+        .produto-titulo-grande .produto-sku {
+            color: #94a3b8;
+            font-size: 1.2rem;
+            font-weight: 500;
             display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            padding: 25px;
-            background: linear-gradient(135deg, #334155, #1e293b);
-            border-radius: 12px;
-            border: 2px solid #fbbf24;
-            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.08);
+            align-items: center;
+            gap: 10px;
         }
         
-        .volume-item {
+        .produto-titulo-grande .produto-sku strong {
+            color: #fbbf24;
+            font-size: 1.3rem;
+        }
+        
+        .volume-info-paisagem {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .volume-card-destaque {
+            flex: 1;
+            background: linear-gradient(135deg, #334155, #1e293b);
+            border: 2px solid #fbbf24;
+            border-radius: 16px;
+            padding: 20px;
             text-align: center;
         }
         
-        .volume-value {
-            font-size: 2.2rem;
-            font-weight: 700;
+        .volume-card-destaque .volume-valor {
+            font-size: 2.5rem;
+            font-weight: 800;
             color: #fbbf24;
             line-height: 1.2;
-            text-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
         }
         
-        .volume-label {
-            font-size: 0.9rem;
+        .volume-card-destaque .volume-label {
+            font-size: 1rem;
             color: #94a3b8;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
         
         .produtos-container {
-            margin: 20px 0;
             display: flex;
             flex-direction: column;
             gap: 20px;
+            margin-top: 20px;
         }
         
         .produto-card {
@@ -147,16 +172,15 @@
             padding: 20px;
             border: 2px solid #fbbf24;
             box-shadow: 0 8px 20px rgba(251, 191, 36, 0.08);
-            text-align: left;
         }
         
         .produto-header {
             color: #fbbf24;
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.4rem;
+            font-weight: 700;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #fbbf2433;
+            border-bottom: 2px solid #fbbf2433;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -164,22 +188,21 @@
         
         .produto-header small {
             color: #94a3b8;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: normal;
         }
         
         .volumes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 15px;
         }
         
         .volume-card {
             background: #0f172a;
-            border: 1px solid #334155;
+            border: 2px solid #334155;
             border-radius: 12px;
             padding: 18px;
-            text-align: left;
             transition: all 0.2s ease;
         }
         
@@ -190,12 +213,13 @@
         
         .volume-card .tipo {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
         }
         
         .volume-card .tipo.padrao {
@@ -209,25 +233,31 @@
         }
         
         .volume-card p {
-            margin: 5px 0;
+            margin: 10px 0;
             color: #cbd5e1;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
         }
         
         .volume-card p strong {
             color: #fbbf24;
+            font-size: 1.1rem;
         }
         
         .info-id {
             background: #1e293b;
-            padding: 15px;
+            padding: 15px 20px;
             border-radius: 12px;
             color: #fbbf24;
             word-break: break-all;
-            margin: 15px 0;
+            margin: 20px 0;
             border: 2px solid #fbbf24;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            font-weight: 600;
         }
         
         .qr-actions {
@@ -239,17 +269,17 @@
         }
         
         .qr-actions button {
-            padding: 12px 25px;
+            padding: 15px 30px;
             border: none;
             border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
-            min-width: 120px;
+            gap: 10px;
+            min-width: 150px;
             justify-content: center;
         }
         
@@ -277,24 +307,78 @@
             transform: translateY(0);
         }
         
-        .produto-resumo {
-            background: #1e293b;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            border-left: 4px solid #fbbf24;
-        }
-        
+        /* ESTILO PARA IMPRESSÃO */
         @media print {
-            .qr-actions, .badge-unidade {
-                display: none;
+            body {
+                background: white;
+                padding: 0.5cm;
             }
             
             .qr-card {
+                background: white;
+                border: 2px solid #000;
                 box-shadow: none;
-                border: 1px solid #000;
+                padding: 0.5cm;
+            }
+            
+            .badge-unidade {
+                background: #000;
+                color: white;
+                border: none;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .qr-actions {
+                display: none;
+            }
+            
+            .qr-code-box {
+                background: white;
+                border: 2px solid #000;
+                box-shadow: none;
+            }
+            
+            .produto-titulo-grande,
+            .volume-card-destaque,
+            .produto-card,
+            .volume-card {
+                background: white;
+                border: 2px solid #000;
+                box-shadow: none;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .produto-titulo-grande h2,
+            .produto-header {
+                color: #000;
+            }
+            
+            .volume-card .tipo.padrao {
+                background: #000;
+                color: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .volume-card .tipo.fora {
+                background: #666;
+                color: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .volume-valor,
+            .volume-card p strong {
+                color: #000;
+                font-weight: bold;
+            }
+            
+            .info-id {
+                border: 2px solid #000;
+                color: #000;
+                background: white;
             }
         }
     </style>
@@ -306,25 +390,44 @@
                 <i class="bi bi-qr-code-scan"></i> QR CODE DA UNIDADE
             </div>
             
-            <div class="qr-code-box" id="qr-code-container">
-                <div id="qrcode"></div>
+            <div class="paisagem-container">
+                <!-- QR Code à esquerda -->
+                <div class="qr-code-section">
+                    <div class="qr-code-box" id="qr-code-container">
+                        <div id="qrcode"></div>
+                    </div>
+                    
+                    <div class="info-id" id="info-id"></div>
+                </div>
+                
+                <!-- Informações à direita -->
+                <div class="info-section">
+                    <!-- Título do produto BEM GRANDE (será preenchido via JS) -->
+                    <div class="produto-titulo-grande" id="produto-titulo-grande">
+                        <h2 id="produto-nome-grande">Carregando...</h2>
+                        <div class="produto-sku" id="produto-sku-grande"></div>
+                    </div>
+                    
+                    <!-- Totais em destaque -->
+                    <div class="volume-info-paisagem" id="volume-info-paisagem">
+                        <div class="volume-card-destaque">
+                            <div class="volume-valor" id="total-volumes-destaque">0</div>
+                            <div class="volume-label">VOLUMES</div>
+                        </div>
+                        <div class="volume-card-destaque">
+                            <div class="volume-valor" id="total-un-destaque">0</div>
+                            <div class="volume-label">UNIDADES</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de produtos e volumes -->
+                    <div class="produtos-container" id="produtos-container"></div>
+                </div>
             </div>
-            
-            <!-- Área para volume/quantidade TOTAIS (sempre visível) -->
-            <div class="volume-info" id="volume-info">
-                <!-- Será preenchido com os totais -->
-            </div>
-            
-            <!-- Área para produtos e volumes -->
-            <div class="produtos-container" id="produtos-container">
-                <!-- Produtos serão inseridos aqui -->
-            </div>
-            
-            <div class="info-id" id="info-id"></div>
             
             <div class="qr-actions">
                 <button class="btn-download" onclick="baixarQR()">
-                    <i class="bi bi-download"></i> Baixar
+                    <i class="bi bi-download"></i> Baixar QR
                 </button>
                 <button class="btn-print" onclick="window.print()">
                     <i class="bi bi-printer"></i> Imprimir
@@ -343,29 +446,19 @@
         function corrigirEstruturaDados(dados) {
             console.log('🔧 Corrigindo estrutura:', dados);
             
-            // CASO 1: Já tem produtos e não está vazio (estrutura correta)
             if (dados.produtos && dados.produtos.length > 0) {
-                console.log('✅ Estrutura já está correta (com produtos)');
-                
-                // Garantir que cada produto tenha um array de volumes
                 dados.produtos.forEach(produto => {
                     if (!produto.volumes) produto.volumes = [];
                     if (!produto.tipoEmbalagem) produto.tipoEmbalagem = 'UN';
                 });
-                
                 return dados;
             }
             
-            // CASO 2: Tem campos individuais (formato antigo)
             if (dados.id && (dados.produto || dados.sku || dados.nome)) {
-                console.log('✅ Convertendo formato antigo para novo formato');
-                
-                // Verificar se tem volumes
                 let volumes = [];
                 if (dados.volumes && dados.volumes.length > 0) {
                     volumes = dados.volumes;
                 } else if (dados.volume !== undefined) {
-                    // Criar volume único a partir dos dados antigos
                     volumes = [{
                         tipo: dados.tipo || 'padrao',
                         qtdVolumes: parseFloat(dados.volume) || 1,
@@ -385,13 +478,11 @@
                         tipoEmbalagem: dados.tipoEmbalagem || dados.unidade || 'UN',
                         volumes: volumes
                     }],
-                    totalVolumes: dados.totalVolumes || (dados.volume ? parseFloat(dados.volume) : (volumes.length > 0 ? volumes.reduce((sum, v) => sum + (v.qtdVolumes || 1), 0) : 1)),
-                    totalUN: dados.totalUN || (dados.quantidade ? parseFloat(dados.quantidade) : (volumes.length > 0 ? volumes.reduce((sum, v) => sum + (v.totalUN || 0), 0) : 0))
+                    totalVolumes: dados.totalVolumes || (dados.volume ? parseFloat(dados.volume) : volumes.reduce((sum, v) => sum + (v.qtdVolumes || 1), 0)),
+                    totalUN: dados.totalUN || (dados.quantidade ? parseFloat(dados.quantidade) : volumes.reduce((sum, v) => sum + (v.totalUN || 0), 0))
                 };
             }
             
-            // CASO 3: Dados mínimos (fallback)
-            console.log('⚠️ Criando estrutura mínima com ID:', dados.id);
             return {
                 id: dados.id || 'ID desconhecido',
                 produtos: [{
@@ -421,35 +512,19 @@
         
         let unidadeData = null;
         
-        // ============================================
-        // PROCESSAR DADOS - PRIORIDADE MÁXIMA PARA O PARÂMETRO 'dados'
-        // ============================================
         if (dadosParam) {
             try {
-                // Tentar parsear o JSON
                 const dadosParsed = JSON.parse(decodeURIComponent(dadosParam));
-                console.log('📦 Dados brutos da URL (parâmetro dados):', dadosParsed);
-                
-                // APLICAR A CORREÇÃO DE ESTRUTURA
                 unidadeData = corrigirEstruturaDados(dadosParsed);
-                
-                console.log('✅ Dados após correção:', unidadeData);
-                
+                console.log('✅ Dados carregados:', unidadeData);
             } catch (e) {
                 console.error('❌ Erro ao parsear dados:', e);
-                console.log('🔍 String recebida:', dadosParam);
             }
         }
         
-        // ============================================
-        // SE NÃO TIVER O PARÂMETRO 'dados', TENTAR O FORMATO ANTIGO
-        // ============================================
         if (!unidadeData) {
             const id = urlParams.get('id');
             if (id) {
-                console.log('📦 Usando formato antigo com parâmetros individuais');
-                
-                // Coletar todos os parâmetros
                 const produto = decodeURIComponent(urlParams.get('produto') || '');
                 const sku = urlParams.get('sku') || '';
                 const lote = urlParams.get('lote') || '';
@@ -457,14 +532,7 @@
                 const volume = parseFloat(urlParams.get('volume')) || 1;
                 const quantidade = parseFloat(urlParams.get('quantidade')) || 0;
                 const unidade = urlParams.get('unidade') || 'UN';
-                const unidadeBase = urlParams.get('unidadeBase') || 'UN';
                 const qtdPorEmbalagem = parseFloat(urlParams.get('qtdPorEmbalagem')) || 1;
-                
-                // Calcular unPorEmbalagem se não veio direto
-                let unPorEmbalagem = qtdPorEmbalagem;
-                if (volume > 0 && quantidade > 0 && !qtdPorEmbalagem) {
-                    unPorEmbalagem = quantidade / volume;
-                }
                 
                 unidadeData = {
                     id: id,
@@ -475,7 +543,7 @@
                         volumes: [{
                             tipo: 'padrao',
                             qtdVolumes: volume,
-                            unPorEmbalagem: unPorEmbalagem,
+                            unPorEmbalagem: qtdPorEmbalagem,
                             totalUN: quantidade,
                             lote: lote,
                             validade: validade,
@@ -485,39 +553,16 @@
                     totalVolumes: volume,
                     totalUN: quantidade
                 };
-                
-                console.log('📦 Dados do formato antigo:', unidadeData);
             }
         }
 
-        // ============================================
-        // SE AINDA NÃO TIVER DADOS, MOSTRAR ERRO
-        // ============================================
         if (!unidadeData) {
-            console.error('❌ Nenhum dado encontrado na URL');
-            document.body.innerHTML = '<div class="alert alert-danger m-5">Erro: Nenhum dado encontrado na URL</div>';
+            document.body.innerHTML = '<div class="alert alert-danger m-5">Erro: Nenhum dado encontrado</div>';
             throw new Error('Sem dados');
         }
 
         // ============================================
-        // CONSTRUIR LINK PARA BAIXA-VIEW
-        // ============================================
-        const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
-        let linkCompleto;
-        
-        // Para o QR code, usar o mesmo objeto
-        const dadosParaQR = {
-            id: unidadeData.id,
-            produtos: unidadeData.produtos,
-            totalVolumes: unidadeData.totalVolumes,
-            totalUN: unidadeData.totalUN
-        };
-        
-        linkCompleto = `${baseUrl}?dados=${encodeURIComponent(JSON.stringify(dadosParaQR))}`;
-        console.log('🔗 Link gerado para QR Code:', linkCompleto);
-
-        // ============================================
-        // FUNÇÃO PARA FORMATAR DATA
+        // FUNÇÕES AUXILIARES
         // ============================================
         function formatarData(dataString) {
             if (!dataString) return 'N/A';
@@ -530,36 +575,42 @@
             return dataString;
         }
 
-        // ============================================
-        // FUNÇÃO PARA FORMATAR NÚMERO
-        // ============================================
         function formatarNumero(valor) {
             if (valor === undefined || valor === null) return '0,00';
             return valor.toFixed(2).replace('.', ',');
         }
 
         // ============================================
-        // FUNÇÃO PARA GERAR QR CODE
+        // GERAR QR CODE E PREENCHER TELA
         // ============================================
         function gerarQRCode() {
             const qrcodeDiv = document.getElementById('qrcode');
             qrcodeDiv.innerHTML = '';
             
             if (!unidadeData || !unidadeData.id) {
-                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID da unidade não encontrado</p>';
+                qrcodeDiv.innerHTML = '<p style="color: #ef4444;">ID não encontrado</p>';
                 return;
             }
 
+            const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
+            const dadosParaQR = {
+                id: unidadeData.id,
+                produtos: unidadeData.produtos,
+                totalVolumes: unidadeData.totalVolumes,
+                totalUN: unidadeData.totalUN
+            };
+            
+            const linkCompleto = `${baseUrl}?dados=${encodeURIComponent(JSON.stringify(dadosParaQR))}`;
+
             if (typeof QRCode !== 'undefined') {
                 try {
-                    // Gerar QR Code
                     QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
                         width: 250,
                         margin: 2
                     }, function(err, canvas) {
                         if (err) {
                             console.error('Erro:', err);
-                            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR Code</p>';
+                            qrcodeDiv.innerHTML = '<p style="color: #ef4444;">Erro ao gerar QR</p>';
                             return;
                         }
                         
@@ -573,11 +624,23 @@
                     // PREENCHER INFORMAÇÕES NA TELA
                     // ============================================
                     
-                    // Coletar todos os volumes de todos os produtos
+                    // Se for unidade múltipla, mostrar todos os produtos
+                    if (unidadeData.produtos.length > 1) {
+                        // Título genérico
+                        document.getElementById('produto-nome-grande').textContent = 'UNIDADE MÚLTIPLA';
+                        document.getElementById('produto-sku-grande').innerHTML = `<strong>${unidadeData.produtos.length} produtos</strong> na unidade`;
+                    } else {
+                        // Produto único - mostrar nome GRANDE
+                        const produto = unidadeData.produtos[0];
+                        document.getElementById('produto-nome-grande').textContent = produto.nome || 'Produto';
+                        document.getElementById('produto-sku-grande').innerHTML = `<strong>SKU:</strong> ${produto.sku || 'N/A'} | <strong>Embalagem:</strong> ${produto.tipoEmbalagem || 'UN'}`;
+                    }
+                    
+                    // Calcular totais
                     let totalVolumes = 0;
                     let totalUN = 0;
                     unidadeData.produtos.forEach(produto => {
-                        if (produto.volumes && produto.volumes.length > 0) {
+                        if (produto.volumes) {
                             produto.volumes.forEach(vol => {
                                 totalVolumes += vol.qtdVolumes || 0;
                                 totalUN += vol.totalUN || 0;
@@ -585,17 +648,12 @@
                         }
                     });
 
-                    // MOSTRAR VOLUME E QUANTIDADE TOTAIS
-                    document.getElementById('volume-info').innerHTML = `
-                        <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(totalVolumes)}</div>
-                            <div class="volume-label">VOLUMES</div>
-                        </div>
-                        <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(totalUN)}</div>
-                            <div class="volume-label">UN</div>
-                        </div>
-                    `;
+                    // Mostrar totais em destaque
+                    document.getElementById('total-volumes-destaque').textContent = formatarNumero(totalVolumes);
+                    document.getElementById('total-un-destaque').textContent = formatarNumero(totalUN);
+                    
+                    // Mostrar ID
+                    document.getElementById('info-id').innerHTML = `<i class="bi bi-upc-scan"></i> ID: ${unidadeData.id}`;
 
                     // ============================================
                     // MOSTRAR PRODUTOS E VOLUMES
@@ -614,9 +672,9 @@
                             <div class="produto-header">
                                 <span>
                                     <i class="bi bi-box"></i> ${produto.nome || 'Produto'}
-                                    ${produto.sku ? `<small>(SKU: ${produto.sku})</small>` : ''}
+                                    ${unidadeData.produtos.length > 1 ? `<small>(SKU: ${produto.sku})</small>` : ''}
                                 </span>
-                                <span class="badge bg-info">${produto.tipoEmbalagem || 'UN'}</span>
+                                <span class="badge bg-info" style="font-size: 1rem; padding: 5px 15px;">${produto.tipoEmbalagem || 'UN'}</span>
                             </div>
                         `;
                         
@@ -626,15 +684,31 @@
                         produto.volumes.forEach((vol, vIndex) => {
                             volumesHtml += `
                                 <div class="volume-card">
-                                    <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">
-                                        ${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA DO PADRÃO'}
-                                    </span>
-                                    <p><strong>Lote:</strong> ${vol.lote || 'N/A'}</p>
-                                    <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
-                                    <p><strong>Volume:</strong> ${vol.qtdVolumes || 0} ${produto.tipoEmbalagem || 'UN'}</p>
-                                    <p><strong>UN/Volume:</strong> ${formatarNumero(vol.unPorEmbalagem || 0)}</p>
-                                    <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN || 0)}</p>
-                                    ${vol.localizacao && vol.localizacao !== '-' ? `<p><strong>Local:</strong> ${vol.localizacao}</p>` : ''}
+                                    <div class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">
+                                        ${vol.tipo === 'padrao' ? '⚡ PADRÃO' : '⚠️ FORA DO PADRÃO'}
+                                    </div>
+                                    <p>
+                                        <strong>Lote:</strong> 
+                                        <span>${vol.lote || 'N/A'}</span>
+                                    </p>
+                                    <p>
+                                        <strong>Validade:</strong> 
+                                        <span>${formatarData(vol.validade)}</span>
+                                    </p>
+                                    <p>
+                                        <strong>Volume:</strong> 
+                                        <span>${vol.qtdVolumes || 0} ${produto.tipoEmbalagem}</span>
+                                    </p>
+                                    <p>
+                                        <strong>UN/Volume:</strong> 
+                                        <span>${formatarNumero(vol.unPorEmbalagem || 0)}</span>
+                                    </p>
+                                    <p>
+                                        <strong>Total UN:</strong> 
+                                        <span style="color: #fbbf24; font-weight: 700;">${formatarNumero(vol.totalUN || 0)}</span>
+                                    </p>
+                                    ${vol.localizacao && vol.localizacao !== '-' ? 
+                                        `<p><strong>Local:</strong> <span>${vol.localizacao}</span></p>` : ''}
                                 </div>
                             `;
                         });
@@ -644,10 +718,6 @@
                         produtoDiv.innerHTML = produtoHeader + volumesHtml;
                         container.appendChild(produtoDiv);
                     });
-
-                    document.getElementById('info-id').innerHTML = `
-                        <i class="bi bi-upc-scan"></i> ID: ${unidadeData.id}
-                    `;
 
                 } catch (e) {
                     console.error('Erro:', e);
