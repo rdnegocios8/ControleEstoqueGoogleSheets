@@ -20,24 +20,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px;
             font-family: 'Inter', 'Segoe UI', sans-serif;
             margin: 0;
         }
         
         .qr-container {
-            max-width: 1100px;  /* Aumentado para paisagem */
+            max-width: 1000px;
             width: 100%;
         }
         
         .qr-card {
             background: linear-gradient(135deg, #1e293b, #0f172a);
             border: 3px solid #fbbf24;
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(251, 191, 36, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             position: relative;
-            overflow: hidden;
         }
         
         .qr-card::before {
@@ -52,134 +51,130 @@
         
         .badge-unidade {
             display: inline-block;
-            padding: 10px 25px;
+            padding: 8px 20px;
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #0f172a;
-            border-radius: 40px;
+            border-radius: 30px;
             font-weight: 800;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-size: 1.1rem;
-            border: 2px solid #ffffff33;
+            letter-spacing: 1px;
+            font-size: 1rem;
         }
         
-        /* LAYOUT PAISAGEM: QR Code à esquerda, informações à direita */
+        /* LAYOUT PAISAGEM COMPACTO */
         .paisagem-container {
             display: flex;
-            gap: 30px;
+            gap: 20px;
             align-items: flex-start;
         }
         
         .qr-code-section {
-            flex: 0 0 300px;  /* Largura fixa para o QR Code */
+            flex: 0 0 220px;
             text-align: center;
         }
         
         .qr-code-box {
             background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-            padding: 20px;
-            border-radius: 20px;
+            padding: 15px;
+            border-radius: 16px;
             border: 3px solid #fbbf24;
-            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.2);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         
         #qrcode canvas, #qrcode img {
             max-width: 100%;
             height: auto;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
         }
         
         .info-section {
             flex: 1;
-            min-width: 0; /* Evita overflow */
+            min-width: 0;
         }
         
-        /* Título do produto BEM GRANDE */
+        /* TÍTULO COMPACTO MAS AINDA GRANDE */
         .produto-titulo-grande {
             background: linear-gradient(135deg, #334155, #1e293b);
             border: 2px solid #fbbf24;
-            border-radius: 16px;
-            padding: 20px 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.08);
+            border-radius: 12px;
+            padding: 15px 18px;
+            margin-bottom: 15px;
         }
         
         .produto-titulo-grande h2 {
             color: #fbbf24;
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin: 0 0 10px 0;
-            line-height: 1.3;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            line-height: 1.2;
             word-break: break-word;
         }
         
         .produto-titulo-grande .produto-sku {
             color: #94a3b8;
-            font-size: 1.2rem;
-            font-weight: 500;
+            font-size: 1rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         
         .produto-titulo-grande .produto-sku strong {
             color: #fbbf24;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
         }
         
+        /* TOTAIS COMPACTOS */
         .volume-info-paisagem {
             display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
         
         .volume-card-destaque {
             flex: 1;
             background: linear-gradient(135deg, #334155, #1e293b);
             border: 2px solid #fbbf24;
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 12px;
             text-align: center;
         }
         
         .volume-card-destaque .volume-valor {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 800;
             color: #fbbf24;
-            line-height: 1.2;
+            line-height: 1;
         }
         
         .volume-card-destaque .volume-label {
-            font-size: 1rem;
+            font-size: 0.85rem;
             color: #94a3b8;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         
         .produtos-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 10px;
         }
         
         .produto-card {
             background: linear-gradient(135deg, #334155, #1e293b);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 15px;
             border: 2px solid #fbbf24;
-            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.08);
         }
         
         .produto-header {
             color: #fbbf24;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 2px solid #fbbf2433;
             display: flex;
             justify-content: space-between;
@@ -188,37 +183,30 @@
         
         .produto-header small {
             color: #94a3b8;
-            font-size: 1rem;
-            font-weight: normal;
+            font-size: 0.9rem;
         }
         
         .volumes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 10px;
         }
         
         .volume-card {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 18px;
-            transition: all 0.2s ease;
-        }
-        
-        .volume-card:hover {
-            border-color: #fbbf24;
-            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.1);
+            border-radius: 10px;
+            padding: 12px;
         }
         
         .volume-card .tipo {
             display: inline-block;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             letter-spacing: 0.5px;
         }
         
@@ -233,54 +221,50 @@
         }
         
         .volume-card p {
-            margin: 10px 0;
+            margin: 6px 0;
             color: #cbd5e1;
-            font-size: 1rem;
+            font-size: 0.9rem;
             display: flex;
             justify-content: space-between;
             border-bottom: 1px solid #334155;
-            padding-bottom: 8px;
+            padding-bottom: 4px;
         }
         
         .volume-card p strong {
             color: #fbbf24;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
         }
         
         .info-id {
             background: #1e293b;
-            padding: 15px 20px;
-            border-radius: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
             color: #fbbf24;
             word-break: break-all;
-            margin: 20px 0;
             border: 2px solid #fbbf24;
             font-family: 'Courier New', monospace;
-            font-size: 1rem;
+            font-size: 0.85rem;
             font-weight: 600;
         }
         
         .qr-actions {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
-            margin-top: 25px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
         
         .qr-actions button {
-            padding: 15px 30px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
-            min-width: 150px;
-            justify-content: center;
+            gap: 8px;
         }
         
         .btn-download {
@@ -298,27 +282,31 @@
             color: white;
         }
         
-        .qr-actions button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.25);
-        }
-        
-        .qr-actions button:active {
-            transform: translateY(0);
-        }
-        
-        /* ESTILO PARA IMPRESSÃO */
+        /* ESTILO PARA IMPRESSÃO - 1 PÁGINA */
         @media print {
+            @page {
+                size: landscape;
+                margin: 0.4cm;
+            }
+            
             body {
                 background: white;
-                padding: 0.5cm;
+                padding: 0;
+                display: block;
+            }
+            
+            .qr-container {
+                max-width: 100%;
+                padding: 0;
             }
             
             .qr-card {
                 background: white;
                 border: 2px solid #000;
                 box-shadow: none;
-                padding: 0.5cm;
+                padding: 10px;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             
             .badge-unidade {
@@ -351,27 +339,24 @@
             }
             
             .produto-titulo-grande h2,
-            .produto-header {
+            .produto-header,
+            .volume-card-destaque .volume-valor {
                 color: #000;
             }
             
             .volume-card .tipo.padrao {
-                background: #000;
-                color: white;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                background: #000 !important;
+                color: white !important;
             }
             
             .volume-card .tipo.fora {
-                background: #666;
-                color: white;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                background: #666 !important;
+                color: white !important;
             }
             
-            .volume-valor,
-            .volume-card p strong {
-                color: #000;
+            .volume-card p strong,
+            .volume-card p span[style*="color: #fbbf24"] {
+                color: #000 !important;
                 font-weight: bold;
             }
             
@@ -402,7 +387,7 @@
                 
                 <!-- Informações à direita -->
                 <div class="info-section">
-                    <!-- Título do produto BEM GRANDE (será preenchido via JS) -->
+                    <!-- Título do produto -->
                     <div class="produto-titulo-grande" id="produto-titulo-grande">
                         <h2 id="produto-nome-grande">Carregando...</h2>
                         <div class="produto-sku" id="produto-sku-grande"></div>
@@ -605,8 +590,8 @@
             if (typeof QRCode !== 'undefined') {
                 try {
                     QRCode.toCanvas(document.createElement('canvas'), linkCompleto, {
-                        width: 250,
-                        margin: 2
+                        width: 200,
+                        margin: 1
                     }, function(err, canvas) {
                         if (err) {
                             console.error('Erro:', err);
@@ -626,11 +611,9 @@
                     
                     // Se for unidade múltipla, mostrar todos os produtos
                     if (unidadeData.produtos.length > 1) {
-                        // Título genérico
                         document.getElementById('produto-nome-grande').textContent = 'UNIDADE MÚLTIPLA';
                         document.getElementById('produto-sku-grande').innerHTML = `<strong>${unidadeData.produtos.length} produtos</strong> na unidade`;
                     } else {
-                        // Produto único - mostrar nome GRANDE
                         const produto = unidadeData.produtos[0];
                         document.getElementById('produto-nome-grande').textContent = produto.nome || 'Produto';
                         document.getElementById('produto-sku-grande').innerHTML = `<strong>SKU:</strong> ${produto.sku || 'N/A'} | <strong>Embalagem:</strong> ${produto.tipoEmbalagem || 'UN'}`;
@@ -648,11 +631,8 @@
                         }
                     });
 
-                    // Mostrar totais em destaque
                     document.getElementById('total-volumes-destaque').textContent = formatarNumero(totalVolumes);
                     document.getElementById('total-un-destaque').textContent = formatarNumero(totalUN);
-                    
-                    // Mostrar ID
                     document.getElementById('info-id').innerHTML = `<i class="bi bi-upc-scan"></i> ID: ${unidadeData.id}`;
 
                     // ============================================
@@ -667,54 +647,34 @@
                         const produtoDiv = document.createElement('div');
                         produtoDiv.className = 'produto-card';
                         
-                        // Cabeçalho do produto
                         let produtoHeader = `
                             <div class="produto-header">
                                 <span>
                                     <i class="bi bi-box"></i> ${produto.nome || 'Produto'}
                                     ${unidadeData.produtos.length > 1 ? `<small>(SKU: ${produto.sku})</small>` : ''}
                                 </span>
-                                <span class="badge bg-info" style="font-size: 1rem; padding: 5px 15px;">${produto.tipoEmbalagem || 'UN'}</span>
+                                <span class="badge bg-info" style="font-size: 0.9rem; padding: 4px 10px;">${produto.tipoEmbalagem || 'UN'}</span>
                             </div>
                         `;
                         
-                        // Volumes do produto
                         let volumesHtml = '<div class="volumes-grid">';
                         
                         produto.volumes.forEach((vol, vIndex) => {
                             volumesHtml += `
                                 <div class="volume-card">
                                     <div class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">
-                                        ${vol.tipo === 'padrao' ? '⚡ PADRÃO' : '⚠️ FORA DO PADRÃO'}
+                                        ${vol.tipo === 'padrao' ? '⚡ PADRÃO' : '⚠️ FORA'}
                                     </div>
-                                    <p>
-                                        <strong>Lote:</strong> 
-                                        <span>${vol.lote || 'N/A'}</span>
-                                    </p>
-                                    <p>
-                                        <strong>Validade:</strong> 
-                                        <span>${formatarData(vol.validade)}</span>
-                                    </p>
-                                    <p>
-                                        <strong>Volume:</strong> 
-                                        <span>${vol.qtdVolumes || 0} ${produto.tipoEmbalagem}</span>
-                                    </p>
-                                    <p>
-                                        <strong>UN/Volume:</strong> 
-                                        <span>${formatarNumero(vol.unPorEmbalagem || 0)}</span>
-                                    </p>
-                                    <p>
-                                        <strong>Total UN:</strong> 
-                                        <span style="color: #fbbf24; font-weight: 700;">${formatarNumero(vol.totalUN || 0)}</span>
-                                    </p>
-                                    ${vol.localizacao && vol.localizacao !== '-' ? 
-                                        `<p><strong>Local:</strong> <span>${vol.localizacao}</span></p>` : ''}
+                                    <p><strong>Lote:</strong> <span>${vol.lote || 'N/A'}</span></p>
+                                    <p><strong>Validade:</strong> <span>${formatarData(vol.validade)}</span></p>
+                                    <p><strong>Volume:</strong> <span>${vol.qtdVolumes || 0} ${produto.tipoEmbalagem}</span></p>
+                                    <p><strong>UN/Vol:</strong> <span>${formatarNumero(vol.unPorEmbalagem || 0)}</span></p>
+                                    <p><strong>Total UN:</strong> <span style="color: #fbbf24; font-weight: 700;">${formatarNumero(vol.totalUN || 0)}</span></p>
                                 </div>
                             `;
                         });
                         
                         volumesHtml += '</div>';
-                        
                         produtoDiv.innerHTML = produtoHeader + volumesHtml;
                         container.appendChild(produtoDiv);
                     });
