@@ -2180,7 +2180,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                         <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                         <td>${u.destino || '-'}</td>
                         <td>
-                            <button class="btn btn-sm btn-info" onclick="('${idCompleto}')" title="Ver detalhes">
+                            <button class="btn btn-sm btn-info" onclick="verUnidade('${idCompleto}')" title="Ver detalhes">
                                 <i class="bi bi-eye"></i>
                             </button>
                             ${u.status === 'Disponível' && volume.totalUN > 0 ? 
@@ -2218,7 +2218,7 @@ function atualizarTabelaUnidades(unidadesFiltradas = null) {
                 <td><span class="badge ${u.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${u.status}</span></td>
                 <td>${u.destino || '-'}</td>
                 <td>
-                    <button class="btn btn-sm btn-info" onclick="('${u.id}')" title="Ver detalhes">
+                    <button class="btn btn-sm btn-info" onclick="verUnidade('${u.id}')" title="Ver detalhes">
                         <i class="bi bi-eye"></i>
                     </button>
                     ${u.status === 'Disponível' && u.quantidade > 0 ? 
@@ -3397,5 +3397,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
