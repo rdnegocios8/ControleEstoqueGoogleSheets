@@ -2402,7 +2402,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - VERSÃO FINAL CORRIGIDA
+// FUNÇÃO VER UNIDADE - CORRIGIDA (TRATA UNDEFINED)
 // ============================================
 function verUnidade(id) {
     console.log('🔍 ID recebido:', id);
@@ -2532,15 +2532,15 @@ function verUnidade(id) {
     }
     
     // ============================================
-    // CASO 2: UNIDADE MÚLTIPLA (JÁ VEM AGRUPADA)
+    // CASO 2: UNIDADE MÚLTIPLA
     // ============================================
     console.log('📦 Processando como unidade múltipla...');
     
-    // Extrair o ID base (UN-VOIVE9DC-BRIM-P1V1 -> UN-VOIVE9DC-BRIM)
+    // Extrair o ID base
     const idBase = id.replace(/-[A-Z]\d+V\d+$/, '');
     console.log('📦 ID Base:', idBase);
     
-    // Buscar a UNIDADE MÚLTIPLA já agrupada
+    // Buscar a unidade múltipla
     const unidadeMultipla = unidades.find(u => u.id === idBase && u.tipo === 'unidade-multipla');
     
     if (!unidadeMultipla) {
@@ -2551,7 +2551,7 @@ function verUnidade(id) {
     
     console.log('📦 Unidade múltipla encontrada:', unidadeMultipla);
     
-    // Usar a unidade múltipla já agrupada
+    // Usar a unidade múltipla
     unidadeAtual = unidadeMultipla;
     
     // PREENCHER DADOS BÁSICOS
@@ -2574,14 +2574,19 @@ function verUnidade(id) {
     const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     
     unidadeAtual.produtos.forEach((produto, pIndex) => {
+        // Garantir que todos os valores existam
+        const produtoNome = produto.nome || 'Produto';
+        const produtoSku = produto.sku || 'SKU';
+        const produtoTipo = produto.tipoEmbalagem || 'UN';
+        
         const dadosProduto = {
-            id: produto.id,
-            produto: produto.nome,
-            sku: produto.sku,
-            tipoEmbalagem: produto.tipoEmbalagem,
-            volumes: produto.volumes,
-            totalVolumes: produto.totalVolumes,
-            totalUN: produto.totalUN
+            id: produto.id || `${unidadeAtual.id}-P${pIndex+1}`,
+            produto: produtoNome,
+            sku: produtoSku,
+            tipoEmbalagem: produtoTipo,
+            volumes: produto.volumes || [],
+            totalVolumes: produto.totalVolumes || 0,
+            totalUN: produto.totalUN || 0
         };
         
         const produtoCard = document.createElement('div');
@@ -2591,14 +2596,14 @@ function verUnidade(id) {
         
         produtoCard.innerHTML = `
             <div class="card-header text-warning p-2 text-center" style="font-size: 0.9rem;">
-                <strong>${produto.nome.length > 20 ? produto.nome.substring(0, 20) + '...' : produto.nome}</strong>
+                <strong>${produtoNome.length > 20 ? produtoNome.substring(0, 20) + '...' : produtoNome}</strong>
             </div>
             <div class="card-body text-center p-2">
                 <div id="qr-produto-${pIndex}" style="width: 150px; height: 150px; margin: 0 auto;"></div>
                 <div class="mt-2">
-                    <small class="text-info">${produto.totalVolumes} volumes</small><br>
-                    <small class="text-warning">${produto.totalUN.toFixed(2)} UN</small><br>
-                    <small class="text-muted" style="font-size: 0.7rem;">${produto.id}</small>
+                    <small class="text-info">${produto.totalVolumes || 0} volumes</small><br>
+                    <small class="text-warning">${(produto.totalUN || 0).toFixed(2)} UN</small><br>
+                    <small class="text-muted" style="font-size: 0.7rem;">${dadosProduto.id}</small>
                 </div>
             </div>
         `;
@@ -2624,12 +2629,16 @@ function verUnidade(id) {
     container.innerHTML = '';
     
     unidadeAtual.produtos.forEach((produto) => {
+        const produtoNome = produto.nome || 'Produto';
+        const produtoSku = produto.sku || 'SKU';
+        const produtoTipo = produto.tipoEmbalagem || 'UN';
+        
         const produtoDiv = document.createElement('div');
         produtoDiv.className = 'card bg-dark mb-3';
         produtoDiv.innerHTML = `
             <div class="card-header text-warning">
-                <strong>${produto.nome}</strong> (SKU: ${produto.sku}) 
-                <span class="badge bg-info float-end">${produto.id}</span>
+                <strong>${produtoNome}</strong> (SKU: ${produtoSku}) 
+                <span class="badge bg-info float-end">${produto.id || unidadeAtual.id}</span>
             </div>
             <div class="card-body">
                 <table class="table table-sm">
@@ -2645,17 +2654,28 @@ function verUnidade(id) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${produto.volumes.map(v => `
-                            <tr>
-                                <td><span class="badge ${v.tipo === 'padrao' ? 'bg-success' : 'bg-warning'}">${v.tipo === 'padrao' ? 'PADRÃO' : 'FORA'}</span></td>
-                                <td>${v.lote || '-'}</td>
-                                <td>${formatarData(v.validade) || '-'}</td>
-                                <td>${v.qtdVolumes}</td>
-                                <td>${v.unPorEmbalagem.toFixed(2)}</td>
-                                <td class="text-warning">${v.totalUN.toFixed(2)}</td>
-                                <td>${v.localizacao || '-'}</td>
-                            </tr>
-                        `).join('')}
+                        ${(produto.volumes || []).map(v => {
+                            // Garantir que todos os valores do volume existam
+                            const tipo = v.tipo || 'padrao';
+                            const lote = v.lote || '-';
+                            const validade = v.validade || '';
+                            const qtdVolumes = v.qtdVolumes || 0;
+                            const unPorEmbalagem = v.unPorEmbalagem || 0;
+                            const totalUN = v.totalUN || 0;
+                            const localizacao = v.localizacao || '-';
+                            
+                            return `
+                                <tr>
+                                    <td><span class="badge ${tipo === 'padrao' ? 'bg-success' : 'bg-warning'}">${tipo === 'padrao' ? 'PADRÃO' : 'FORA'}</span></td>
+                                    <td>${lote}</td>
+                                    <td>${formatarData(validade) || '-'}</td>
+                                    <td>${qtdVolumes}</td>
+                                    <td>${unPorEmbalagem.toFixed(2)}</td>
+                                    <td class="text-warning">${totalUN.toFixed(2)}</td>
+                                    <td>${localizacao}</td>
+                                </tr>
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
@@ -3509,6 +3529,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
