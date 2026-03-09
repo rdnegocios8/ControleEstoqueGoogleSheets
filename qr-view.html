@@ -20,7 +20,7 @@
         }
         
         .qr-container {
-            max-width: 600px;
+            max-width: 800px;
             width: 100%;
         }
         
@@ -134,24 +134,43 @@
             letter-spacing: 0.5px;
         }
         
-        .volumes-table {
-            background: linear-gradient(135deg, #334155, #1e293b);
-            border-radius: 16px;
-            padding: 25px;
+        .produtos-container {
             margin: 20px 0;
-            border: 2px solid #fbbf24;
-            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
         
-        .volumes-table h4 {
-            color: #fbbf24;
-            margin-bottom: 15px;
+        .produto-card {
+            background: linear-gradient(135deg, #334155, #1e293b);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #fbbf24;
+            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.08);
             text-align: left;
+        }
+        
+        .produto-header {
+            color: #fbbf24;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #fbbf2433;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .produto-header small {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: normal;
         }
         
         .volumes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 15px;
         }
         
@@ -258,6 +277,16 @@
             transform: translateY(0);
         }
         
+        .produto-resumo {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            border-left: 4px solid #fbbf24;
+        }
+        
         @media print {
             .qr-actions, .badge-unidade {
                 display: none;
@@ -281,19 +310,14 @@
                 <div id="qrcode"></div>
             </div>
             
-            <div class="qr-info" id="qr-info">
-                <!-- Informações serão preenchidas via JavaScript -->
-            </div>
-            
             <!-- Área para volume/quantidade TOTAIS (sempre visível) -->
             <div class="volume-info" id="volume-info">
                 <!-- Será preenchido com os totais -->
             </div>
             
-            <!-- Área para múltiplos volumes (aparece só quando necessário) -->
-            <div class="volumes-table" id="volumes-table" style="display: none;">
-                <h4><i class="bi bi-boxes"></i> Detalhamento dos Volumes</h4>
-                <div class="volumes-grid" id="volumes-grid"></div>
+            <!-- Área para produtos e volumes -->
+            <div class="produtos-container" id="produtos-container">
+                <!-- Produtos serão inseridos aqui -->
             </div>
             
             <div class="info-id" id="info-id"></div>
@@ -481,8 +505,7 @@
         const baseUrl = 'https://rdnegocios8.github.io/ControleEstoqueGoogleSheets/baixa-view.html';
         let linkCompleto;
         
-        // Para o QR code, usar o mesmo objeto mas APENAS com o primeiro produto
-        // (o QR code vai apontar para a unidade inteira)
+        // Para o QR code, usar o mesmo objeto
         const dadosParaQR = {
             id: unidadeData.id,
             produtos: unidadeData.produtos,
@@ -550,90 +573,77 @@
                     // PREENCHER INFORMAÇÕES NA TELA
                     // ============================================
                     
-                    // Se tiver múltiplos produtos, mostrar o primeiro como principal
-                    const primeiroProduto = unidadeData.produtos?.[0];
-                    if (!primeiroProduto) {
-                        console.error('❌ Nenhum produto encontrado');
-                        return;
-                    }
-                    
                     // Coletar todos os volumes de todos os produtos
-                    let todosVolumes = [];
-                    let totalProdutos = unidadeData.produtos.length;
-                    
+                    let totalVolumes = 0;
+                    let totalUN = 0;
                     unidadeData.produtos.forEach(produto => {
                         if (produto.volumes && produto.volumes.length > 0) {
-                            todosVolumes = todosVolumes.concat(produto.volumes);
+                            produto.volumes.forEach(vol => {
+                                totalVolumes += vol.qtdVolumes || 0;
+                                totalUN += vol.totalUN || 0;
+                            });
                         }
                     });
-                    
-                    // Se tiver apenas um produto com um volume, mostrar informações básicas
-                    if (totalProdutos === 1 && todosVolumes.length === 1) {
-                        const volume = todosVolumes[0];
-                        
-                        document.getElementById('qr-info').innerHTML = `
-                            <p><strong>Produto:</strong> ${primeiroProduto.nome || 'N/A'}</p>
-                            <p><strong>SKU:</strong> ${primeiroProduto.sku || 'N/A'}</p>
-                            <p><strong>Lote:</strong> ${volume.lote || 'N/A'}</p>
-                            <p><strong>Validade:</strong> ${formatarData(volume.validade)}</p>
-                        `;
-                    } else {
-                        // Múltiplos produtos ou volumes
-                        document.getElementById('qr-info').innerHTML = `
-                            <p><strong>Unidade:</strong> ${unidadeData.id}</p>
-                            <p><strong>Produtos:</strong> ${totalProdutos}</p>
-                            <p><strong>Volumes:</strong> ${unidadeData.totalVolumes || todosVolumes.length}</p>
-                            <p><strong>Total UN:</strong> ${formatarNumero(unidadeData.totalUN || 0)}</p>
-                        `;
-                    }
 
                     // MOSTRAR VOLUME E QUANTIDADE TOTAIS
                     document.getElementById('volume-info').innerHTML = `
                         <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(unidadeData.totalVolumes || todosVolumes.length)}</div>
+                            <div class="volume-value">${formatarNumero(totalVolumes)}</div>
                             <div class="volume-label">VOLUMES</div>
                         </div>
                         <div class="volume-item">
-                            <div class="volume-value">${formatarNumero(unidadeData.totalUN || 0)}</div>
+                            <div class="volume-value">${formatarNumero(totalUN)}</div>
                             <div class="volume-label">UN</div>
                         </div>
                     `;
 
-                    // MOSTRAR DETALHAMENTO DOS VOLUMES (se houver mais de um)
-                    if (todosVolumes.length > 1 || totalProdutos > 1) {
-                        document.getElementById('volumes-table').style.display = 'block';
-                        const grid = document.getElementById('volumes-grid');
-                        grid.innerHTML = '';
+                    // ============================================
+                    // MOSTRAR PRODUTOS E VOLUMES
+                    // ============================================
+                    const container = document.getElementById('produtos-container');
+                    container.innerHTML = '';
+                    
+                    unidadeData.produtos.forEach((produto, pIndex) => {
+                        if (!produto.volumes || produto.volumes.length === 0) return;
                         
-                        let volumeIndex = 1;
-                        unidadeData.produtos.forEach(produto => {
-                            if (produto.volumes && produto.volumes.length > 0) {
-                                produto.volumes.forEach(vol => {
-                                    const card = document.createElement('div');
-                                    card.className = 'volume-card';
-                                    
-                                    // Título mostrando produto e volume
-                                    const titulo = totalProdutos > 1 ? 
-                                        `${produto.nome?.substring(0, 15) || 'Produto'} - Vol ${volumeIndex}` : 
-                                        `Volume ${volumeIndex}`;
-                                    
-                                    card.innerHTML = `
-                                        <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">${titulo}</span>
-                                        <p><strong>Lote:</strong> ${vol.lote || '-'}</p>
-                                        <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
-                                        <p><strong>Quantidade:</strong> ${vol.qtdVolumes || 0} ${produto.tipoEmbalagem || 'UN'}</p>
-                                        <p><strong>UN/Volume:</strong> ${formatarNumero(vol.unPorEmbalagem || 0)}</p>
-                                        <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN || 0)}</p>
-                                    `;
-                                    grid.appendChild(card);
-                                    volumeIndex++;
-                                });
-                            }
+                        const produtoDiv = document.createElement('div');
+                        produtoDiv.className = 'produto-card';
+                        
+                        // Cabeçalho do produto
+                        let produtoHeader = `
+                            <div class="produto-header">
+                                <span>
+                                    <i class="bi bi-box"></i> ${produto.nome || 'Produto'}
+                                    ${produto.sku ? `<small>(SKU: ${produto.sku})</small>` : ''}
+                                </span>
+                                <span class="badge bg-info">${produto.tipoEmbalagem || 'UN'}</span>
+                            </div>
+                        `;
+                        
+                        // Volumes do produto
+                        let volumesHtml = '<div class="volumes-grid">';
+                        
+                        produto.volumes.forEach((vol, vIndex) => {
+                            volumesHtml += `
+                                <div class="volume-card">
+                                    <span class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">
+                                        ${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA DO PADRÃO'}
+                                    </span>
+                                    <p><strong>Lote:</strong> ${vol.lote || 'N/A'}</p>
+                                    <p><strong>Validade:</strong> ${formatarData(vol.validade)}</p>
+                                    <p><strong>Volume:</strong> ${vol.qtdVolumes || 0} ${produto.tipoEmbalagem || 'UN'}</p>
+                                    <p><strong>UN/Volume:</strong> ${formatarNumero(vol.unPorEmbalagem || 0)}</p>
+                                    <p><strong>Total UN:</strong> ${formatarNumero(vol.totalUN || 0)}</p>
+                                    ${vol.localizacao && vol.localizacao !== '-' ? `<p><strong>Local:</strong> ${vol.localizacao}</p>` : ''}
+                                </div>
+                            `;
                         });
-                    } else if (todosVolumes.length === 1) {
-                        // Se tiver apenas um volume, não mostrar a tabela
-                        document.getElementById('volumes-table').style.display = 'none';
-                    }
+                        
+                        volumesHtml += '</div>';
+                        
+                        produtoDiv.innerHTML = produtoHeader + volumesHtml;
+                        container.appendChild(produtoDiv);
+                    });
 
                     document.getElementById('info-id').innerHTML = `
                         <i class="bi bi-upc-scan"></i> ID: ${unidadeData.id}
