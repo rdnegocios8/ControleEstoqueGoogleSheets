@@ -53,7 +53,7 @@
             display: inline-block;
             padding: 8px 20px;
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-weight: 800;
             border-radius: 30px;
             margin-bottom: 15px;
@@ -76,10 +76,10 @@
         }
         
         .qr-code-box {
-            background: #ffffff; /* Branco puro */
+            background: #ffffff;
             padding: 15px;
             border-radius: 16px;
-            border: 3px solid #000000; /* Preto */
+            border: 3px solid #000000;
             margin-bottom: 10px;
         }
         
@@ -96,15 +96,15 @@
         
         /* TÍTULO COMPACTO MAS AINDA GRANDE */
         .produto-titulo-grande {
-            background: #ffffff; /* Branco puro */
-            border: 3px solid #000000; /* Preto */
+            background: #ffffff;
+            border: 3px solid #000000;
             border-radius: 12px;
             padding: 15px 18px;
             margin-bottom: 15px;
         }
         
         .produto-titulo-grande h2 {
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-size: 1.5rem;
             font-weight: 800;
             margin: 0 0 8px 0;
@@ -113,7 +113,7 @@
         }
         
         .produto-titulo-grande .produto-sku {
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-size: 1rem;
             font-weight: 600;
             display: flex;
@@ -123,7 +123,7 @@
         }
         
         .produto-titulo-grande .produto-sku strong {
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-size: 1.1rem;
             font-weight: 800;
         }
@@ -137,8 +137,8 @@
         
         .volume-card-destaque {
             flex: 1;
-            background: #ffffff; /* Branco puro */
-            border: 3px solid #000000; /* Preto */
+            background: #ffffff;
+            border: 3px solid #000000;
             border-radius: 12px;
             padding: 12px;
             text-align: center;
@@ -147,13 +147,13 @@
         .volume-card-destaque .volume-valor {
             font-size: 2rem;
             font-weight: 900;
-            color: #000000; /* Preto puro */
+            color: #fbbf24;
             line-height: 1;
         }
         
         .volume-card-destaque .volume-label {
             font-size: 0.85rem;
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -167,14 +167,14 @@
         }
         
         .produto-card {
-            background: #ffffff; /* Branco puro */
+            background: #ffffff;
             border-radius: 12px;
             padding: 15px;
-            border: 3px solid #000000; /* Preto */
+            border: 3px solid #000000;
         }
         
         .produto-header {
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-size: 1.2rem;
             font-weight: 800;
             margin-bottom: 10px;
@@ -186,13 +186,13 @@
         }
         
         .produto-header small {
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-size: 0.9rem;
             font-weight: 600;
         }
         
         .produto-header .badge {
-            background: #000000 !important; /* Preto */
+            background: #000000 !important;
             color: #ffffff !important;
             font-size: 0.9rem;
             padding: 4px 10px;
@@ -207,8 +207,8 @@
         }
         
         .volume-card {
-            background: #ffffff; /* Branco puro */
-            border: 3px solid #000000; /* Preto */
+            background: #ffffff;
+            border: 3px solid #000000;
             border-radius: 10px;
             padding: 12px;
         }
@@ -226,19 +226,19 @@
         }
         
         .volume-card .tipo.padrao {
-            background: #000000; /* Preto */
-            color: #ffffff; /* Branco */
+            background: #000000;
+            color: #ffffff;
         }
         
         .volume-card .tipo.fora {
-            background: #333333; /* Cinza escuro */
-            color: #ffffff; /* Branco */
+            background: #333333;
+            color: #ffffff;
             border-color: #000000;
         }
         
         .volume-card p {
             margin: 6px 0;
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-size: 0.9rem;
             font-weight: 600;
             display: flex;
@@ -248,28 +248,23 @@
         }
         
         .volume-card p strong {
-            color: #000000; /* Preto puro */
+            color: #000000;
             font-size: 0.95rem;
             font-weight: 800;
         }
         
         .volume-card p span {
-            color: #000000; /* Preto puro */
+            color: #fbbf24;
             font-weight: 700;
         }
         
-        .volume-card p span[style*="color: #fbbf24"] {
-            color: #000000 !important; /* Força preto */
-            font-weight: 900;
-        }
-        
         .info-id {
-            background: #ffffff; /* Branco puro */
+            background: #ffffff;
             padding: 10px 12px;
             border-radius: 8px;
-            color: #000000; /* Preto puro */
+            color: #000000;
             word-break: break-all;
-            border: 3px solid #000000; /* Preto */
+            border: 3px solid #000000;
             font-family: 'Courier New', monospace;
             font-size: 0.85rem;
             font-weight: 800;
@@ -369,11 +364,14 @@
             
             .produto-titulo-grande h2,
             .produto-header,
-            .volume-card-destaque .volume-valor,
             .volume-card-destaque .volume-label,
             .produto-header small,
             .volume-card p,
-            .volume-card p strong,
+            .volume-card p strong {
+                color: #000 !important;
+            }
+            
+            .volume-card-destaque .volume-valor,
             .volume-card p span {
                 color: #000 !important;
             }
@@ -628,8 +626,8 @@
                         width: 200,
                         margin: 1,
                         color: {
-                            dark: '#000000',  // Preto puro
-                            light: '#ffffff'  // Branco puro
+                            dark: '#000000',
+                            light: '#ffffff'
                         }
                     }, function(err, canvas) {
                         if (err) {
@@ -698,11 +696,11 @@
                                     <div class="tipo ${vol.tipo === 'padrao' ? 'padrao' : 'fora'}">
                                         ${vol.tipo === 'padrao' ? 'PADRÃO' : 'FORA'}
                                     </div>
-                                    <p><strong>Lote:</strong> <span>${vol.lote || 'N/A'}</span></p>
-                                    <p><strong>Validade:</strong> <span>${formatarData(vol.validade)}</span></p>
-                                    <p><strong>Volume:</strong> <span>${vol.qtdVolumes || 0} ${produto.tipoEmbalagem}</span></p>
-                                    <p><strong>UN/Vol:</strong> <span>${formatarNumero(vol.unPorEmbalagem || 0)}</span></p>
-                                    <p><strong>Total UN:</strong> <span style="font-weight: 900;">${formatarNumero(vol.totalUN || 0)}</span></p>
+                                    <p><strong>Lote:</strong> <span style="color: #fbbf24;">${vol.lote || 'N/A'}</span></p>
+                                    <p><strong>Validade:</strong> <span style="color: #fbbf24;">${formatarData(vol.validade)}</span></p>
+                                    <p><strong>Volume:</strong> <span style="color: #fbbf24;">${vol.qtdVolumes || 0} ${produto.tipoEmbalagem}</span></p>
+                                    <p><strong>UN/Vol:</strong> <span style="color: #fbbf24;">${formatarNumero(vol.unPorEmbalagem || 0)}</span></p>
+                                    <p><strong>Total UN:</strong> <span style="color: #fbbf24; font-weight: 900;">${formatarNumero(vol.totalUN || 0)}</span></p>
                                 </div>
                             `;
                         });
