@@ -1552,106 +1552,141 @@ async function carregarDados() {
         }
 
         const unidadesRes = await fetch(UNIDADES_URL);
-const unidadesData = await unidadesRes.json();
-if (unidadesData.values && unidadesData.values.length > 1) {
-    // Primeiro, carregar todas as unidades cruas
-    const unidadesRaw = unidadesData.values.slice(1).map(row => {
-        let sku = row[1] || '';
-        
-        if (sku && !isNaN(sku) && sku.length < 8) {
-            sku = sku.padStart(8, '0');
-        }
-        
-        const quantidadeStr = row[5] || '0';
-        const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
-        
-        return {
-            id: row[0] || '',
-            sku: sku,
-            lote: row[2] || '',
-            validade: row[3] || '',
-            volume: parseInt(row[4]) || 1,
-            quantidade: quantidade,  
-            unidadeEmbalagem: row[6] || 'UN',
-            status: row[7] || 'Disponível',
-            localizacao: row[8] || '-',
-            destino: row[9] || '',
-            foraPadrao: row[10] === 'Sim',
-            qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null,
-            tipoEntrada: row[12] || 'Manual'
-        };
-    }).filter(u => u.id);
-    
-    // ============================================
-    // AGRUPAR UNIDADES MÚLTIPLAS PELO ID BASE
-    // ============================================
-    const unidadesMap = new Map();
-    const produtosMap = new Map(); // Cache de produtos para evitar buscas repetidas
-    
-    unidadesRaw.forEach(u => {
-        // Extrair ID base (remover sufixo -P1V1, -P1V2 etc)
-        const idBase = u.id.replace(/-P\d+V\d+$/, '');
-        
-        if (u.id.includes('-P') && u.id.includes('V')) {
-            // É uma unidade múltipla (tem -P1V1, -P1V2)
-            if (!unidadesMap.has(idBase)) {
-                // Buscar nome do produto
-                let nomeProduto = u.sku;
-                if (!produtosMap.has(u.sku)) {
-                    const produto = produtos.find(p => p.sku === u.sku);
-                    produtosMap.set(u.sku, produto?.nome || u.sku);
-                }
-                nomeProduto = produtosMap.get(u.sku);
+        const unidadesData = await unidadesRes.json();
+        if (unidadesData.values && unidadesData.values.length > 1) {
+            // Primeiro, carregar todas as unidades cruas
+            const unidadesRaw = unidadesData.values.slice(1).map(row => {
+                let sku = row[1] || '';
                 
-                // Criar unidade múltipla
-                unidadesMap.set(idBase, {
-                    id: idBase,
-                    tipo: 'unidade-multipla',
-                    produtos: [{
-                        sku: u.sku,
-                        nome: nomeProduto,
-                        tipoEmbalagem: u.unidadeEmbalagem,
-                        volumes: []
-                    }],
-                    totalVolumes: 0,
-                    totalUN: 0,
-                    status: u.status,
-                    tipoEntrada: u.tipoEntrada,
-                    numeroNF: u.numeroNF,
-                    fornecedor: u.fornecedor,
-                    dataRecebimento: u.dataRecebimento
-                });
-            }
+                if (sku && !isNaN(sku) && sku.length < 8) {
+                    sku = sku.padStart(8, '0');
+                }
+                
+                const quantidadeStr = row[5] || '0';
+                const quantidade = parseFloat(quantidadeStr.replace(',', '.')) || 0;
+                
+                return {
+                    id: row[0] || '',
+                    sku: sku,
+                    lote: row[2] || '',
+                    validade: row[3] || '',
+                    volume: parseInt(row[4]) || 1,
+                    quantidade: quantidade,  
+                    unidadeEmbalagem: row[6] || 'UN',
+                    status: row[7] || 'Disponível',
+                    localizacao: row[8] || '-',
+                    destino: row[9] || '',
+                    foraPadrao: row[10] === 'Sim',
+                    qtdRealPorEmbalagem: row[11] ? parseFloat(row[11].replace(',', '.')) : null,
+                    tipoEntrada: row[12] || 'Manual'
+                };
+            }).filter(u => u.id);
             
-            // Adicionar volume à unidade múltipla
-            const unidadeMultipla = unidadesMap.get(idBase);
-            const produto = unidadeMultipla.produtos[0];
+            // ============================================
+            // AGRUPAR UNIDADES MÚLTIPLAS CORRETAMENTE (POR PRODUTO P1, P2)
+            // ============================================
+            const unidadesMap = new Map();
+            const produtosMap = new Map(); // Cache de produtos
             
-            produto.volumes.push({
-                tipo: u.foraPadrao ? 'fora-padrao' : 'padrao',
-                qtdVolumes: u.volume,
-                unPorEmbalagem: u.qtdRealPorEmbalagem || (u.quantidade / u.volume),
-                totalUN: u.quantidade,
-                lote: u.lote,
-                validade: u.validade,
-                localizacao: u.localizacao
+            unidadesRaw.forEach(u => {
+                // Verificar se é uma unidade múltipla (tem -P1V1, -P2V1, etc)
+                const match = u.id.match(/-([A-Z])(\d+)V\d+$/);
+                
+                if (match) {
+                    // É uma unidade múltipla
+                    const letraProduto = match[1]; // P, M, etc
+                    const numeroProduto = match[2]; // 1, 2, 3
+                    const idBase = u.id.replace(/-[A-Z]\d+V\d+$/, ''); // UN-VOIVE9DC-BRIM
+                    const produtoKey = `${idBase}-${letraProduto}${numeroProduto}`; // UN-VOIVE9DC-BRIM-P1
+                    
+                    if (!unidadesMap.has(idBase)) {
+                        // Criar a unidade múltipla
+                        unidadesMap.set(idBase, {
+                            id: idBase,
+                            tipo: 'unidade-multipla',
+                            produtos: new Map(), // Mapa de produtos (P1, P2, etc)
+                            totalVolumes: 0,
+                            totalUN: 0,
+                            status: u.status,
+                            tipoEntrada: u.tipoEntrada,
+                            numeroNF: u.numeroNF,
+                            fornecedor: u.fornecedor,
+                            dataRecebimento: u.dataRecebimento
+                        });
+                    }
+                    
+                    const unidadeMultipla = unidadesMap.get(idBase);
+                    
+                    // Se este produto ainda não existe na unidade
+                    if (!unidadeMultipla.produtos.has(produtoKey)) {
+                        // Buscar nome do produto
+                        let nomeProduto = u.sku;
+                        if (!produtosMap.has(u.sku)) {
+                            const produto = produtos.find(p => p.sku === u.sku);
+                            produtosMap.set(u.sku, produto?.nome || u.sku);
+                        }
+                        nomeProduto = produtosMap.get(u.sku);
+                        
+                        // Criar o produto dentro da unidade
+                        unidadeMultipla.produtos.set(produtoKey, {
+                            id: produtoKey,
+                            sku: u.sku,
+                            nome: nomeProduto,
+                            tipoEmbalagem: u.unidadeEmbalagem,
+                            letra: letraProduto,
+                            numero: numeroProduto,
+                            volumes: [],
+                            totalVolumes: 0,
+                            totalUN: 0
+                        });
+                    }
+                    
+                    // Adicionar volume ao produto
+                    const produto = unidadeMultipla.produtos.get(produtoKey);
+                    const volume = {
+                        tipo: u.foraPadrao ? 'fora-padrao' : 'padrao',
+                        qtdVolumes: u.volume,
+                        unPorEmbalagem: u.qtdRealPorEmbalagem || (u.quantidade / u.volume),
+                        totalUN: u.quantidade,
+                        lote: u.lote,
+                        validade: u.validade,
+                        localizacao: u.localizacao
+                    };
+                    
+                    produto.volumes.push(volume);
+                    produto.totalVolumes += u.volume;
+                    produto.totalUN += u.quantidade;
+                    
+                    unidadeMultipla.totalVolumes += u.volume;
+                    unidadeMultipla.totalUN += u.quantidade;
+                    
+                } else {
+                    // É unidade simples
+                    unidadesMap.set(u.id, {
+                        ...u,
+                        tipo: 'unidade'
+                    });
+                }
             });
             
-            unidadeMultipla.totalVolumes += u.volume;
-            unidadeMultipla.totalUN += u.quantidade;
-            
-        } else {
-            // É unidade simples
-            unidadesMap.set(u.id, {
-                ...u,
-                tipo: 'unidade'
+            // Converter Map de produtos para Array
+            unidades = Array.from(unidadesMap.values()).map(u => {
+                if (u.tipo === 'unidade-multipla') {
+                    u.produtos = Array.from(u.produtos.values());
+                }
+                return u;
             });
+            
+            console.log(`✅ ${unidades.length} unidades carregadas (${unidadesRaw.length} linhas agrupadas em ${unidades.length} unidades)`);
+            console.log('📦 Unidades múltiplas:', unidades.filter(u => u.tipo === 'unidade-multipla').map(u => ({
+                id: u.id,
+                produtos: u.produtos.map(p => ({
+                    id: p.id,
+                    volumes: p.volumes.length,
+                    sku: p.sku
+                }))
+            })));
         }
-    });
-    
-    unidades = Array.from(unidadesMap.values());
-    console.log(`✅ ${unidades.length} unidades carregadas (${unidadesRaw.length} linhas agrupadas em ${unidades.length} unidades)`);
-}
 
         const movRes = await fetch(MOVIMENTACOES_URL);
         const movData = await movRes.json();
@@ -2367,7 +2402,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - COMPLETA (SEM ERROS)
+// FUNÇÃO VER UNIDADE - VERSÃO FINAL CORRIGIDA
 // ============================================
 function verUnidade(id) {
     console.log('🔍 ID recebido:', id);
@@ -2493,90 +2528,31 @@ function verUnidade(id) {
         // ABRIR MODAL
         const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
         modal.show();
-        return; // <--- IMPORTANTE: Este return está DENTRO da função
+        return;
     }
+    
     // ============================================
-    // CASO 2: UNIDADE MÚLTIPLA (código original adaptado)
+    // CASO 2: UNIDADE MÚLTIPLA (JÁ VEM AGRUPADA)
     // ============================================
     console.log('📦 Processando como unidade múltipla...');
     
-    // Extrair o ID base (UN-2KDCMC39-4PHJ)
+    // Extrair o ID base (UN-VOIVE9DC-BRIM-P1V1 -> UN-VOIVE9DC-BRIM)
     const idBase = id.replace(/-[A-Z]\d+V\d+$/, '');
     console.log('📦 ID Base:', idBase);
     
-    // Buscar TODAS as unidades com esse ID base
-    const todasUnidades = unidades.filter(u => u.id.startsWith(idBase));
-    console.log('📦 Total de unidades encontradas:', todasUnidades.length);
+    // Buscar a UNIDADE MÚLTIPLA já agrupada
+    const unidadeMultipla = unidades.find(u => u.id === idBase && u.tipo === 'unidade-multipla');
     
-    if (todasUnidades.length === 0) {
+    if (!unidadeMultipla) {
+        console.log('❌ Unidade múltipla não encontrada:', idBase);
         alert('Unidade não encontrada!');
         return;
     }
     
-    // AGRUPAR POR PRODUTO
-    const produtosMap = new Map();
-    let encontrouAlgum = false;
+    console.log('📦 Unidade múltipla encontrada:', unidadeMultipla);
     
-    todasUnidades.forEach(u => {
-        const match = u.id.match(/-([A-Z])(\d+)V/);
-        if (!match) {
-            console.log('⚠️ Unidade ignorada (sem padrão):', u.id);
-            return;
-        }
-        
-        encontrouAlgum = true;
-        const letraProduto = match[1];
-        const numeroProduto = match[2];
-        const produtoKey = `${letraProduto}${numeroProduto}`;
-        
-        if (!produtosMap.has(produtoKey)) {
-            const produtoInfo = produtos.find(p => p.sku === u.sku);
-            
-            produtosMap.set(produtoKey, {
-                id: `${idBase}-${letraProduto}${numeroProduto}`,
-                nome: produtoInfo?.nome || u.sku,
-                sku: u.sku,
-                tipoEmbalagem: u.unidadeEmbalagem || 'UN',
-                volumes: [],
-                totalVolumes: 0,
-                totalUN: 0
-            });
-        }
-        
-        const produto = produtosMap.get(produtoKey);
-        const volume = {
-            tipo: u.foraPadrao ? 'fora-padrao' : 'padrao',
-            qtdVolumes: u.volume || 1,
-            unPorEmbalagem: u.qtdRealPorEmbalagem || (u.quantidade / (u.volume || 1)),
-            totalUN: u.quantidade || 0,
-            lote: u.lote || '',
-            validade: u.validade || '',
-            localizacao: u.localizacao || ''
-        };
-        
-        produto.volumes.push(volume);
-        produto.totalVolumes += u.volume || 1;
-        produto.totalUN += u.quantidade || 0;
-    });
-    
-    // Se não encontrou nenhum produto com padrão
-    if (!encontrouAlgum || produtosMap.size === 0) {
-        alert('Nenhum produto válido encontrado para esta unidade!');
-        return;
-    }
-    
-    // Criar objeto da unidade
-    unidadeAtual = {
-        id: idBase,
-        tipo: 'unidade-multipla',
-        produtos: Array.from(produtosMap.values()),
-        totalVolumes: Array.from(produtosMap.values()).reduce((sum, p) => sum + p.totalVolumes, 0),
-        totalUN: Array.from(produtosMap.values()).reduce((sum, p) => sum + p.totalUN, 0),
-        numeroNF: todasUnidades[0]?.numeroNF || '',
-        fornecedor: todasUnidades[0]?.fornecedor || '',
-        dataRecebimento: todasUnidades[0]?.dataRecebimento || '',
-        status: todasUnidades[0]?.status || 'Disponível'
-    };
+    // Usar a unidade múltipla já agrupada
+    unidadeAtual = unidadeMultipla;
     
     // PREENCHER DADOS BÁSICOS
     document.getElementById('detalhe-id').textContent = unidadeAtual.id;
@@ -2584,8 +2560,8 @@ function verUnidade(id) {
     document.getElementById('detalhe-fornecedor').textContent = unidadeAtual.fornecedor || '-';
     document.getElementById('detalhe-data').textContent = formatarData(unidadeAtual.dataRecebimento) || '-';
     document.getElementById('detalhe-status').innerHTML = `<span class="badge ${unidadeAtual.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${unidadeAtual.status}</span>`;
-    document.getElementById('detalhe-total-volumes').textContent = unidadeAtual.totalVolumes;
-    document.getElementById('detalhe-total-un').textContent = unidadeAtual.totalUN.toFixed(2);
+    document.getElementById('detalhe-total-volumes').textContent = unidadeAtual.totalVolumes || 0;
+    document.getElementById('detalhe-total-un').textContent = (unidadeAtual.totalUN || 0).toFixed(2);
     
     // LIMPAR CONTAINERS
     const qrContainer = document.getElementById('unidade-qr-code');
@@ -3533,6 +3509,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
