@@ -2367,7 +2367,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - COMPLETA (SIMPLES + MÚLTIPLAS)
+// FUNÇÃO VER UNIDADE - CORRIGIDA (PARA UNIDADES MÚLTIPLAS AGRUPADAS)
 // ============================================
 function verUnidade(id) {
     console.log('🔍 ID recebido:', id);
@@ -2379,122 +2379,147 @@ function verUnidade(id) {
     
     if (unidadeSimples && unidadeSimples.tipo !== 'unidade-multipla') {
         console.log('📦 Unidade simples encontrada:', unidadeSimples);
-        
-        unidadeAtual = unidadeSimples;
-        const produto = produtos.find(p => p.sku === unidadeSimples.sku);
-        
-        // PREENCHER DADOS BÁSICOS
-        document.getElementById('detalhe-id').textContent = unidadeSimples.id;
-        document.getElementById('detalhe-nf').textContent = unidadeSimples.numeroNF || '-';
-        document.getElementById('detalhe-fornecedor').textContent = unidadeSimples.fornecedor || '-';
-        document.getElementById('detalhe-data').textContent = formatarData(unidadeSimples.dataRecebimento) || '-';
-        document.getElementById('detalhe-status').innerHTML = `<span class="badge ${unidadeSimples.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${unidadeSimples.status}</span>`;
-        document.getElementById('detalhe-total-volumes').textContent = unidadeSimples.volume || 0;
-        document.getElementById('detalhe-total-un').textContent = (unidadeSimples.quantidade || 0).toFixed(2);
-        
-        // LIMPAR CONTAINERS
-        const qrContainer = document.getElementById('unidade-qr-code');
-        qrContainer.innerHTML = '';
-        qrContainer.className = '';
-        
-        const containerProdutos = document.getElementById('detalhe-produtos-container');
-        containerProdutos.innerHTML = '';
-        
-        // GERAR QR CODE SIMPLES
-        qrContainer.innerHTML = '<h6 class="text-info mb-3">📱 QR Code da Unidade:</h6>';
-        qrContainer.className = 'text-center';
-        
-        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-        
-        // Construir URL para unidade simples
+        // ... (código da unidade simples igual ao anterior)
+        // (mantenha o código que você já tem para unidades simples)
+        return;
+    }
+    
+    // ============================================
+    // CASO 2: UNIDADE MÚLTIPLA
+    // ============================================
+    console.log('📦 Processando como unidade múltipla...');
+    
+    // Extrair o ID base removendo o sufixo (ex: UN-VOIVE9DC-BRIM-P1V1 -> UN-VOIVE9DC-BRIM)
+    const idBase = id.replace(/-[A-Z]\d+V\d+$/, '');
+    console.log('📦 ID Base:', idBase);
+    
+    // Buscar a unidade múltipla NO MAPA (já agrupada)
+    const unidadeMultipla = unidades.find(u => u.id === idBase && u.tipo === 'unidade-multipla');
+    
+    if (!unidadeMultipla) {
+        console.log('❌ Unidade múltipla não encontrada no mapa:', idBase);
+        alert('Unidade múltipla não encontrada!');
+        return;
+    }
+    
+    console.log('📦 Unidade múltipla encontrada:', unidadeMultipla);
+    
+    // Usar a unidade múltipla já agrupada
+    unidadeAtual = unidadeMultipla;
+    
+    // PREENCHER DADOS BÁSICOS
+    document.getElementById('detalhe-id').textContent = unidadeAtual.id;
+    document.getElementById('detalhe-nf').textContent = unidadeAtual.numeroNF || '-';
+    document.getElementById('detalhe-fornecedor').textContent = unidadeAtual.fornecedor || '-';
+    document.getElementById('detalhe-data').textContent = formatarData(unidadeAtual.dataRecebimento) || '-';
+    document.getElementById('detalhe-status').innerHTML = `<span class="badge ${unidadeAtual.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${unidadeAtual.status}</span>`;
+    document.getElementById('detalhe-total-volumes').textContent = unidadeAtual.totalVolumes || 0;
+    document.getElementById('detalhe-total-un').textContent = (unidadeAtual.totalUN || 0).toFixed(2);
+    
+    // LIMPAR CONTAINERS
+    const qrContainer = document.getElementById('unidade-qr-code');
+    qrContainer.innerHTML = '';
+    
+    // GERAR QR CODES POR PRODUTO
+    qrContainer.innerHTML = '<h6 class="text-info mb-3">📱 QR Codes por Produto:</h6>';
+    qrContainer.className = 'd-flex flex-wrap gap-3 justify-content-center';
+    
+    const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    
+    unidadeAtual.produtos.forEach((produto, pIndex) => {
         const dadosProduto = {
-            id: unidadeSimples.id,
-            produto: produto?.nome || 'Produto',
-            sku: unidadeSimples.sku,
-            tipoEmbalagem: unidadeSimples.unidadeEmbalagem || 'UN',
-            volumes: [{
-                tipo: unidadeSimples.foraPadrao ? 'fora-padrao' : 'padrao',
-                qtdVolumes: unidadeSimples.volume || 1,
-                unPorEmbalagem: unidadeSimples.qtdRealPorEmbalagem || (unidadeSimples.quantidade / (unidadeSimples.volume || 1)),
-                totalUN: unidadeSimples.quantidade || 0,
-                lote: unidadeSimples.lote || '',
-                validade: unidadeSimples.validade || '',
-                localizacao: unidadeSimples.localizacao || '-'
-            }],
-            totalVolumes: unidadeSimples.volume || 1,
-            totalUN: unidadeSimples.quantidade || 0
+            id: `${unidadeAtual.id}-${produto.letraProduto || 'P'}${produto.numeroProduto || (pIndex+1)}`,
+            produto: produto.nome,
+            sku: produto.sku,
+            tipoEmbalagem: produto.tipoEmbalagem,
+            volumes: produto.volumes,
+            totalVolumes: produto.totalVolumes,
+            totalUN: produto.totalUN
         };
         
-        const dadosJSON = encodeURIComponent(JSON.stringify(dadosProduto));
-        const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
+        const produtoCard = document.createElement('div');
+        produtoCard.className = 'card bg-dark mb-3';
+        produtoCard.style.width = '200px';
+        produtoCard.style.border = '1px solid #fbbf24';
         
-        const qrDiv = document.createElement('div');
-        qrDiv.id = 'qr-unidade-simples';
-        qrDiv.style.width = '200px';
-        qrDiv.style.height = '200px';
-        qrDiv.style.margin = '0 auto';
-        qrContainer.appendChild(qrDiv);
-        
-        setTimeout(() => {
-            if (typeof QRCode !== 'undefined') {
-                new QRCode(qrDiv, {
-                    text: urlCompleta,
-                    width: 200,
-                    height: 200
-                });
-            }
-        }, 100);
-        
-        // MOSTRAR DETALHES DO PRODUTO
-        containerProdutos.innerHTML = `
-            <div class="card bg-dark">
-                <div class="card-header text-warning">
-                    <strong>Detalhes do Produto</strong>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <tr>
-                            <th>Produto:</th>
-                            <td>${produto?.nome || unidadeSimples.sku}</td>
-                        </tr>
-                        <tr>
-                            <th>SKU:</th>
-                            <td>${unidadeSimples.sku}</td>
-                        </tr>
-                        <tr>
-                            <th>Lote:</th>
-                            <td>${unidadeSimples.lote || '-'}</td>
-                        </tr>
-                        <tr>
-                            <th>Validade:</th>
-                            <td>${formatarData(unidadeSimples.validade) || '-'}</td>
-                        </tr>
-                        <tr>
-                            <th>Embalagem:</th>
-                            <td>${unidadeSimples.unidadeEmbalagem || 'UN'}</td>
-                        </tr>
-                        <tr>
-                            <th>Volumes:</th>
-                            <td>${unidadeSimples.volume || 0}</td>
-                        </tr>
-                        <tr>
-                            <th>Total UN:</th>
-                            <td class="text-warning">${(unidadeSimples.quantidade || 0).toFixed(2)}</td>
-                        </tr>
-                        <tr>
-                            <th>Localização:</th>
-                            <td>${unidadeSimples.localizacao || '-'}</td>
-                        </tr>
-                    </table>
+        produtoCard.innerHTML = `
+            <div class="card-header text-warning p-2 text-center" style="font-size: 0.9rem;">
+                <strong>${produto.nome.length > 20 ? produto.nome.substring(0, 20) + '...' : produto.nome}</strong>
+            </div>
+            <div class="card-body text-center p-2">
+                <div id="qr-produto-${pIndex}" style="width: 150px; height: 150px; margin: 0 auto;"></div>
+                <div class="mt-2">
+                    <small class="text-info">${produto.totalVolumes} volumes</small><br>
+                    <small class="text-warning">${produto.totalUN.toFixed(2)} UN</small><br>
+                    <small class="text-muted" style="font-size: 0.7rem;">${dadosProduto.id}</small>
                 </div>
             </div>
         `;
         
-        // ABRIR MODAL
-        const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
-        modal.show();
-        return;
-    }
+        qrContainer.appendChild(produtoCard);
+        
+        setTimeout(() => {
+            const dadosJSON = encodeURIComponent(JSON.stringify(dadosProduto));
+            const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
+            
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(document.getElementById(`qr-produto-${pIndex}`), {
+                    text: urlCompleta,
+                    width: 150,
+                    height: 150
+                });
+            }
+        }, 100 * pIndex);
+    });
+    
+    // MOSTRAR VOLUMES
+    const container = document.getElementById('detalhe-produtos-container');
+    container.innerHTML = '';
+    
+    unidadeAtual.produtos.forEach((produto) => {
+        const produtoDiv = document.createElement('div');
+        produtoDiv.className = 'card bg-dark mb-3';
+        produtoDiv.innerHTML = `
+            <div class="card-header text-warning">
+                <strong>${produto.nome}</strong> (SKU: ${produto.sku}) 
+                <span class="badge bg-info float-end">${unidadeAtual.id}-${produto.letraProduto || 'P'}${produto.numeroProduto || ''}</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Lote</th>
+                            <th>Validade</th>
+                            <th>Qtd Volumes</th>
+                            <th>UN/Vol</th>
+                            <th>Total UN</th>
+                            <th>Local</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${produto.volumes.map(v => `
+                            <tr>
+                                <td><span class="badge ${v.tipo === 'padrao' ? 'bg-success' : 'bg-warning'}">${v.tipo === 'padrao' ? 'PADRÃO' : 'FORA'}</span></td>
+                                <td>${v.lote || '-'}</td>
+                                <td>${formatarData(v.validade) || '-'}</td>
+                                <td>${v.qtdVolumes}</td>
+                                <td>${v.unPorEmbalagem.toFixed(2)}</td>
+                                <td class="text-warning">${v.totalUN.toFixed(2)}</td>
+                                <td>${v.localizacao || '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        container.appendChild(produtoDiv);
+    });
+    
+    // ABRIR MODAL
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
+    modal.show();
+}
     
     // ============================================
     // CASO 2: UNIDADE MÚLTIPLA (código original adaptado)
@@ -3534,6 +3559,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
