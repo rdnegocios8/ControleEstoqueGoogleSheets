@@ -2367,7 +2367,7 @@ function atualizarTabelaRecebimentos(recebimentosFiltrados = null) {
 }
 
 // ============================================
-// FUNÇÃO VER UNIDADE - CORRIGIDA (PARA UNIDADES MÚLTIPLAS AGRUPADAS)
+// FUNÇÃO VER UNIDADE - COMPLETA (SEM ERROS)
 // ============================================
 function verUnidade(id) {
     console.log('🔍 ID recebido:', id);
@@ -2379,9 +2379,121 @@ function verUnidade(id) {
     
     if (unidadeSimples && unidadeSimples.tipo !== 'unidade-multipla') {
         console.log('📦 Unidade simples encontrada:', unidadeSimples);
-        // ... (código da unidade simples igual ao anterior)
-        // (mantenha o código que você já tem para unidades simples)
-        return;
+        
+        unidadeAtual = unidadeSimples;
+        const produto = produtos.find(p => p.sku === unidadeSimples.sku);
+        
+        // PREENCHER DADOS BÁSICOS
+        document.getElementById('detalhe-id').textContent = unidadeSimples.id;
+        document.getElementById('detalhe-nf').textContent = unidadeSimples.numeroNF || '-';
+        document.getElementById('detalhe-fornecedor').textContent = unidadeSimples.fornecedor || '-';
+        document.getElementById('detalhe-data').textContent = formatarData(unidadeSimples.dataRecebimento) || '-';
+        document.getElementById('detalhe-status').innerHTML = `<span class="badge ${unidadeSimples.status === 'Disponível' ? 'bg-success' : 'bg-danger'}">${unidadeSimples.status}</span>`;
+        document.getElementById('detalhe-total-volumes').textContent = unidadeSimples.volume || 0;
+        document.getElementById('detalhe-total-un').textContent = (unidadeSimples.quantidade || 0).toFixed(2);
+        
+        // LIMPAR CONTAINERS
+        const qrContainer = document.getElementById('unidade-qr-code');
+        qrContainer.innerHTML = '';
+        qrContainer.className = '';
+        
+        const containerProdutos = document.getElementById('detalhe-produtos-container');
+        containerProdutos.innerHTML = '';
+        
+        // GERAR QR CODE SIMPLES
+        qrContainer.innerHTML = '<h6 class="text-info mb-3">📱 QR Code da Unidade:</h6>';
+        qrContainer.className = 'text-center';
+        
+        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        
+        // Construir URL para unidade simples
+        const dadosProduto = {
+            id: unidadeSimples.id,
+            produto: produto?.nome || 'Produto',
+            sku: unidadeSimples.sku,
+            tipoEmbalagem: unidadeSimples.unidadeEmbalagem || 'UN',
+            volumes: [{
+                tipo: unidadeSimples.foraPadrao ? 'fora-padrao' : 'padrao',
+                qtdVolumes: unidadeSimples.volume || 1,
+                unPorEmbalagem: unidadeSimples.qtdRealPorEmbalagem || (unidadeSimples.quantidade / (unidadeSimples.volume || 1)),
+                totalUN: unidadeSimples.quantidade || 0,
+                lote: unidadeSimples.lote || '',
+                validade: unidadeSimples.validade || '',
+                localizacao: unidadeSimples.localizacao || '-'
+            }],
+            totalVolumes: unidadeSimples.volume || 1,
+            totalUN: unidadeSimples.quantidade || 0
+        };
+        
+        const dadosJSON = encodeURIComponent(JSON.stringify(dadosProduto));
+        const urlCompleta = `${baseUrl}qr-view.html?dados=${dadosJSON}`;
+        
+        const qrDiv = document.createElement('div');
+        qrDiv.id = 'qr-unidade-simples';
+        qrDiv.style.width = '200px';
+        qrDiv.style.height = '200px';
+        qrDiv.style.margin = '0 auto';
+        qrContainer.appendChild(qrDiv);
+        
+        setTimeout(() => {
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrDiv, {
+                    text: urlCompleta,
+                    width: 200,
+                    height: 200
+                });
+            }
+        }, 100);
+        
+        // MOSTRAR DETALHES DO PRODUTO
+        containerProdutos.innerHTML = `
+            <div class="card bg-dark">
+                <div class="card-header text-warning">
+                    <strong>Detalhes do Produto</strong>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Produto:</th>
+                            <td>${produto?.nome || unidadeSimples.sku}</td>
+                        </tr>
+                        <tr>
+                            <th>SKU:</th>
+                            <td>${unidadeSimples.sku}</td>
+                        </tr>
+                        <tr>
+                            <th>Lote:</th>
+                            <td>${unidadeSimples.lote || '-'}</td>
+                        </tr>
+                        <tr>
+                            <th>Validade:</th>
+                            <td>${formatarData(unidadeSimples.validade) || '-'}</td>
+                        </tr>
+                        <tr>
+                            <th>Embalagem:</th>
+                            <td>${unidadeSimples.unidadeEmbalagem || 'UN'}</td>
+                        </tr>
+                        <tr>
+                            <th>Volumes:</th>
+                            <td>${unidadeSimples.volume || 0}</td>
+                        </tr>
+                        <tr>
+                            <th>Total UN:</th>
+                            <td class="text-warning">${(unidadeSimples.quantidade || 0).toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <th>Localização:</th>
+                            <td>${unidadeSimples.localizacao || '-'}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        `;
+        
+        // ABRIR MODAL
+        const modal = new bootstrap.Modal(document.getElementById('modalDetalhesUnidade'));
+        modal.show();
+        return; // <--- IMPORTANTE: Este return está DENTRO da função
     }
     
     // ============================================
@@ -2389,7 +2501,7 @@ function verUnidade(id) {
     // ============================================
     console.log('📦 Processando como unidade múltipla...');
     
-    // Extrair o ID base removendo o sufixo (ex: UN-VOIVE9DC-BRIM-P1V1 -> UN-VOIVE9DC-BRIM)
+    // Extrair o ID base removendo o sufixo
     const idBase = id.replace(/-[A-Z]\d+V\d+$/, '');
     console.log('📦 ID Base:', idBase);
     
@@ -2427,8 +2539,12 @@ function verUnidade(id) {
     const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     
     unidadeAtual.produtos.forEach((produto, pIndex) => {
+        // Determinar a letra do produto (se não tiver, usar P)
+        const letraProduto = produto.letraProduto || 'P';
+        const numeroProduto = produto.numeroProduto || (pIndex + 1);
+        
         const dadosProduto = {
-            id: `${unidadeAtual.id}-${produto.letraProduto || 'P'}${produto.numeroProduto || (pIndex+1)}`,
+            id: `${unidadeAtual.id}-${letraProduto}${numeroProduto}`,
             produto: produto.nome,
             sku: produto.sku,
             tipoEmbalagem: produto.tipoEmbalagem,
@@ -2477,12 +2593,15 @@ function verUnidade(id) {
     container.innerHTML = '';
     
     unidadeAtual.produtos.forEach((produto) => {
+        const letraProduto = produto.letraProduto || 'P';
+        const numeroProduto = produto.numeroProduto || '';
+        
         const produtoDiv = document.createElement('div');
         produtoDiv.className = 'card bg-dark mb-3';
         produtoDiv.innerHTML = `
             <div class="card-header text-warning">
                 <strong>${produto.nome}</strong> (SKU: ${produto.sku}) 
-                <span class="badge bg-info float-end">${unidadeAtual.id}-${produto.letraProduto || 'P'}${produto.numeroProduto || ''}</span>
+                <span class="badge bg-info float-end">${unidadeAtual.id}-${letraProduto}${numeroProduto}</span>
             </div>
             <div class="card-body">
                 <table class="table table-sm">
@@ -3559,6 +3678,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
 
 
 
